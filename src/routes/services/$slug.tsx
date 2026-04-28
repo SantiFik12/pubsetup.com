@@ -52,7 +52,7 @@ function ServicePage() {
             <div>
               <h2 className="text-xl font-semibold">What's included</h2>
               <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-                {service.includes.map((it) => (
+                {service.includes.map((it: string) => (
                   <li key={it} className="flex items-start gap-2 rounded-lg border border-border bg-card p-3 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />{it}
                   </li>

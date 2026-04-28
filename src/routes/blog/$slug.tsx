@@ -69,7 +69,7 @@ function BlogPostPage() {
           <nav className="mb-10 rounded-xl border border-border bg-surface p-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Table of contents</p>
             <ol className="space-y-1 text-sm">
-              {post.toc.map((item) => (
+              {post.toc.map((item: { id: string; label: string }) => (
                 <li key={item.id}><a href={`#${item.id}`} className="text-primary hover:underline">{item.label}</a></li>
               ))}
             </ol>
@@ -77,7 +77,7 @@ function BlogPostPage() {
         )}
 
         <div className="space-y-5">
-          {post.content.map((block, i) => {
+          {post.content.map((block: { type: string; text?: string; items?: string[]; extensionSlug?: string }, i: number) => {
             if (block.type === "p") return <p key={i} className="leading-relaxed text-foreground">{block.text}</p>;
             if (block.type === "h2") {
               const id = block.text?.toLowerCase().replace(/[^a-z0-9]+/g, "-");
@@ -85,7 +85,7 @@ function BlogPostPage() {
             }
             if (block.type === "list") return (
               <ul key={i} className="ml-5 list-disc space-y-1.5 text-foreground">
-                {block.items?.map((it) => <li key={it}>{it}</li>)}
+                {block.items?.map((it: string) => <li key={it}>{it}</li>)}
               </ul>
             );
             if (block.type === "extension-card" && block.extensionSlug) {
@@ -120,7 +120,7 @@ function BlogPostPage() {
         <div className="mt-12 border-t border-border pt-6">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tags</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {post.tags.map((t) => (
+            {post.tags.map((t: string) => (
               <Link key={t} to="/tag/$slug" params={{ slug: tagSlug(t) }} className="rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">{t}</Link>
             ))}
           </div>

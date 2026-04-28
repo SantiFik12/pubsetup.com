@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { extensions, allTags } from "@/data/mock";
 import { tagFromSlug } from "@/lib/slug";
+import type { Extension } from "@/data/types";
 
 export const Route = createFileRoute("/tag/$slug")({
   loader: ({ params }) => {
@@ -41,7 +42,7 @@ function TagPage() {
       </section>
       <section className="container-page py-10">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
+          {list.map((e: Extension) => <ExtensionCard key={e.id} ext={e} />)}
         </div>
       </section>
     </>

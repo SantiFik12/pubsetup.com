@@ -68,7 +68,7 @@ function ExtensionPage() {
                 {ext.bestSeller && <span className="rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-medium text-warning-foreground">Best seller</span>}
               </div>
               <div className="mt-4 flex flex-wrap gap-1.5">
-                {ext.tags.map((t) => (
+                {ext.tags.map((t: string) => (
                   <Link key={t} to="/tag/$slug" params={{ slug: tagSlug(t) }} className="rounded-md bg-card px-2 py-1 text-xs font-medium text-muted-foreground shadow-soft hover:bg-accent hover:text-accent-foreground">
                     {t}
                   </Link>
@@ -99,7 +99,7 @@ function ExtensionPage() {
             <div>
               <h2 className="text-xl font-semibold text-foreground">Key features</h2>
               <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-                {ext.features.map((f) => (
+                {ext.features.map((f: string) => (
                   <li key={f} className="flex items-start gap-2 rounded-lg border border-border bg-card p-3 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
                     <span>{f}</span>

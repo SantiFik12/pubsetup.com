@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ExtensionCard } from "@/components/ExtensionCard";
-import { categories, extensions, findCategory } from "@/data/mock";
+import { categories, extensions } from "@/data/mock";
+import type { Extension } from "@/data/types";
 
 export const Route = createFileRoute("/category/$slug")({
   loader: ({ params }) => {
@@ -47,7 +48,7 @@ function CategoryPage() {
       <section className="container-page py-10">
         <p className="mb-6 text-sm text-muted-foreground">{list.length} extensions in this category</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
+          {list.map((e: Extension) => <ExtensionCard key={e.id} ext={e} />)}
         </div>
       </section>
     </>

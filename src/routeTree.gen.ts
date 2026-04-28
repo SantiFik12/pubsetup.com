@@ -9,38 +9,102 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
+import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExtensionsRoute = ExtensionsRouteImport.update({
+  id: '/extensions',
+  path: '/extensions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ServicesRoute,
+} as any)
+const ExtensionSlugRoute = ExtensionSlugRouteImport.update({
+  id: '/extension/$slug',
+  path: '/extension/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/extensions': typeof ExtensionsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/extension/$slug': typeof ExtensionSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/extensions': typeof ExtensionsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/extension/$slug': typeof ExtensionSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/extensions': typeof ExtensionsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/extension/$slug': typeof ExtensionSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/extensions'
+    | '/services'
+    | '/extension/$slug'
+    | '/services/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/extensions' | '/services' | '/extension/$slug' | '/services/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/extensions'
+    | '/services'
+    | '/extension/$slug'
+    | '/services/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ExtensionsRoute: typeof ExtensionsRoute
+  ServicesRoute: typeof ServicesRouteWithChildren
+  ExtensionSlugRoute: typeof ExtensionSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/extensions': {
+      id: '/extensions'
+      path: '/extensions'
+      fullPath: '/extensions'
+      preLoaderRoute: typeof ExtensionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +112,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/extension/$slug': {
+      id: '/extension/$slug'
+      path: '/extension/$slug'
+      fullPath: '/extension/$slug'
+      preLoaderRoute: typeof ExtensionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface ServicesRouteChildren {
+  ServicesSlugRoute: typeof ServicesSlugRoute
+}
+
+const ServicesRouteChildren: ServicesRouteChildren = {
+  ServicesSlugRoute: ServicesSlugRoute,
+}
+
+const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
+  ServicesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ExtensionsRoute: ExtensionsRoute,
+  ServicesRoute: ServicesRouteWithChildren,
+  ExtensionSlugRoute: ExtensionSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

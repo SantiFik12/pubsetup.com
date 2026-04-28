@@ -9,38 +9,238 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ExtensionsRouteImport } from './routes/extensions'
+import { Route as CompareRouteImport } from './routes/compare'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as LandingRouteImport } from './routes/$landing'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TagSlugRouteImport } from './routes/tag/$slug'
+import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
+import { Route as PartnerSlugRouteImport } from './routes/partner/$slug'
+import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
+import { Route as CategorySlugRouteImport } from './routes/category/$slug'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExtensionsRoute = ExtensionsRouteImport.update({
+  id: '/extensions',
+  path: '/extensions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/$landing',
+  path: '/$landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TagSlugRoute = TagSlugRouteImport.update({
+  id: '/tag/$slug',
+  path: '/tag/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ServicesRoute,
+} as any)
+const PartnerSlugRoute = PartnerSlugRouteImport.update({
+  id: '/partner/$slug',
+  path: '/partner/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExtensionSlugRoute = ExtensionSlugRouteImport.update({
+  id: '/extension/$slug',
+  path: '/extension/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/category/$slug',
+  path: '/category/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$landing': typeof LandingRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/compare': typeof CompareRoute
+  '/extensions': typeof ExtensionsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
+  '/category/$slug': typeof CategorySlugRoute
+  '/extension/$slug': typeof ExtensionSlugRoute
+  '/partner/$slug': typeof PartnerSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/tag/$slug': typeof TagSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$landing': typeof LandingRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/compare': typeof CompareRoute
+  '/extensions': typeof ExtensionsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
+  '/category/$slug': typeof CategorySlugRoute
+  '/extension/$slug': typeof ExtensionSlugRoute
+  '/partner/$slug': typeof PartnerSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/tag/$slug': typeof TagSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$landing': typeof LandingRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/checkout': typeof CheckoutRoute
+  '/compare': typeof CompareRoute
+  '/extensions': typeof ExtensionsRoute
+  '/services': typeof ServicesRouteWithChildren
+  '/blog/$slug': typeof BlogSlugRoute
+  '/category/$slug': typeof CategorySlugRoute
+  '/extension/$slug': typeof ExtensionSlugRoute
+  '/partner/$slug': typeof PartnerSlugRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/tag/$slug': typeof TagSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/$landing'
+    | '/blog'
+    | '/checkout'
+    | '/compare'
+    | '/extensions'
+    | '/services'
+    | '/blog/$slug'
+    | '/category/$slug'
+    | '/extension/$slug'
+    | '/partner/$slug'
+    | '/services/$slug'
+    | '/tag/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/$landing'
+    | '/blog'
+    | '/checkout'
+    | '/compare'
+    | '/extensions'
+    | '/services'
+    | '/blog/$slug'
+    | '/category/$slug'
+    | '/extension/$slug'
+    | '/partner/$slug'
+    | '/services/$slug'
+    | '/tag/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/$landing'
+    | '/blog'
+    | '/checkout'
+    | '/compare'
+    | '/extensions'
+    | '/services'
+    | '/blog/$slug'
+    | '/category/$slug'
+    | '/extension/$slug'
+    | '/partner/$slug'
+    | '/services/$slug'
+    | '/tag/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LandingRoute: typeof LandingRoute
+  BlogRoute: typeof BlogRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
+  CompareRoute: typeof CompareRoute
+  ExtensionsRoute: typeof ExtensionsRoute
+  ServicesRoute: typeof ServicesRouteWithChildren
+  CategorySlugRoute: typeof CategorySlugRoute
+  ExtensionSlugRoute: typeof ExtensionSlugRoute
+  PartnerSlugRoute: typeof PartnerSlugRoute
+  TagSlugRoute: typeof TagSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/extensions': {
+      id: '/extensions'
+      path: '/extensions'
+      fullPath: '/extensions'
+      preLoaderRoute: typeof ExtensionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$landing': {
+      id: '/$landing'
+      path: '/$landing'
+      fullPath: '/$landing'
+      preLoaderRoute: typeof LandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +248,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tag/$slug': {
+      id: '/tag/$slug'
+      path: '/tag/$slug'
+      fullPath: '/tag/$slug'
+      preLoaderRoute: typeof TagSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/partner/$slug': {
+      id: '/partner/$slug'
+      path: '/partner/$slug'
+      fullPath: '/partner/$slug'
+      preLoaderRoute: typeof PartnerSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/extension/$slug': {
+      id: '/extension/$slug'
+      path: '/extension/$slug'
+      fullPath: '/extension/$slug'
+      preLoaderRoute: typeof ExtensionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/$slug': {
+      id: '/category/$slug'
+      path: '/category/$slug'
+      fullPath: '/category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
   }
 }
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
+interface ServicesRouteChildren {
+  ServicesSlugRoute: typeof ServicesSlugRoute
+}
+
+const ServicesRouteChildren: ServicesRouteChildren = {
+  ServicesSlugRoute: ServicesSlugRoute,
+}
+
+const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
+  ServicesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LandingRoute: LandingRoute,
+  BlogRoute: BlogRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
+  CompareRoute: CompareRoute,
+  ExtensionsRoute: ExtensionsRoute,
+  ServicesRoute: ServicesRouteWithChildren,
+  CategorySlugRoute: CategorySlugRoute,
+  ExtensionSlugRoute: ExtensionSlugRoute,
+  PartnerSlugRoute: PartnerSlugRoute,
+  TagSlugRoute: TagSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

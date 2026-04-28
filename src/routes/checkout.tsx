@@ -64,7 +64,7 @@ function CheckoutPage() {
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">Service</label>
                   <select
                     value={service.slug}
-                    onChange={(e) => navigate({ search: (p) => ({ ...p, service: e.target.value }) })}
+                    onChange={(e) => navigate({ search: (p: typeof search) => ({ ...p, service: e.target.value }) })}
                     className="ring-focus h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
                   >
                     {services.map((s) => (

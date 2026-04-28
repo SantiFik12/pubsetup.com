@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { findPost, findExtension, findPartner } from "@/data/mock";
+import type { Extension } from "@/data/types";
 import { tagSlug } from "@/lib/slug";
 import { ExternalLink, Zap } from "lucide-react";
 

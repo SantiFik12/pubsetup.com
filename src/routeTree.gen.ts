@@ -14,6 +14,7 @@ import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as LandingRouteImport } from './routes/$landing'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TagSlugRouteImport } from './routes/tag/$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
@@ -45,6 +46,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/$landing',
+  path: '/$landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -85,6 +91,7 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$landing': typeof LandingRoute
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$landing': typeof LandingRoute
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
@@ -114,6 +122,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$landing': typeof LandingRoute
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$landing'
     | '/blog'
     | '/checkout'
     | '/compare'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$landing'
     | '/blog'
     | '/checkout'
     | '/compare'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$landing'
     | '/blog'
     | '/checkout'
     | '/compare'
@@ -173,6 +185,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LandingRoute: typeof LandingRoute
   BlogRoute: typeof BlogRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   CompareRoute: typeof CompareRoute
@@ -219,6 +232,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$landing': {
+      id: '/$landing'
+      path: '/$landing'
+      fullPath: '/$landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -297,6 +317,7 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LandingRoute: LandingRoute,
   BlogRoute: BlogRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   CompareRoute: CompareRoute,

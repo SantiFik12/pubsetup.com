@@ -1,7 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Star, ExternalLink, Check, ArrowLeft, Zap, BookOpen } from "lucide-react";
 import { useExtension, usePartner, useCategory, useCatalog } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, type CarouselApi } from "@/components/ui/carousel";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/extension/$slug")({
   head: () => ({

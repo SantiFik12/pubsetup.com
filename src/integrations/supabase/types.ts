@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: boolean
+          paddle_mode: string
+          paddle_token_live: string
+          paddle_token_sandbox: string
+          updated_at: string
+        }
+        Insert: {
+          id?: boolean
+          paddle_mode?: string
+          paddle_token_live?: string
+          paddle_token_sandbox?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: boolean
+          paddle_mode?: string
+          paddle_token_live?: string
+          paddle_token_sandbox?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author: string

@@ -198,6 +198,22 @@ function ExtensionPage() {
           </aside>
         </div>
       </section>
+
+      <Dialog open={lightboxIndex !== null} onOpenChange={(o) => !o && setLightboxIndex(null)}>
+        <DialogContent className="max-w-5xl border-none bg-transparent p-0 shadow-none">
+          <Carousel setApi={setCarouselApi} opts={{ loop: true, startIndex: lightboxIndex ?? 0 }} className="w-full">
+            <CarouselContent>
+              {ext.gallery.map((url) => (
+                <CarouselItem key={url} className="flex items-center justify-center">
+                  <img src={url} alt="" className="max-h-[80vh] w-auto rounded-lg object-contain" />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-2 bg-background/80" />
+            <CarouselNext className="right-2 bg-background/80" />
+          </Carousel>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

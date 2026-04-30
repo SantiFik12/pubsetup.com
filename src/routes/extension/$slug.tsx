@@ -150,6 +150,16 @@ function ExtensionPage() {
               >
                 Buy on Partner Website <ExternalLink className="h-4 w-4" />
               </a>
+              {ext.userGuideUrl && (
+                <a
+                  href={ext.userGuideUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ring-focus mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-surface"
+                >
+                  <BookOpen className="h-4 w-4" /> User Guide
+                </a>
+              )}
               <p className="mt-2 text-center text-[11px] text-muted-foreground">Affiliate link · we may earn a commission</p>
             </div>
 

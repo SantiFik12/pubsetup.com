@@ -15,7 +15,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminLayout() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, roleError, refreshRole } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +25,29 @@ function AdminLayout() {
 
   if (loading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
   if (!user) return null;
+  if (roleError) {
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-2xl font-bold">Admin check failed</h1>
+        <p className="mt-2 text-muted-foreground">We couldn’t verify your admin role right now.</p>
+        <p className="mt-2 text-xs text-destructive">{roleError}</p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <button
+            onClick={() => refreshRole()}
+            className="ring-focus inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary-hover"
+          >
+            Try again
+          </button>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/login" }); }}
+            className="ring-focus inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold hover:bg-surface"
+          >
+            <LogOut className="h-4 w-4" /> Sign out
+          </button>
+        </div>
+      </div>
+    );
+  }
   if (!isAdmin) {
     return (
       <div className="container-page py-20 text-center">

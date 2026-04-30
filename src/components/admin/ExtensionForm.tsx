@@ -155,6 +155,18 @@ export function ExtensionForm({ id }: { id?: string }) {
           <input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} className={inp} placeholder="https://amasty.com/..." />
         </Field>
 
+        <Field label="User guide URL" className="md:col-span-2" hint="Link to vendor's documentation / user guide">
+          <input value={form.user_guide_url} onChange={(e) => set("user_guide_url", e.target.value)} className={inp} placeholder="https://docs.vendor.com/..." />
+        </Field>
+
+        <Field label="Cover image" className="md:col-span-2" hint="Main image shown on cards and detail page">
+          <ImageUploader value={form.cover_image} onChange={(url) => set("cover_image", url)} folder={form.slug || "misc"} />
+        </Field>
+
+        <Field label="Gallery (up to 5)" className="md:col-span-2" hint="Additional screenshots">
+          <GalleryUploader value={form.gallery} onChange={(v) => set("gallery", v)} folder={form.slug || "misc"} max={5} />
+        </Field>
+
         <Field label="Price from ($)">
           <input type="number" min={0} step="0.01" value={form.price_from} onChange={(e) => set("price_from", Number(e.target.value))} className={inp} />
         </Field>

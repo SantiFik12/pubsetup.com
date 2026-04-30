@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useInvalidateCatalog, useService } from "@/data/catalog";
-import { slugify } from "@/lib/slug";
+import { tagSlug as slugify } from "@/lib/slug";
 import { Save, X } from "lucide-react";
 
 interface Props {
@@ -49,7 +49,7 @@ export function ServiceForm({ serviceId }: Props) {
         duration: existing.duration,
         price: String(existing.price),
         unit: existing.unit ?? "fixed",
-        featured: existing.featured,
+        featured: existing.featured ?? false,
         includes: existing.includes.join("\n"),
       });
     }

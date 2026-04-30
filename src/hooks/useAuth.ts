@@ -6,7 +6,8 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
@@ -16,21 +17,31 @@ export function useAuth() {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      setLoading(false);
+      setAuthLoading(false);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!user) { setIsAdmin(false); return; }
+    if (authLoading) return;
+    if (!user) {
+      setIsAdmin(false);
+      setRoleLoading(false);
+      return;
+    }
+    setRoleLoading(true);
     supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
       .maybeSingle()
-      .then(({ data }) => setIsAdmin(!!data));
-  }, [user]);
+      .then(({ data, error }) => {
+        if (error) console.error("[useAuth] role fetch error:", error);
+        setIsAdmin(!!data);
+        setRoleLoading(false);
+      });
+  }, [user, authLoading]);
 
-  return { session, user, isAdmin, loading };
+  return { session, user, isAdmin, loading: authLoading || roleLoading };
 }

@@ -110,3 +110,15 @@ export const seoLandings: SeoLanding[] = [
 export const findService = (slug: string) => services.find((s) => s.slug === slug);
 export const findPost = (slug: string) => blogPosts.find((p) => p.slug === slug);
 export const findLanding = (slug: string) => seoLandings.find((l) => l.slug === slug);
+
+// ===== Backward-compat shims (deprecated, will be removed) =====
+// These keep old imports compiling while the codebase migrates to
+// `@/data/catalog` hooks (useExtensions, usePartners, useCategories).
+import type { Partner, Category, Extension } from "./types";
+export const extensions: Extension[] = [];
+export const partners: Partner[] = [];
+export const categories: Category[] = [];
+export const allTags: string[] = [];
+export const findExtension = (_slug: string): Extension | undefined => undefined;
+export const findPartner = (_id: string): Partner | undefined => undefined;
+export const findCategory = (_id: string): Category | undefined => undefined;

@@ -1,39 +1,30 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, Clock, ArrowRight } from "lucide-react";
-import { findService, services } from "@/data/mock";
+import { useService, useServices, useCatalog } from "@/data/catalog";
 
 export const Route = createFileRoute("/services/$slug")({
-  loader: ({ params }) => {
-    const service = findService(params.slug);
-    if (!service) throw notFound();
-    return { service };
-  },
-  head: ({ loaderData }) => {
-    const s = loaderData?.service;
-    if (!s) return { meta: [{ title: "Service not found" }] };
-    return {
-      meta: [
-        { title: `${s.name} — €${s.price} | pubsetup.com` },
-        { name: "description", content: s.description },
-        { property: "og:title", content: s.name },
-        { property: "og:description", content: s.description },
-      ],
-    };
-  },
-  notFoundComponent: () => (
-    <div className="container-page py-20 text-center">
-      <h1 className="text-2xl font-bold">Service not found</h1>
-      <Link to="/services" className="mt-4 inline-block text-primary">Back to services</Link>
-    </div>
-  ),
-  errorComponent: ({ error }) => (
-    <div className="container-page py-20 text-center"><h1 className="text-2xl font-bold">Error</h1><p className="text-muted-foreground">{error.message}</p></div>
-  ),
+  head: () => ({
+    meta: [
+      { title: "Magento 2 service — pubsetup.com" },
+    ],
+  }),
   component: ServicePage,
 });
 
 function ServicePage() {
-  const { service } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { isLoading } = useCatalog();
+  const service = useService(slug);
+  const services = useServices();
+  if (isLoading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
+  if (!service) {
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-2xl font-bold">Service not found</h1>
+        <Link to="/services" className="mt-4 inline-block text-primary">Back to services</Link>
+      </div>
+    );
+  }
   const others = services.filter((s) => s.slug !== service.slug).slice(0, 3);
 
   return (

@@ -1,36 +1,31 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ExtensionCard } from "@/components/ExtensionCard";
-import { extensions, allTags } from "@/data/mock";
+import { useExtensions, useAllTags, useCatalog } from "@/data/catalog";
 import { tagFromSlug } from "@/lib/slug";
-import type { Extension } from "@/data/types";
 
 export const Route = createFileRoute("/tag/$slug")({
-  loader: ({ params }) => {
-    const tag = tagFromSlug(params.slug, allTags);
-    if (!tag) throw notFound();
-    const list = extensions.filter((e) => e.tags.includes(tag));
-    return { tag, list };
-  },
-  head: ({ loaderData }) => {
-    const t = loaderData?.tag;
-    if (!t) return { meta: [{ title: "Tag not found" }] };
-    return {
-      meta: [
-        { title: `${t} Magento 2 Extensions — pubsetup.com` },
-        { name: "description", content: `Browse Magento 2 extensions tagged "${t}". Curated and reviewed by experts.` },
-        { property: "og:title", content: `${t} Magento 2 Extensions` },
-      ],
-    };
-  },
-  notFoundComponent: () => (
-    <div className="container-page py-20 text-center"><h1 className="text-2xl font-bold">Tag not found</h1><Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link></div>
-  ),
-  errorComponent: ({ error }) => <div className="container-page py-20 text-center">{error.message}</div>,
+  head: () => ({
+    meta: [{ title: "Tag — pubsetup.com" }],
+  }),
   component: TagPage,
 });
 
 function TagPage() {
-  const { tag, list } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { isLoading } = useCatalog();
+  const tags = useAllTags();
+  const exts = useExtensions();
+  if (isLoading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
+  const tag = tagFromSlug(slug, tags);
+  if (!tag) {
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-2xl font-bold">Tag not found</h1>
+        <Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link>
+      </div>
+    );
+  }
+  const list = exts.filter((e) => e.tags.includes(tag));
   return (
     <>
       <section className="border-b border-border bg-surface">
@@ -42,7 +37,7 @@ function TagPage() {
       </section>
       <section className="container-page py-10">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((e: Extension) => <ExtensionCard key={e.id} ext={e} />)}
+          {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
         </div>
       </section>
     </>

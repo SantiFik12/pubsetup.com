@@ -1,45 +1,36 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Star, ExternalLink, Check, ArrowLeft, Zap } from "lucide-react";
-import { findExtension, findPartner, findCategory } from "@/data/mock";
+import { useExtension, usePartner, useCategory, useCatalog } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
 
 export const Route = createFileRoute("/extension/$slug")({
-  loader: ({ params }) => {
-    const ext = findExtension(params.slug);
-    if (!ext) throw notFound();
-    return { ext };
-  },
-  head: ({ loaderData }) => {
-    const ext = loaderData?.ext;
-    if (!ext) return { meta: [{ title: "Extension not found" }] };
-    return {
-      meta: [
-        { title: `${ext.name} by ${findPartner(ext.partnerId).name} — pubsetup.com` },
-        { name: "description", content: ext.shortDescription },
-        { property: "og:title", content: `${ext.name} — Magento 2 extension` },
-        { property: "og:description", content: ext.shortDescription },
-      ],
-    };
-  },
-  notFoundComponent: () => (
-    <div className="container-page py-20 text-center">
-      <h1 className="text-2xl font-bold">Extension not found</h1>
-      <Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link>
-    </div>
-  ),
-  errorComponent: ({ error }) => (
-    <div className="container-page py-20 text-center">
-      <h1 className="text-2xl font-bold">Something went wrong</h1>
-      <p className="mt-2 text-muted-foreground">{error.message}</p>
-    </div>
-  ),
+  head: () => ({
+    meta: [
+      { title: "Magento 2 extension — pubsetup.com" },
+      { name: "description", content: "Magento 2 extension details, pricing, features and Hyvä compatibility." },
+    ],
+  }),
   component: ExtensionPage,
 });
 
 function ExtensionPage() {
-  const { ext } = Route.useLoaderData();
-  const partner = findPartner(ext.partnerId);
-  const category = findCategory(ext.categoryId);
+  const { slug } = Route.useParams();
+  const { isLoading } = useCatalog();
+  const ext = useExtension(slug);
+  const partner = usePartner(ext?.partnerId);
+  const category = useCategory(ext?.categoryId);
+
+  if (isLoading) {
+    return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
+  }
+  if (!ext || !partner || !category) {
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-2xl font-bold">Extension not found</h1>
+        <Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -85,15 +76,6 @@ function ExtensionPage() {
             <div>
               <h2 className="text-xl font-semibold text-foreground">About this extension</h2>
               <p className="mt-3 leading-relaxed text-muted-foreground">{ext.description}</p>
-            </div>
-
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Preview</h2>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="aspect-[4/3] rounded-xl border border-border bg-surface" />
-                ))}
-              </div>
             </div>
 
             <div>

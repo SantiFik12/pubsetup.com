@@ -18,14 +18,14 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LandingRouteImport } from './routes/$landing'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TagSlugRouteImport } from './routes/tag/$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as PartnerSlugRouteImport } from './routes/partner/$slug'
 import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
-import { Route as AdminExtensionsRouteImport } from './routes/admin/extensions'
+import { Route as AdminExtensionsIndexRouteImport } from './routes/admin/extensions.index'
 
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
@@ -107,9 +107,9 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
-const AdminExtensionsRoute = AdminExtensionsRouteImport.update({
-  id: '/extensions',
-  path: '/extensions',
+const AdminExtensionsIndexRoute = AdminExtensionsIndexRouteImport.update({
+  id: '/extensions/',
+  path: '/extensions/',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -123,7 +123,6 @@ export interface FileRoutesByFullPath {
   '/extensions': typeof ExtensionsRoute
   '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
-  '/admin/extensions': typeof AdminExtensionsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -131,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/extensions/': typeof AdminExtensionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,7 +141,6 @@ export interface FileRoutesByTo {
   '/extensions': typeof ExtensionsRoute
   '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
-  '/admin/extensions': typeof AdminExtensionsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -149,6 +148,7 @@ export interface FileRoutesByTo {
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/extensions': typeof AdminExtensionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,7 +161,6 @@ export interface FileRoutesById {
   '/extensions': typeof ExtensionsRoute
   '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
-  '/admin/extensions': typeof AdminExtensionsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -169,6 +168,7 @@ export interface FileRoutesById {
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/extensions/': typeof AdminExtensionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -182,7 +182,6 @@ export interface FileRouteTypes {
     | '/extensions'
     | '/login'
     | '/services'
-    | '/admin/extensions'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -190,6 +189,7 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/tag/$slug'
     | '/admin/'
+    | '/admin/extensions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -200,7 +200,6 @@ export interface FileRouteTypes {
     | '/extensions'
     | '/login'
     | '/services'
-    | '/admin/extensions'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -208,6 +207,7 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/tag/$slug'
     | '/admin'
+    | '/admin/extensions'
   id:
     | '__root__'
     | '/'
@@ -219,7 +219,6 @@ export interface FileRouteTypes {
     | '/extensions'
     | '/login'
     | '/services'
-    | '/admin/extensions'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -227,6 +226,7 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/tag/$slug'
     | '/admin/'
+    | '/admin/extensions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -359,24 +359,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
-    '/admin/extensions': {
-      id: '/admin/extensions'
+    '/admin/extensions/': {
+      id: '/admin/extensions/'
       path: '/extensions'
-      fullPath: '/admin/extensions'
-      preLoaderRoute: typeof AdminExtensionsRouteImport
+      fullPath: '/admin/extensions/'
+      preLoaderRoute: typeof AdminExtensionsIndexRouteImport
       parentRoute: typeof AdminRoute
     }
   }
 }
 
 interface AdminRouteChildren {
-  AdminExtensionsRoute: typeof AdminExtensionsRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminExtensionsIndexRoute: typeof AdminExtensionsIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
-  AdminExtensionsRoute: AdminExtensionsRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminExtensionsIndexRoute: AdminExtensionsIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -421,3 +421,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

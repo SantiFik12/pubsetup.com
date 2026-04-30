@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-rout
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Package } from "lucide-react";
+import { LogOut, Package, Wrench, Settings as SettingsIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -47,9 +47,15 @@ function AdminLayout() {
           <h1 className="text-2xl font-bold tracking-tight">Admin</h1>
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link to="/admin/extensions" className="ring-focus inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-surface" activeProps={{ className: "ring-focus inline-flex items-center gap-2 rounded-lg border border-primary bg-brand-soft px-3 py-2 text-sm font-semibold text-primary" }}>
             <Package className="h-4 w-4" /> Extensions
+          </Link>
+          <Link to="/admin/services" className="ring-focus inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-surface" activeProps={{ className: "ring-focus inline-flex items-center gap-2 rounded-lg border border-primary bg-brand-soft px-3 py-2 text-sm font-semibold text-primary" }}>
+            <Wrench className="h-4 w-4" /> Services
+          </Link>
+          <Link to="/admin/settings" className="ring-focus inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold hover:bg-surface" activeProps={{ className: "ring-focus inline-flex items-center gap-2 rounded-lg border border-primary bg-brand-soft px-3 py-2 text-sm font-semibold text-primary" }}>
+            <SettingsIcon className="h-4 w-4" /> Settings
           </Link>
           <button
             onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/login" }); }}

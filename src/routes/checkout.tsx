@@ -1,18 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { z } from "zod";
-import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { useState } from "react";
 import { useService, useExtension, useServices, useCatalog } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
 import { Check, ArrowRight, Lock } from "lucide-react";
 
-const searchSchema = z.object({
-  service: fallback(z.string(), "").default(""),
-  extension: fallback(z.string().optional(), undefined as string | undefined).default(() => undefined as unknown as string),
-});
+type CheckoutSearch = {
+  service: string;
+  extension?: string;
+};
 
 export const Route = createFileRoute("/checkout")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (search: Record<string, unknown>): CheckoutSearch => ({
+    service: typeof search.service === "string" ? search.service : "",
+    extension: typeof search.extension === "string" ? search.extension : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Checkout — pubsetup.com" },

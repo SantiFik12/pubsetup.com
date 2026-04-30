@@ -1,4 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, getRouteApi } from "@tanstack/react-router";
+
+const routeApi = getRouteApi("/checkout");
 import { useState } from "react";
 import { useService, useExtension, useServices, useCatalog } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,8 +29,8 @@ export const Route = createFileRoute("/checkout")({
 type FormState = { name: string; email: string; site: string; access: string };
 
 function CheckoutPage() {
-  const search = Route.useSearch();
-  const navigate = useNavigate({ from: Route.fullPath });
+  const search = routeApi.useSearch();
+  const navigate = useNavigate({ from: "/checkout" });
   const { isLoading } = useCatalog();
   const services = useServices();
   const fallbackService = services[0];

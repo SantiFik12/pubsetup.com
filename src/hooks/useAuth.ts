@@ -8,6 +8,8 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [roleLoading, setRoleLoading] = useState(true);
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [roleReloadKey, setRoleReloadKey] = useState(0);
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
@@ -26,10 +28,15 @@ export function useAuth() {
     if (authLoading) return;
     if (!user) {
       setIsAdmin(false);
+      setRoleError(null);
       setRoleLoading(false);
       return;
     }
+
+    let cancelled = false;
     setRoleLoading(true);
+    setRoleError(null);
+
     supabase
       .from("user_roles")
       .select("role")
@@ -37,11 +44,30 @@ export function useAuth() {
       .eq("role", "admin")
       .maybeSingle()
       .then(({ data, error }) => {
-        if (error) console.error("[useAuth] role fetch error:", error);
+        if (cancelled) return;
+
+        if (error) {
+          console.error("[useAuth] role fetch error:", error);
+          setRoleError(error.message);
+          setRoleLoading(false);
+          return;
+        }
+
         setIsAdmin(!!data);
         setRoleLoading(false);
       });
-  }, [user, authLoading]);
 
-  return { session, user, isAdmin, loading: authLoading || roleLoading };
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authLoading, roleReloadKey]);
+
+  return {
+    session,
+    user,
+    isAdmin,
+    loading: authLoading || roleLoading,
+    roleError,
+    refreshRole: () => setRoleReloadKey((value) => value + 1),
+  };
 }

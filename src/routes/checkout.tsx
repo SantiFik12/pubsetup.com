@@ -7,7 +7,7 @@ import { Check, ArrowRight, Lock } from "lucide-react";
 
 const searchSchema = z.object({
   service: fallback(z.string(), services[0].slug).default(services[0].slug),
-  extension: fallback(z.string().optional(), undefined).default(undefined),
+  extension: fallback(z.string().optional(), undefined as string | undefined).default(() => undefined as unknown as string),
 });
 
 export const Route = createFileRoute("/checkout")({

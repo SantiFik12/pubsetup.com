@@ -35,13 +35,13 @@ export function Footer() {
             <li><Link to="/blog" className="hover:text-foreground">Blog & guides</Link></li>
             <li><Link to="/$landing" params={{ landing: "best-magento-2-seo-extensions" }} className="hover:text-foreground">Best SEO extensions</Link></li>
             <li><Link to="/$landing" params={{ landing: "magento-2-hyva-compatible-extensions" }} className="hover:text-foreground">Hyvä compatible</Link></li>
-            <li><a href="https://magento.implement.it" target="_blank" rel="noreferrer" className="hover:text-foreground">Live demo ↗</a></li>
+            <li><a href="https://magento.pubsetup.com" target="_blank" rel="noreferrer" className="hover:text-foreground">Live demo ↗</a></li>
           </ul>
         </div>
       </div>
       <div className="border-t border-border">
         <div className="container-page flex flex-col items-center justify-between gap-3 py-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} implement.it — Independent Magento 2 catalog & services.</p>
+          <p>© {new Date().getFullYear()} pubsetup.com — Independent Magento 2 catalog & services.</p>
           <p>Affiliate disclosure: we may earn a commission from links to partner sites.</p>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { services } from "@/data/mock";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Magento 2 Services — Installation, Optimization, Migration | implement.it" },
+      { title: "Magento 2 Services — Installation, Optimization, Migration | pubsetup.com" },
       { name: "description", content: "Fixed-price Magento 2 services: installation from scratch, extension installation, security patches, speed optimization, migration consulting." },
       { property: "og:title", content: "Magento 2 Services" },
       { property: "og:description", content: "Fixed-price Magento 2 installation, optimization and migration services." },

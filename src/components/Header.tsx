@@ -32,7 +32,7 @@ export function Header() {
         </div>
         <div className="hidden items-center gap-2 md:flex">
           <a
-            href="https://magento.implement.it"
+            href="https://magento.pubsetup.com"
             target="_blank"
             rel="noreferrer"
             className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"

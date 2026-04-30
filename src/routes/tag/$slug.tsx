@@ -16,7 +16,7 @@ export const Route = createFileRoute("/tag/$slug")({
     if (!t) return { meta: [{ title: "Tag not found" }] };
     return {
       meta: [
-        { title: `${t} Magento 2 Extensions — implement.it` },
+        { title: `${t} Magento 2 Extensions — pubsetup.com` },
         { name: "description", content: `Browse Magento 2 extensions tagged "${t}". Curated and reviewed by experts.` },
         { property: "og:title", content: `${t} Magento 2 Extensions` },
       ],

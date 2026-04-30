@@ -13,7 +13,7 @@ export const Route = createFileRoute("/services/$slug")({
     if (!s) return { meta: [{ title: "Service not found" }] };
     return {
       meta: [
-        { title: `${s.name} — €${s.price} | implement.it` },
+        { title: `${s.name} — €${s.price} | pubsetup.com` },
         { name: "description", content: s.description },
         { property: "og:title", content: s.name },
         { property: "og:description", content: s.description },

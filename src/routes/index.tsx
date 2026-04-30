@@ -6,9 +6,9 @@ import { extensions, services } from "@/data/mock";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "implement.it — Magento 2 extensions catalog & expert services" },
+      { title: "pubsetup.com — Magento 2 extensions catalog & expert services" },
       { name: "description", content: "Find the best Magento 2 extensions from trusted partners and get them installed by experts. Curated catalog, transparent pricing, professional services." },
-      { property: "og:title", content: "implement.it — Magento 2 extensions catalog" },
+      { property: "og:title", content: "pubsetup.com — Magento 2 extensions catalog" },
       { property: "og:description", content: "Find the best Magento 2 extensions and get them installed by experts." },
     ],
   }),
@@ -90,12 +90,12 @@ function HomePage() {
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
-                  href="https://magento.implement.it"
+                  href="https://magento.pubsetup.com"
                   target="_blank"
                   rel="noreferrer"
                   className="ring-focus inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
                 >
-                  Open magento.implement.it ↗
+                  Open magento.pubsetup.com ↗
                 </a>
                 <Link
                   to="/services/$slug"
@@ -111,7 +111,7 @@ function HomePage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-warning/80" />
                 <span className="h-2.5 w-2.5 rounded-full bg-success/80" />
-                <span className="ml-3 text-xs text-muted-foreground">magento.implement.it</span>
+                <span className="ml-3 text-xs text-muted-foreground">magento.pubsetup.com</span>
               </div>
               <div className="space-y-3 p-5">
                 <div className="h-8 w-2/3 rounded-md bg-card shadow-soft" />

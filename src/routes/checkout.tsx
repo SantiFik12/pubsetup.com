@@ -14,7 +14,7 @@ export const Route = createFileRoute("/checkout")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Checkout — implement.it" },
+      { title: "Checkout — pubsetup.com" },
       { name: "description", content: "Order a Magento 2 service in under a minute. Secure checkout via Paddle." },
       { name: "robots", content: "noindex" },
     ],

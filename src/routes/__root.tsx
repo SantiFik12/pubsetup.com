@@ -32,14 +32,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "implement.it — Magento 2 extensions catalog & expert services" },
+      { title: "pubsetup.com — Magento 2 extensions catalog & expert services" },
       {
         name: "description",
         content:
           "The trusted catalog of Magento 2 extensions. Discover proven modules from top partners, then have our team install and optimize your store.",
       },
-      { name: "author", content: "implement.it" },
-      { property: "og:title", content: "implement.it — Magento 2 extensions catalog & services" },
+      { name: "author", content: "pubsetup.com" },
+      { property: "og:title", content: "pubsetup.com — Magento 2 extensions catalog & services" },
       { property: "og:description", content: "Find the best Magento 2 extensions and get them installed by experts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -4,7 +4,7 @@ import { blogPosts } from "@/data/mock";
 export const Route = createFileRoute("/blog")({
   head: () => ({
     meta: [
-      { title: "Magento 2 Blog & Guides — implement.it" },
+      { title: "Magento 2 Blog & Guides — pubsetup.com" },
       { name: "description", content: "Reviews, comparisons, roundups and practical guides for Magento 2 merchants." },
       { property: "og:title", content: "Magento 2 Blog & Guides" },
       { property: "og:description", content: "Reviews, comparisons and guides for Magento 2." },

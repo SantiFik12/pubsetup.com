@@ -14,7 +14,7 @@ export const Route = createFileRoute("/extension/$slug")({
     if (!ext) return { meta: [{ title: "Extension not found" }] };
     return {
       meta: [
-        { title: `${ext.name} by ${findPartner(ext.partnerId).name} — implement.it` },
+        { title: `${ext.name} by ${findPartner(ext.partnerId).name} — pubsetup.com` },
         { name: "description", content: ext.shortDescription },
         { property: "og:title", content: `${ext.name} — Magento 2 extension` },
         { property: "og:description", content: ext.shortDescription },

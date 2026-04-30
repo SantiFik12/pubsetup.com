@@ -50,6 +50,7 @@ const empty: Form = {
   support_months: 12,
   features: [], use_cases: [], tags: [],
   install_price: 60,
+  cover_image: "", gallery: [], user_guide_url: "",
 };
 
 function fromExtension(e: Extension): Form {

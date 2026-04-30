@@ -31,6 +31,9 @@ type Form = {
   use_cases: string[];
   tags: string[];
   install_price: number;
+  cover_image: string;
+  gallery: string[];
+  user_guide_url: string;
 };
 
 const empty: Form = {

@@ -23,7 +23,7 @@ export const Route = createFileRoute("/$landing")({
     if (!l) return { meta: [{ title: "Page not found" }] };
     return {
       meta: [
-        { title: `${l.title} — implement.it` },
+        { title: `${l.title} — pubsetup.com` },
         { name: "description", content: l.metaDescription },
         { property: "og:title", content: l.title },
         { property: "og:description", content: l.metaDescription },

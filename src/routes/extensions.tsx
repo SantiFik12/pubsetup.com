@@ -22,7 +22,7 @@ export const Route = createFileRoute("/extensions")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Magento 2 Extensions Catalog — implement.it" },
+      { title: "Magento 2 Extensions Catalog — pubsetup.com" },
       { name: "description", content: "Browse a curated catalog of Magento 2 extensions. Filter by category, partner, Hyvä compatibility, price and more." },
       { property: "og:title", content: "Magento 2 Extensions Catalog" },
       { property: "og:description", content: "Curated, expert-reviewed Magento 2 extensions from trusted partners." },

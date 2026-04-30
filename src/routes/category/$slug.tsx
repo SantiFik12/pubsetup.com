@@ -15,7 +15,7 @@ export const Route = createFileRoute("/category/$slug")({
     if (!cat) return { meta: [{ title: "Category not found" }] };
     return {
       meta: [
-        { title: `${cat.name} Extensions for Magento 2 — implement.it` },
+        { title: `${cat.name} Extensions for Magento 2 — pubsetup.com` },
         { name: "description", content: `${cat.description} Browse the best ${cat.name} extensions for Magento 2 from trusted partners.` },
         { property: "og:title", content: `${cat.name} Magento 2 Extensions` },
         { property: "og:description", content: cat.description },

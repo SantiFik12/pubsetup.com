@@ -15,7 +15,7 @@ export const Route = createFileRoute("/partner/$slug")({
     if (!p) return { meta: [{ title: "Partner not found" }] };
     return {
       meta: [
-        { title: `${p.name} Magento 2 Extensions — implement.it` },
+        { title: `${p.name} Magento 2 Extensions — pubsetup.com` },
         { name: "description", content: p.description },
         { property: "og:title", content: `${p.name} Magento 2 Extensions` },
       ],

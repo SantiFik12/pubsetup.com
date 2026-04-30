@@ -15,7 +15,7 @@ export const Route = createFileRoute("/blog/$slug")({
     if (!p) return { meta: [{ title: "Article not found" }] };
     return {
       meta: [
-        { title: `${p.title} — implement.it` },
+        { title: `${p.title} — pubsetup.com` },
         { name: "description", content: p.excerpt },
         { property: "og:title", content: p.title },
         { property: "og:description", content: p.excerpt },

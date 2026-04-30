@@ -6,7 +6,7 @@ import { Star, Check, X, ExternalLink } from "lucide-react";
 export const Route = createFileRoute("/compare")({
   head: () => ({
     meta: [
-      { title: "Compare Magento 2 Extensions — implement.it" },
+      { title: "Compare Magento 2 Extensions — pubsetup.com" },
       { name: "description", content: "Compare Magento 2 extensions side by side: price, features, Hyvä support, license type and ratings." },
     ],
   }),

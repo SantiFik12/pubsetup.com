@@ -23,6 +23,14 @@ function ExtensionPage() {
   const ext = useExtension(slug);
   const partner = usePartner(ext?.partnerId);
   const category = useCategory(ext?.categoryId);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi | null>(null);
+
+  useEffect(() => {
+    if (carouselApi && lightboxIndex !== null) {
+      carouselApi.scrollTo(lightboxIndex, true);
+    }
+  }, [carouselApi, lightboxIndex]);
 
   if (isLoading) {
     return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;

@@ -127,10 +127,12 @@ export type Database = {
           affiliate_url: string
           best_seller: boolean
           category_id: string
+          cover_image: string
           created_at: string
           description: string
           edition: Database["public"]["Enums"]["magento_edition"]
           features: string[]
+          gallery: Json
           has_demo: boolean
           has_trial: boolean
           hyva_compatible: boolean
@@ -152,15 +154,18 @@ export type Database = {
           tags: string[]
           updated_at: string
           use_cases: string[]
+          user_guide_url: string
         }
         Insert: {
           affiliate_url?: string
           best_seller?: boolean
           category_id: string
+          cover_image?: string
           created_at?: string
           description?: string
           edition?: Database["public"]["Enums"]["magento_edition"]
           features?: string[]
+          gallery?: Json
           has_demo?: boolean
           has_trial?: boolean
           hyva_compatible?: boolean
@@ -182,15 +187,18 @@ export type Database = {
           tags?: string[]
           updated_at?: string
           use_cases?: string[]
+          user_guide_url?: string
         }
         Update: {
           affiliate_url?: string
           best_seller?: boolean
           category_id?: string
+          cover_image?: string
           created_at?: string
           description?: string
           edition?: Database["public"]["Enums"]["magento_edition"]
           features?: string[]
+          gallery?: Json
           has_demo?: boolean
           has_trial?: boolean
           hyva_compatible?: boolean
@@ -212,6 +220,7 @@ export type Database = {
           tags?: string[]
           updated_at?: string
           use_cases?: string[]
+          user_guide_url?: string
         }
         Relationships: [
           {

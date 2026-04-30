@@ -85,9 +85,6 @@ function ExtensionPage() {
       <section className="container-page py-12">
         <div className="grid gap-10 lg:grid-cols-[1fr,360px]">
           <div className="space-y-10">
-            {ext.coverImage && (
-              <img src={ext.coverImage} alt={ext.name} className="w-full rounded-2xl border border-border object-cover" loading="lazy" />
-            )}
             <div>
               <h2 className="text-xl font-semibold text-foreground">About this extension</h2>
               <p className="mt-3 leading-relaxed text-muted-foreground">{ext.description}</p>
@@ -97,10 +94,15 @@ function ExtensionPage() {
               <div>
                 <h2 className="text-xl font-semibold text-foreground">Screenshots</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {ext.gallery.map((url) => (
-                    <a key={url} href={url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-border bg-card">
+                  {ext.gallery.map((url, idx) => (
+                    <button
+                      type="button"
+                      key={url}
+                      onClick={() => setLightboxIndex(idx)}
+                      className="block overflow-hidden rounded-lg border border-border bg-card text-left"
+                    >
                       <img src={url} alt="" className="aspect-video w-full object-cover transition hover:scale-105" loading="lazy" />
-                    </a>
+                    </button>
                   ))}
                 </div>
               </div>

@@ -40,7 +40,8 @@ export function Header() {
             Live demo ↗
           </a>
           <Link
-            to="/services/magento-2-setup-from-scratch"
+            to="/services/$slug"
+            params={{ slug: "magento-2-setup-from-scratch" }}
             className="ring-focus rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-soft transition hover:bg-primary-hover"
           >
             Get Magento 2 Setup
@@ -68,7 +69,8 @@ export function Header() {
               </Link>
             ))}
             <Link
-              to="/services/magento-2-setup-from-scratch"
+              to="/services/$slug"
+              params={{ slug: "magento-2-setup-from-scratch" }}
               onClick={() => setOpen(false)}
               className="mt-2 rounded-md bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground"
             >

@@ -33,8 +33,8 @@ export function Footer() {
           <h4 className="mb-3 text-sm font-semibold text-foreground">Resources</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/blog" className="hover:text-foreground">Blog & guides</Link></li>
-            <li><Link to="/best-magento-2-seo-extensions" className="hover:text-foreground">Best SEO extensions</Link></li>
-            <li><Link to="/magento-2-hyva-compatible-extensions" className="hover:text-foreground">Hyvä compatible</Link></li>
+            <li><Link to="/$landing" params={{ landing: "best-magento-2-seo-extensions" }} className="hover:text-foreground">Best SEO extensions</Link></li>
+            <li><Link to="/$landing" params={{ landing: "magento-2-hyva-compatible-extensions" }} className="hover:text-foreground">Hyvä compatible</Link></li>
             <li><a href="https://magento.implement.it" target="_blank" rel="noreferrer" className="hover:text-foreground">Live demo ↗</a></li>
           </ul>
         </div>

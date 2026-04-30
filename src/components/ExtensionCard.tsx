@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Star, Check, X, Zap, ExternalLink } from "lucide-react";
 import type { Extension } from "@/data/types";
-import { findPartner, findCategory } from "@/data/mock";
+import { usePartner, useCategory } from "@/data/catalog";
 import { useCompare } from "@/state/compare";
 
 function formatPrice(e: Extension) {
@@ -10,8 +10,8 @@ function formatPrice(e: Extension) {
 }
 
 export function ExtensionCard({ ext }: { ext: Extension }) {
-  const partner = findPartner(ext.partnerId);
-  const category = findCategory(ext.categoryId);
+  const partner = usePartner(ext.partnerId);
+  const category = useCategory(ext.categoryId);
   const { items, toggle } = useCompare();
   const inCompare = items.includes(ext.slug);
 
@@ -19,19 +19,21 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
       <div className="flex items-start gap-3 p-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">
-          {partner.logoLetter}
+          {partner?.logoLetter ?? "·"}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">{partner.name}</span>
+            <span className="text-xs font-medium text-muted-foreground">{partner?.name ?? "Partner"}</span>
             <span className="text-muted-foreground">·</span>
-            <Link
-              to="/category/$slug"
-              params={{ slug: category.slug }}
-              className="text-xs font-medium text-muted-foreground hover:text-foreground"
-            >
-              {category.name}
-            </Link>
+            {category ? (
+              <Link
+                to="/category/$slug"
+                params={{ slug: category.slug }}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                {category.name}
+              </Link>
+            ) : null}
           </div>
           <Link
             to="/extension/$slug"

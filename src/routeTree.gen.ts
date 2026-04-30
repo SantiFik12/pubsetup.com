@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -26,6 +27,11 @@ import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExtensionsRoute = ExtensionsRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/login'
     | '/services'
     | '/blog/$slug'
     | '/category/$slug'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/login'
     | '/services'
     | '/blog/$slug'
     | '/category/$slug'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/login'
     | '/services'
     | '/blog/$slug'
     | '/category/$slug'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   CompareRoute: typeof CompareRoute
   ExtensionsRoute: typeof ExtensionsRoute
+  LoginRoute: typeof LoginRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   CategorySlugRoute: typeof CategorySlugRoute
   ExtensionSlugRoute: typeof ExtensionSlugRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/extensions': {
@@ -322,6 +342,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   CompareRoute: CompareRoute,
   ExtensionsRoute: ExtensionsRoute,
+  LoginRoute: LoginRoute,
   ServicesRoute: ServicesRouteWithChildren,
   CategorySlugRoute: CategorySlugRoute,
   ExtensionSlugRoute: ExtensionSlugRoute,

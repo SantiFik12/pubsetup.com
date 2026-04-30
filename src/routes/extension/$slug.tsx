@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Star, ExternalLink, Check, ArrowLeft, Zap } from "lucide-react";
+import { Star, ExternalLink, Check, ArrowLeft, Zap, BookOpen } from "lucide-react";
 import { useExtension, usePartner, useCategory, useCatalog } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
 

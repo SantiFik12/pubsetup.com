@@ -25,7 +25,11 @@ import { Route as PartnerSlugRouteImport } from './routes/partner/$slug'
 import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminServicesIndexRouteImport } from './routes/admin/services.index'
 import { Route as AdminExtensionsIndexRouteImport } from './routes/admin/extensions.index'
+import { Route as AdminServicesNewRouteImport } from './routes/admin/services.new'
+import { Route as AdminServicesIdRouteImport } from './routes/admin/services.$id'
 import { Route as AdminExtensionsNewRouteImport } from './routes/admin/extensions.new'
 import { Route as AdminExtensionsIdRouteImport } from './routes/admin/extensions.$id'
 
@@ -109,9 +113,29 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServicesIndexRoute = AdminServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminExtensionsIndexRoute = AdminExtensionsIndexRouteImport.update({
   id: '/extensions/',
   path: '/extensions/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServicesNewRoute = AdminServicesNewRouteImport.update({
+  id: '/services/new',
+  path: '/services/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminServicesIdRoute = AdminServicesIdRouteImport.update({
+  id: '/services/$id',
+  path: '/services/$id',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminExtensionsNewRoute = AdminExtensionsNewRouteImport.update({
@@ -135,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/extensions': typeof ExtensionsRoute
   '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -144,7 +169,10 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/extensions/$id': typeof AdminExtensionsIdRoute
   '/admin/extensions/new': typeof AdminExtensionsNewRoute
+  '/admin/services/$id': typeof AdminServicesIdRoute
+  '/admin/services/new': typeof AdminServicesNewRoute
   '/admin/extensions/': typeof AdminExtensionsIndexRoute
+  '/admin/services/': typeof AdminServicesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -155,6 +183,7 @@ export interface FileRoutesByTo {
   '/extensions': typeof ExtensionsRoute
   '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -164,7 +193,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/extensions/$id': typeof AdminExtensionsIdRoute
   '/admin/extensions/new': typeof AdminExtensionsNewRoute
+  '/admin/services/$id': typeof AdminServicesIdRoute
+  '/admin/services/new': typeof AdminServicesNewRoute
   '/admin/extensions': typeof AdminExtensionsIndexRoute
+  '/admin/services': typeof AdminServicesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -177,6 +209,7 @@ export interface FileRoutesById {
   '/extensions': typeof ExtensionsRoute
   '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -186,7 +219,10 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/extensions/$id': typeof AdminExtensionsIdRoute
   '/admin/extensions/new': typeof AdminExtensionsNewRoute
+  '/admin/services/$id': typeof AdminServicesIdRoute
+  '/admin/services/new': typeof AdminServicesNewRoute
   '/admin/extensions/': typeof AdminExtensionsIndexRoute
+  '/admin/services/': typeof AdminServicesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -200,6 +236,7 @@ export interface FileRouteTypes {
     | '/extensions'
     | '/login'
     | '/services'
+    | '/admin/settings'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -209,7 +246,10 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/extensions/$id'
     | '/admin/extensions/new'
+    | '/admin/services/$id'
+    | '/admin/services/new'
     | '/admin/extensions/'
+    | '/admin/services/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -220,6 +260,7 @@ export interface FileRouteTypes {
     | '/extensions'
     | '/login'
     | '/services'
+    | '/admin/settings'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -229,7 +270,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/extensions/$id'
     | '/admin/extensions/new'
+    | '/admin/services/$id'
+    | '/admin/services/new'
     | '/admin/extensions'
+    | '/admin/services'
   id:
     | '__root__'
     | '/'
@@ -241,6 +285,7 @@ export interface FileRouteTypes {
     | '/extensions'
     | '/login'
     | '/services'
+    | '/admin/settings'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -250,7 +295,10 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/extensions/$id'
     | '/admin/extensions/new'
+    | '/admin/services/$id'
+    | '/admin/services/new'
     | '/admin/extensions/'
+    | '/admin/services/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -383,11 +431,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/services/': {
+      id: '/admin/services/'
+      path: '/services'
+      fullPath: '/admin/services/'
+      preLoaderRoute: typeof AdminServicesIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/extensions/': {
       id: '/admin/extensions/'
       path: '/extensions'
       fullPath: '/admin/extensions/'
       preLoaderRoute: typeof AdminExtensionsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/services/new': {
+      id: '/admin/services/new'
+      path: '/services/new'
+      fullPath: '/admin/services/new'
+      preLoaderRoute: typeof AdminServicesNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/services/$id': {
+      id: '/admin/services/$id'
+      path: '/services/$id'
+      fullPath: '/admin/services/$id'
+      preLoaderRoute: typeof AdminServicesIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/extensions/new': {
@@ -408,17 +484,25 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminExtensionsIdRoute: typeof AdminExtensionsIdRoute
   AdminExtensionsNewRoute: typeof AdminExtensionsNewRoute
+  AdminServicesIdRoute: typeof AdminServicesIdRoute
+  AdminServicesNewRoute: typeof AdminServicesNewRoute
   AdminExtensionsIndexRoute: typeof AdminExtensionsIndexRoute
+  AdminServicesIndexRoute: typeof AdminServicesIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminExtensionsIdRoute: AdminExtensionsIdRoute,
   AdminExtensionsNewRoute: AdminExtensionsNewRoute,
+  AdminServicesIdRoute: AdminServicesIdRoute,
+  AdminServicesNewRoute: AdminServicesNewRoute,
   AdminExtensionsIndexRoute: AdminExtensionsIndexRoute,
+  AdminServicesIndexRoute: AdminServicesIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

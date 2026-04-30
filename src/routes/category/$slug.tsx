@@ -1,41 +1,31 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ExtensionCard } from "@/components/ExtensionCard";
-import { categories, extensions } from "@/data/mock";
-import type { Extension } from "@/data/types";
+import { useCategory, useExtensions, useCatalog } from "@/data/catalog";
 
 export const Route = createFileRoute("/category/$slug")({
-  loader: ({ params }) => {
-    const cat = categories.find((c) => c.slug === params.slug);
-    if (!cat) throw notFound();
-    const list = extensions.filter((e) => e.categoryId === cat.id);
-    return { cat, list };
-  },
-  head: ({ loaderData }) => {
-    const cat = loaderData?.cat;
-    if (!cat) return { meta: [{ title: "Category not found" }] };
-    return {
-      meta: [
-        { title: `${cat.name} Extensions for Magento 2 — implement.it` },
-        { name: "description", content: `${cat.description} Browse the best ${cat.name} extensions for Magento 2 from trusted partners.` },
-        { property: "og:title", content: `${cat.name} Magento 2 Extensions` },
-        { property: "og:description", content: cat.description },
-      ],
-    };
-  },
-  notFoundComponent: () => (
-    <div className="container-page py-20 text-center">
-      <h1 className="text-2xl font-bold">Category not found</h1>
-      <Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link>
-    </div>
-  ),
-  errorComponent: ({ error }) => (
-    <div className="container-page py-20 text-center"><h1 className="text-2xl font-bold">Error</h1><p>{error.message}</p></div>
-  ),
+  head: () => ({
+    meta: [
+      { title: "Magento 2 Extensions Category — pubsetup.com" },
+    ],
+  }),
   component: CategoryPage,
 });
 
 function CategoryPage() {
-  const { cat, list } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { isLoading } = useCatalog();
+  const cat = useCategory(slug);
+  const all = useExtensions();
+  if (isLoading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
+  if (!cat) {
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-2xl font-bold">Category not found</h1>
+        <Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link>
+      </div>
+    );
+  }
+  const list = all.filter((e) => e.categoryId === cat.id);
   return (
     <>
       <section className="border-b border-border bg-surface">
@@ -48,7 +38,7 @@ function CategoryPage() {
       <section className="container-page py-10">
         <p className="mb-6 text-sm text-muted-foreground">{list.length} extensions in this category</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((e: Extension) => <ExtensionCard key={e.id} ext={e} />)}
+          {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
         </div>
       </section>
     </>

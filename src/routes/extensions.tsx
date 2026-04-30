@@ -4,7 +4,7 @@ import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { useMemo, useState } from "react";
 import { Search, X, SlidersHorizontal, Star } from "lucide-react";
 import { ExtensionCard } from "@/components/ExtensionCard";
-import { extensions, partners, categories, allTags } from "@/data/mock";
+import { useCatalog, useAllTags } from "@/data/catalog";
 import { useCompare } from "@/state/compare";
 
 const searchSchema = z.object({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/extensions")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Magento 2 Extensions Catalog — implement.it" },
+      { title: "Magento 2 Extensions Catalog — pubsetup.com" },
       { name: "description", content: "Browse a curated catalog of Magento 2 extensions. Filter by category, partner, Hyvä compatibility, price and more." },
       { property: "og:title", content: "Magento 2 Extensions Catalog" },
       { property: "og:description", content: "Curated, expert-reviewed Magento 2 extensions from trusted partners." },
@@ -36,6 +36,8 @@ function ExtensionsPage() {
   const navigate = useNavigate({ from: Route.fullPath });
   const [mobileFilters, setMobileFilters] = useState(false);
   const { items: compareItems, clear } = useCompare();
+  const { extensions, partners, categories } = useCatalog();
+  const allTags = useAllTags();
 
   const update = (patch: Partial<typeof search>) => {
     navigate({ search: (prev: typeof search) => ({ ...prev, ...patch }) });

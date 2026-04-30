@@ -1,4 +1,6 @@
 import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "@tanstack/react-router";
@@ -32,14 +34,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "implement.it — Magento 2 extensions catalog & expert services" },
+      { title: "pubsetup.com — Magento 2 extensions catalog & expert services" },
       {
         name: "description",
         content:
           "The trusted catalog of Magento 2 extensions. Discover proven modules from top partners, then have our team install and optimize your store.",
       },
-      { name: "author", content: "implement.it" },
-      { property: "og:title", content: "implement.it — Magento 2 extensions catalog & services" },
+      { name: "author", content: "pubsetup.com" },
+      { property: "og:title", content: "pubsetup.com — Magento 2 extensions catalog & services" },
       { property: "og:description", content: "Find the best Magento 2 extensions and get them installed by experts." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -75,13 +77,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const [qc] = useState(() => new QueryClient({
+    defaultOptions: { queries: { staleTime: 60_000, refetchOnWindowFocus: false } },
+  }));
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      <main className="flex-1">
-        <Outlet />
-      </main>
-      <Footer />
-    </div>
+    <QueryClientProvider client={qc}>
+      <div className="flex min-h-screen flex-col bg-background">
+        <Header />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
+    </QueryClientProvider>
   );
 }

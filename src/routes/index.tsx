@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Search, ShoppingCart, Zap, FileText, Shield, RefreshCw, Palette, Boxes, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ShoppingCart, Zap, FileText, Shield, RefreshCw, Palette, Boxes, Sparkles } from "lucide-react";
 import { ExtensionCard } from "@/components/ExtensionCard";
-import { extensions, services } from "@/data/mock";
+import { useExtensions } from "@/data/catalog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "implement.it — Magento 2 extensions catalog & expert services" },
+      { title: "pubsetup.com — Magento 2 extensions catalog & expert services" },
       { name: "description", content: "Find the best Magento 2 extensions from trusted partners and get them installed by experts. Curated catalog, transparent pricing, professional services." },
-      { property: "og:title", content: "implement.it — Magento 2 extensions catalog" },
+      { property: "og:title", content: "pubsetup.com — Magento 2 extensions catalog" },
       { property: "og:description", content: "Find the best Magento 2 extensions and get them installed by experts." },
     ],
   }),
@@ -35,6 +35,7 @@ const stack = [
 ];
 
 function HomePage() {
+  const extensions = useExtensions();
   const featured = extensions.filter((e) => e.recommended).slice(0, 6);
   return (
     <>
@@ -90,12 +91,12 @@ function HomePage() {
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
-                  href="https://magento.implement.it"
+                  href="https://magento.pubsetup.com"
                   target="_blank"
                   rel="noreferrer"
                   className="ring-focus inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
                 >
-                  Open magento.implement.it ↗
+                  Open magento.pubsetup.com ↗
                 </a>
                 <Link
                   to="/services/$slug"
@@ -111,7 +112,7 @@ function HomePage() {
                 <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-warning/80" />
                 <span className="h-2.5 w-2.5 rounded-full bg-success/80" />
-                <span className="ml-3 text-xs text-muted-foreground">magento.implement.it</span>
+                <span className="ml-3 text-xs text-muted-foreground">magento.pubsetup.com</span>
               </div>
               <div className="space-y-3 p-5">
                 <div className="h-8 w-2/3 rounded-md bg-card shadow-soft" />
@@ -134,22 +135,24 @@ function HomePage() {
       </section>
 
       {/* FEATURED EXTENSIONS */}
-      <section className="container-page py-16 md:py-20">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Recommended extensions</h2>
-            <p className="mt-2 text-muted-foreground">Hand-picked by our team — proven on real client stores.</p>
+      {featured.length > 0 && (
+        <section className="container-page py-16 md:py-20">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">Recommended extensions</h2>
+              <p className="mt-2 text-muted-foreground">Hand-picked by our team — proven on real client stores.</p>
+            </div>
+            <Link to="/extensions" className="hidden text-sm font-semibold text-primary hover:text-primary-hover sm:inline-flex">
+              View all extensions →
+            </Link>
           </div>
-          <Link to="/extensions" className="hidden text-sm font-semibold text-primary hover:text-primary-hover sm:inline-flex">
-            View all extensions →
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((e) => (
-            <ExtensionCard key={e.id} ext={e} />
-          ))}
-        </div>
-      </section>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((e) => (
+              <ExtensionCard key={e.id} ext={e} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* SERVICES */}
       <section className="bg-surface">

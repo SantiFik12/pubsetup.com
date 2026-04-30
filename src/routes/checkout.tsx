@@ -2,20 +2,21 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { useState } from "react";
-import { findService, findExtension, services } from "@/data/mock";
+import { useService, useExtension, useServices, useCatalog } from "@/data/catalog";
+import { supabase } from "@/integrations/supabase/client";
 import { Check, ArrowRight, Lock } from "lucide-react";
 
 const searchSchema = z.object({
-  service: fallback(z.string(), services[0].slug).default(services[0].slug),
-  extension: fallback(z.string().optional(), undefined).default(undefined),
+  service: fallback(z.string(), "").default(""),
+  extension: fallback(z.string().optional(), undefined as string | undefined).default(() => undefined as unknown as string),
 });
 
 export const Route = createFileRoute("/checkout")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Checkout — implement.it" },
-      { name: "description", content: "Order a Magento 2 service in under a minute. Secure checkout via Paddle." },
+      { title: "Checkout — pubsetup.com" },
+      { name: "description", content: "Order a Magento 2 service in under a minute." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -27,22 +28,56 @@ type FormState = { name: string; email: string; site: string; access: string };
 function CheckoutPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const service = findService(search.service) ?? services[0];
-  const extension = search.extension ? findExtension(search.extension) : undefined;
+  const { isLoading } = useCatalog();
+  const services = useServices();
+  const fallbackService = services[0];
+  const service = useService(search.service) ?? fallbackService;
+  const extension = useExtension(search.extension);
 
   const [form, setForm] = useState<FormState>({ name: "", email: "", site: "", access: "" });
   const [step, setStep] = useState<"form" | "summary" | "thanks">("form");
-  const [orderId] = useState(() => "IMP-" + Math.random().toString(36).slice(2, 8).toUpperCase());
+  const [orderCode, setOrderCode] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (isLoading || !service) {
+    return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
+  }
 
   const valid = form.name.trim() && /\S+@\S+\.\S+/.test(form.email);
+
+  const placeOrder = async () => {
+    setSubmitting(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from("orders")
+      .insert({
+        customer_name: form.name,
+        email: form.email,
+        website: form.site || null,
+        notes: form.access || null,
+        amount: service.price,
+        status: "pending",
+        service_id: service.id,
+        extension_id: extension?.id ?? null,
+      })
+      .select("order_code")
+      .single();
+    setSubmitting(false);
+    if (error || !data) {
+      setError(error?.message ?? "Failed to place order");
+      return;
+    }
+    setOrderCode(data.order_code);
+    setStep("thanks");
+  };
 
   return (
     <section className="container-page py-12">
       <div className="mx-auto max-w-3xl">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Order service</h1>
-        <p className="mt-1 text-muted-foreground">A short form, then secure payment via Paddle. We get to work as soon as your order is confirmed.</p>
+        <p className="mt-1 text-muted-foreground">A short form, then we'll confirm your order and get to work.</p>
 
-        {/* Stepper */}
         <ol className="mt-8 flex items-center gap-2 text-xs font-medium">
           {(["Details", "Summary", "Done"] as const).map((label, i) => {
             const idx = ["form", "summary", "thanks"].indexOf(step);
@@ -99,7 +134,6 @@ function CheckoutPage() {
               <>
                 <h2 className="text-lg font-semibold">Order summary</h2>
                 <dl className="mt-4 space-y-2 text-sm">
-                  <Row k="Order #" v={orderId} />
                   <Row k="Service" v={service.name} />
                   {extension && <Row k="Extension" v={extension.name} />}
                   <Row k="Name" v={form.name} />
@@ -108,11 +142,13 @@ function CheckoutPage() {
                   <div className="my-2 border-t border-border" />
                   <Row k="Total" v={`€${service.price}`} bold />
                 </dl>
+                {error && <p className="mt-3 rounded bg-destructive/10 p-2 text-sm text-destructive">{error}</p>}
                 <button
-                  onClick={() => setStep("thanks")}
-                  className="ring-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
+                  disabled={submitting}
+                  onClick={placeOrder}
+                  className="ring-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-50"
                 >
-                  <Lock className="h-4 w-4" /> Pay €{service.price} with Paddle
+                  <Lock className="h-4 w-4" /> {submitting ? "Placing order…" : `Confirm order — €${service.price}`}
                 </button>
                 <button onClick={() => setStep("form")} className="mt-2 text-center w-full text-xs text-muted-foreground hover:text-foreground">← Back to edit</button>
               </>
@@ -124,12 +160,7 @@ function CheckoutPage() {
                   <Check className="h-6 w-6" />
                 </div>
                 <h2 className="mt-4 text-2xl font-bold">Thank you, {form.name.split(" ")[0]}!</h2>
-                <p className="mt-2 text-muted-foreground">Your order <span className="font-semibold text-foreground">{orderId}</span> is now <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning-foreground">pending</span> and will move through:</p>
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
-                  {(["pending", "paid", "in progress", "completed"] as const).map((s, i) => (
-                    <span key={s} className={`rounded-full px-3 py-1 ${i === 0 ? "bg-warning/15 text-warning-foreground" : "bg-surface text-muted-foreground"}`}>{s}</span>
-                  ))}
-                </div>
+                <p className="mt-2 text-muted-foreground">Your order <span className="font-semibold text-foreground">{orderCode}</span> is now <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning-foreground">pending</span>.</p>
                 <p className="mt-4 text-sm text-muted-foreground">A confirmation email is on its way to <span className="font-medium text-foreground">{form.email}</span>.</p>
                 <Link to="/" className="mt-6 inline-block text-sm font-semibold text-primary">← Back to home</Link>
               </div>

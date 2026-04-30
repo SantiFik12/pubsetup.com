@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Star, ExternalLink, Check, ArrowLeft, Zap } from "lucide-react";
+import { Star, ExternalLink, Check, ArrowLeft, Zap, BookOpen } from "lucide-react";
 import { useExtension, usePartner, useCategory, useCatalog } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
 
@@ -73,10 +73,26 @@ function ExtensionPage() {
       <section className="container-page py-12">
         <div className="grid gap-10 lg:grid-cols-[1fr,360px]">
           <div className="space-y-10">
+            {ext.coverImage && (
+              <img src={ext.coverImage} alt={ext.name} className="w-full rounded-2xl border border-border object-cover" loading="lazy" />
+            )}
             <div>
               <h2 className="text-xl font-semibold text-foreground">About this extension</h2>
               <p className="mt-3 leading-relaxed text-muted-foreground">{ext.description}</p>
             </div>
+
+            {ext.gallery.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-foreground">Screenshots</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {ext.gallery.map((url) => (
+                    <a key={url} href={url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-border bg-card">
+                      <img src={url} alt="" className="aspect-video w-full object-cover transition hover:scale-105" loading="lazy" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <h2 className="text-xl font-semibold text-foreground">Key features</h2>
@@ -134,6 +150,16 @@ function ExtensionPage() {
               >
                 Buy on Partner Website <ExternalLink className="h-4 w-4" />
               </a>
+              {ext.userGuideUrl && (
+                <a
+                  href={ext.userGuideUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ring-focus mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-surface"
+                >
+                  <BookOpen className="h-4 w-4" /> User Guide
+                </a>
+              )}
               <p className="mt-2 text-center text-[11px] text-muted-foreground">Affiliate link · we may earn a commission</p>
             </div>
 

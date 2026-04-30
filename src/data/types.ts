@@ -43,6 +43,9 @@ export type Extension = {
   tags: string[];
   installPrice: number;
   createdAt: string;
+  coverImage: string;
+  gallery: string[];
+  userGuideUrl: string;
 };
 
 export type Service = {

@@ -54,6 +54,9 @@ function mapExtension(r: Row): Extension {
     tags: r.tags ?? [],
     installPrice: Number(r.install_price ?? 0),
     createdAt: r.created_at,
+    coverImage: r.cover_image ?? "",
+    gallery: Array.isArray(r.gallery) ? r.gallery : [],
+    userGuideUrl: r.user_guide_url ?? "",
   };
 }
 

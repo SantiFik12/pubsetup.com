@@ -31,6 +31,9 @@ type Form = {
   use_cases: string[];
   tags: string[];
   install_price: number;
+  cover_image: string;
+  gallery: string[];
+  user_guide_url: string;
 };
 
 const empty: Form = {
@@ -47,6 +50,7 @@ const empty: Form = {
   support_months: 12,
   features: [], use_cases: [], tags: [],
   install_price: 60,
+  cover_image: "", gallery: [], user_guide_url: "",
 };
 
 function fromExtension(e: Extension): Form {
@@ -64,6 +68,7 @@ function fromExtension(e: Extension): Form {
     support_months: e.supportMonths,
     features: e.features, use_cases: e.useCases, tags: e.tags,
     install_price: e.installPrice,
+    cover_image: e.coverImage, gallery: e.gallery, user_guide_url: e.userGuideUrl,
   };
 }
 
@@ -148,6 +153,18 @@ export function ExtensionForm({ id }: { id?: string }) {
 
         <Field label="Affiliate URL" className="md:col-span-2">
           <input value={form.affiliate_url} onChange={(e) => set("affiliate_url", e.target.value)} className={inp} placeholder="https://amasty.com/..." />
+        </Field>
+
+        <Field label="User guide URL" className="md:col-span-2" hint="Link to vendor's documentation / user guide">
+          <input value={form.user_guide_url} onChange={(e) => set("user_guide_url", e.target.value)} className={inp} placeholder="https://docs.vendor.com/..." />
+        </Field>
+
+        <Field label="Cover image" className="md:col-span-2" hint="Main image shown on cards and detail page">
+          <ImageUploader value={form.cover_image} onChange={(url) => set("cover_image", url)} folder={form.slug || "misc"} />
+        </Field>
+
+        <Field label="Gallery (up to 5)" className="md:col-span-2" hint="Additional screenshots">
+          <GalleryUploader value={form.gallery} onChange={(v) => set("gallery", v)} folder={form.slug || "misc"} max={5} />
         </Field>
 
         <Field label="Price from ($)">
@@ -303,6 +320,85 @@ function TagsInput({ value, onChange, suggestions }: { value: string[]; onChange
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+async function uploadImage(file: File, folder: string): Promise<string> {
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from("extension-images").upload(path, file, {
+    cacheControl: "31536000", upsert: false, contentType: file.type,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from("extension-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function ImageUploader({ value, onChange, folder }: { value: string; onChange: (url: string) => void; folder: string }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const onPick = async (f: File | null) => {
+    if (!f) return;
+    setBusy(true); setErr(null);
+    try { onChange(await uploadImage(f, folder)); }
+    catch (e: any) { setErr(e.message); }
+    finally { setBusy(false); }
+  };
+  return (
+    <div className="space-y-2">
+      {value && (
+        <div className="relative inline-block">
+          <img src={value} alt="" className="h-32 w-32 rounded-lg border border-border object-cover" />
+          <button type="button" onClick={() => onChange("")} className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"><X className="h-3 w-3" /></button>
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <label className="ring-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold hover:bg-surface">
+          {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
+          <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(e) => onPick(e.target.files?.[0] ?? null)} />
+        </label>
+        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="or paste URL" className={`${inp} flex-1`} />
+      </div>
+      {err && <p className="text-xs text-destructive">{err}</p>}
+    </div>
+  );
+}
+
+function GalleryUploader({ value, onChange, folder, max }: { value: string[]; onChange: (v: string[]) => void; folder: string; max: number }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const onPick = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setBusy(true); setErr(null);
+    try {
+      const slots = Math.max(0, max - value.length);
+      const picked = Array.from(files).slice(0, slots);
+      const urls = await Promise.all(picked.map((f) => uploadImage(f, folder)));
+      onChange([...value, ...urls]);
+    } catch (e: any) { setErr(e.message); }
+    finally { setBusy(false); }
+  };
+  const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i));
+  return (
+    <div className="space-y-2">
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {value.map((url, i) => (
+            <div key={url + i} className="relative">
+              <img src={url} alt="" className="h-24 w-24 rounded-lg border border-border object-cover" />
+              <button type="button" onClick={() => remove(i)} className="absolute -right-2 -top-2 rounded-full bg-destructive p-1 text-destructive-foreground"><X className="h-3 w-3" /></button>
+            </div>
+          ))}
+        </div>
+      )}
+      {value.length < max && (
+        <label className="ring-focus inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold hover:bg-surface">
+          {busy ? "Uploading…" : `Add images (${value.length}/${max})`}
+          <input type="file" accept="image/*" multiple className="hidden" disabled={busy} onChange={(e) => onPick(e.target.files)} />
+        </label>
+      )}
+      {err && <p className="text-xs text-destructive">{err}</p>}
     </div>
   );
 }

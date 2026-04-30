@@ -14,16 +14,411 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          author: string
+          category: string
+          content: Json
+          cover: string
+          created_at: string
+          date: string
+          excerpt: string
+          id: string
+          published: boolean
+          read_minutes: number
+          slug: string
+          tags: string[]
+          title: string
+          toc: Json
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          category?: string
+          content?: Json
+          cover?: string
+          created_at?: string
+          date?: string
+          excerpt?: string
+          id?: string
+          published?: boolean
+          read_minutes?: number
+          slug: string
+          tags?: string[]
+          title: string
+          toc?: Json
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: string
+          content?: Json
+          cover?: string
+          created_at?: string
+          date?: string
+          excerpt?: string
+          id?: string
+          published?: boolean
+          read_minutes?: number
+          slug?: string
+          tags?: string[]
+          title?: string
+          toc?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      extensions: {
+        Row: {
+          affiliate_url: string
+          best_seller: boolean
+          category_id: string
+          created_at: string
+          description: string
+          edition: Database["public"]["Enums"]["magento_edition"]
+          features: string[]
+          has_demo: boolean
+          has_trial: boolean
+          hyva_compatible: boolean
+          id: string
+          install_complexity: Database["public"]["Enums"]["install_complexity"]
+          install_price: number
+          magento_versions: string[]
+          name: string
+          partner_id: string
+          price_from: number
+          price_type: Database["public"]["Enums"]["price_type"]
+          pwa_ready: boolean
+          rating: number
+          recommended: boolean
+          reviews: number
+          short_description: string
+          slug: string
+          support_months: number
+          tags: string[]
+          updated_at: string
+          use_cases: string[]
+        }
+        Insert: {
+          affiliate_url?: string
+          best_seller?: boolean
+          category_id: string
+          created_at?: string
+          description?: string
+          edition?: Database["public"]["Enums"]["magento_edition"]
+          features?: string[]
+          has_demo?: boolean
+          has_trial?: boolean
+          hyva_compatible?: boolean
+          id?: string
+          install_complexity?: Database["public"]["Enums"]["install_complexity"]
+          install_price?: number
+          magento_versions?: string[]
+          name: string
+          partner_id: string
+          price_from?: number
+          price_type?: Database["public"]["Enums"]["price_type"]
+          pwa_ready?: boolean
+          rating?: number
+          recommended?: boolean
+          reviews?: number
+          short_description?: string
+          slug: string
+          support_months?: number
+          tags?: string[]
+          updated_at?: string
+          use_cases?: string[]
+        }
+        Update: {
+          affiliate_url?: string
+          best_seller?: boolean
+          category_id?: string
+          created_at?: string
+          description?: string
+          edition?: Database["public"]["Enums"]["magento_edition"]
+          features?: string[]
+          has_demo?: boolean
+          has_trial?: boolean
+          hyva_compatible?: boolean
+          id?: string
+          install_complexity?: Database["public"]["Enums"]["install_complexity"]
+          install_price?: number
+          magento_versions?: string[]
+          name?: string
+          partner_id?: string
+          price_from?: number
+          price_type?: Database["public"]["Enums"]["price_type"]
+          pwa_ready?: boolean
+          rating?: number
+          recommended?: boolean
+          reviews?: number
+          short_description?: string
+          slug?: string
+          support_months?: number
+          tags?: string[]
+          updated_at?: string
+          use_cases?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extensions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extensions_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          amount: number
+          created_at: string
+          customer_name: string
+          email: string
+          extension_id: string | null
+          id: string
+          notes: string | null
+          order_code: string
+          service_id: string
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          customer_name: string
+          email: string
+          extension_id?: string | null
+          id?: string
+          notes?: string | null
+          order_code?: string
+          service_id: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          customer_name?: string
+          email?: string
+          extension_id?: string | null
+          id?: string
+          notes?: string | null
+          order_code?: string
+          service_id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_extension_id_fkey"
+            columns: ["extension_id"]
+            isOneToOne: false
+            referencedRelation: "extensions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          logo_letter: string
+          name: string
+          slug: string
+          updated_at: string
+          website: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          logo_letter: string
+          name: string
+          slug: string
+          updated_at?: string
+          website?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          logo_letter?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+          website?: string
+        }
+        Relationships: []
+      }
+      seo_landings: {
+        Row: {
+          created_at: string
+          filter: Json
+          id: string
+          intro: string
+          meta_description: string
+          published: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          filter?: Json
+          id?: string
+          intro?: string
+          meta_description?: string
+          published?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          filter?: Json
+          id?: string
+          intro?: string
+          meta_description?: string
+          published?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          duration: string
+          featured: boolean
+          id: string
+          includes: string[]
+          name: string
+          price: number
+          slug: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          duration?: string
+          featured?: boolean
+          id?: string
+          includes?: string[]
+          name: string
+          price?: number
+          slug: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          duration?: string
+          featured?: boolean
+          id?: string
+          includes?: string[]
+          name?: string
+          price?: number
+          slug?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor"
+      install_complexity: "simple" | "complex"
+      magento_edition: "open-source" | "commerce" | "both"
+      order_status:
+        | "pending"
+        | "paid"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+      price_type: "one-time" | "subscription" | "free"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +545,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor"],
+      install_complexity: ["simple", "complex"],
+      magento_edition: ["open-source", "commerce", "both"],
+      order_status: [
+        "pending",
+        "paid",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
+      price_type: ["one-time", "subscription", "free"],
+    },
   },
 } as const

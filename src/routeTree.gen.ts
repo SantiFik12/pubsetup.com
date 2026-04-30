@@ -10,22 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LandingRouteImport } from './routes/$landing'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TagSlugRouteImport } from './routes/tag/$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as PartnerSlugRouteImport } from './routes/partner/$slug'
 import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as AdminExtensionsIndexRouteImport } from './routes/admin/extensions.index'
+import { Route as AdminExtensionsNewRouteImport } from './routes/admin/extensions.new'
+import { Route as AdminExtensionsIdRouteImport } from './routes/admin/extensions.$id'
 
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExtensionsRoute = ExtensionsRouteImport.update({
@@ -48,6 +59,11 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LandingRoute = LandingRouteImport.update({
   id: '/$landing',
   path: '/$landing',
@@ -57,6 +73,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const TagSlugRoute = TagSlugRouteImport.update({
   id: '/tag/$slug',
@@ -88,14 +109,31 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AdminExtensionsIndexRoute = AdminExtensionsIndexRouteImport.update({
+  id: '/extensions/',
+  path: '/extensions/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExtensionsNewRoute = AdminExtensionsNewRouteImport.update({
+  id: '/extensions/new',
+  path: '/extensions/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExtensionsIdRoute = AdminExtensionsIdRouteImport.update({
+  id: '/extensions/$id',
+  path: '/extensions/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -103,6 +141,10 @@ export interface FileRoutesByFullPath {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/extensions/$id': typeof AdminExtensionsIdRoute
+  '/admin/extensions/new': typeof AdminExtensionsNewRoute
+  '/admin/extensions/': typeof AdminExtensionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -111,6 +153,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -118,15 +161,21 @@ export interface FileRoutesByTo {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/extensions/$id': typeof AdminExtensionsIdRoute
+  '/admin/extensions/new': typeof AdminExtensionsNewRoute
+  '/admin/extensions': typeof AdminExtensionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/login': typeof LoginRoute
   '/services': typeof ServicesRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -134,16 +183,22 @@ export interface FileRoutesById {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/extensions/$id': typeof AdminExtensionsIdRoute
+  '/admin/extensions/new': typeof AdminExtensionsNewRoute
+  '/admin/extensions/': typeof AdminExtensionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/$landing'
+    | '/admin'
     | '/blog'
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/login'
     | '/services'
     | '/blog/$slug'
     | '/category/$slug'
@@ -151,6 +206,10 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/admin/'
+    | '/admin/extensions/$id'
+    | '/admin/extensions/new'
+    | '/admin/extensions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,6 +218,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/login'
     | '/services'
     | '/blog/$slug'
     | '/category/$slug'
@@ -166,14 +226,20 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/admin'
+    | '/admin/extensions/$id'
+    | '/admin/extensions/new'
+    | '/admin/extensions'
   id:
     | '__root__'
     | '/'
     | '/$landing'
+    | '/admin'
     | '/blog'
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/login'
     | '/services'
     | '/blog/$slug'
     | '/category/$slug'
@@ -181,15 +247,21 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/admin/'
+    | '/admin/extensions/$id'
+    | '/admin/extensions/new'
+    | '/admin/extensions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LandingRoute: typeof LandingRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   CompareRoute: typeof CompareRoute
   ExtensionsRoute: typeof ExtensionsRoute
+  LoginRoute: typeof LoginRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   CategorySlugRoute: typeof CategorySlugRoute
   ExtensionSlugRoute: typeof ExtensionSlugRoute
@@ -204,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/extensions': {
@@ -234,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$landing': {
       id: '/$landing'
       path: '/$landing'
@@ -247,6 +333,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/tag/$slug': {
       id: '/tag/$slug'
@@ -290,8 +383,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/admin/extensions/': {
+      id: '/admin/extensions/'
+      path: '/extensions'
+      fullPath: '/admin/extensions/'
+      preLoaderRoute: typeof AdminExtensionsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/extensions/new': {
+      id: '/admin/extensions/new'
+      path: '/extensions/new'
+      fullPath: '/admin/extensions/new'
+      preLoaderRoute: typeof AdminExtensionsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/extensions/$id': {
+      id: '/admin/extensions/$id'
+      path: '/extensions/$id'
+      fullPath: '/admin/extensions/$id'
+      preLoaderRoute: typeof AdminExtensionsIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminExtensionsIdRoute: typeof AdminExtensionsIdRoute
+  AdminExtensionsNewRoute: typeof AdminExtensionsNewRoute
+  AdminExtensionsIndexRoute: typeof AdminExtensionsIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminExtensionsIdRoute: AdminExtensionsIdRoute,
+  AdminExtensionsNewRoute: AdminExtensionsNewRoute,
+  AdminExtensionsIndexRoute: AdminExtensionsIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
@@ -318,10 +448,12 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LandingRoute: LandingRoute,
+  AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   CompareRoute: CompareRoute,
   ExtensionsRoute: ExtensionsRoute,
+  LoginRoute: LoginRoute,
   ServicesRoute: ServicesRouteWithChildren,
   CategorySlugRoute: CategorySlugRoute,
   ExtensionSlugRoute: ExtensionSlugRoute,

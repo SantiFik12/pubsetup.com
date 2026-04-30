@@ -1,50 +1,54 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { findPost, findExtension, findPartner } from "@/data/mock";
-import type { Extension } from "@/data/types";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useBlogPost, useExtension, usePartner, useCatalog } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
 import { ExternalLink, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/blog/$slug")({
-  loader: ({ params }) => {
-    const post = findPost(params.slug);
-    if (!post) throw notFound();
-    return { post };
-  },
-  head: ({ loaderData }) => {
-    const p = loaderData?.post;
-    if (!p) return { meta: [{ title: "Article not found" }] };
-    return {
-      meta: [
-        { title: `${p.title} — pubsetup.com` },
-        { name: "description", content: p.excerpt },
-        { property: "og:title", content: p.title },
-        { property: "og:description", content: p.excerpt },
-        { property: "og:type", content: "article" },
-        { property: "article:published_time", content: p.date },
-        { property: "article:author", content: p.author },
-      ],
-      scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            headline: p.title,
-            description: p.excerpt,
-            datePublished: p.date,
-            author: { "@type": "Organization", name: p.author },
-          }),
-        },
-      ],
-    };
-  },
-  notFoundComponent: () => <div className="container-page py-20 text-center"><h1 className="text-2xl font-bold">Article not found</h1><Link to="/blog" className="mt-4 inline-block text-primary">Back to blog</Link></div>,
-  errorComponent: ({ error }) => <div className="container-page py-20 text-center">{error.message}</div>,
+  head: () => ({
+    meta: [{ title: "Article — pubsetup.com" }],
+  }),
   component: BlogPostPage,
 });
 
+function ExtensionCardBlock({ extensionSlug }: { extensionSlug: string }) {
+  const ext = useExtension(extensionSlug);
+  const partner = usePartner(ext?.partnerId);
+  if (!ext || !partner) return null;
+  return (
+    <div className="my-6 rounded-2xl border border-border bg-card p-5 shadow-soft">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">{partner.logoLetter}</div>
+        <div className="flex-1">
+          <div className="text-xs text-muted-foreground">{partner.name}</div>
+          <Link to="/extension/$slug" params={{ slug: ext.slug }} className="text-base font-semibold text-foreground hover:text-primary">{ext.name}</Link>
+          <p className="mt-1 text-sm text-muted-foreground">{ext.shortDescription}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a href={ext.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover">
+              Buy via partner <ExternalLink className="h-3 w-3" />
+            </a>
+            <Link to="/checkout" search={{ service: "install-magento-2-extension", extension: ext.slug }} className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface">
+              <Zap className="h-3 w-3" /> Order installation
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BlogPostPage() {
-  const { post } = Route.useLoaderData();
+  const { slug } = Route.useParams();
+  const { isLoading } = useCatalog();
+  const post = useBlogPost(slug);
+  if (isLoading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
+  if (!post) {
+    return (
+      <div className="container-page py-20 text-center">
+        <h1 className="text-2xl font-bold">Article not found</h1>
+        <Link to="/blog" className="mt-4 inline-block text-primary">Back to blog</Link>
+      </div>
+    );
+  }
 
   return (
     <article>
@@ -89,29 +93,7 @@ function BlogPostPage() {
               </ul>
             );
             if (block.type === "extension-card" && block.extensionSlug) {
-              const ext = findExtension(block.extensionSlug);
-              if (!ext) return null;
-              const partner = findPartner(ext.partnerId);
-              return (
-                <div key={i} className="my-6 rounded-2xl border border-border bg-card p-5 shadow-soft">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">{partner.logoLetter}</div>
-                    <div className="flex-1">
-                      <div className="text-xs text-muted-foreground">{partner.name}</div>
-                      <Link to="/extension/$slug" params={{ slug: ext.slug }} className="text-base font-semibold text-foreground hover:text-primary">{ext.name}</Link>
-                      <p className="mt-1 text-sm text-muted-foreground">{ext.shortDescription}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <a href={ext.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover">
-                          Buy via partner <ExternalLink className="h-3 w-3" />
-                        </a>
-                        <Link to="/checkout" search={{ service: "install-magento-2-extension", extension: ext.slug }} className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface">
-                          <Zap className="h-3 w-3" /> Order installation
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
+              return <ExtensionCardBlock key={i} extensionSlug={block.extensionSlug} />;
             }
             return null;
           })}

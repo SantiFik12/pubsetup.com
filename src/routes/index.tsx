@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Search, ShoppingCart, Zap, FileText, Shield, RefreshCw, Palette, Boxes, Sparkles } from "lucide-react";
+import { ArrowRight, Check, ShoppingCart, Zap, FileText, Shield, RefreshCw, Palette, Boxes, Sparkles } from "lucide-react";
 import { ExtensionCard } from "@/components/ExtensionCard";
-import { extensions, services } from "@/data/mock";
+import { useExtensions } from "@/data/catalog";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +35,7 @@ const stack = [
 ];
 
 function HomePage() {
+  const extensions = useExtensions();
   const featured = extensions.filter((e) => e.recommended).slice(0, 6);
   return (
     <>
@@ -134,22 +135,24 @@ function HomePage() {
       </section>
 
       {/* FEATURED EXTENSIONS */}
-      <section className="container-page py-16 md:py-20">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Recommended extensions</h2>
-            <p className="mt-2 text-muted-foreground">Hand-picked by our team — proven on real client stores.</p>
+      {featured.length > 0 && (
+        <section className="container-page py-16 md:py-20">
+          <div className="flex items-end justify-between">
+            <div>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">Recommended extensions</h2>
+              <p className="mt-2 text-muted-foreground">Hand-picked by our team — proven on real client stores.</p>
+            </div>
+            <Link to="/extensions" className="hidden text-sm font-semibold text-primary hover:text-primary-hover sm:inline-flex">
+              View all extensions →
+            </Link>
           </div>
-          <Link to="/extensions" className="hidden text-sm font-semibold text-primary hover:text-primary-hover sm:inline-flex">
-            View all extensions →
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((e) => (
-            <ExtensionCard key={e.id} ext={e} />
-          ))}
-        </div>
-      </section>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((e) => (
+              <ExtensionCard key={e.id} ext={e} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* SERVICES */}
       <section className="bg-surface">

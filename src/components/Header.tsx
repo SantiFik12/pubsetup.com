@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Shield } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const nav = [
   { to: "/extensions", label: "Extensions" },
@@ -12,6 +13,7 @@ const nav = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { isAdmin } = useAuth();
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
       <div className="container-page flex h-16 items-center justify-between">
@@ -31,6 +33,11 @@ export function Header() {
           </nav>
         </div>
         <div className="hidden items-center gap-2 md:flex">
+          {isAdmin && (
+            <Link to="/admin" className="inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium text-primary hover:bg-brand-soft">
+              <Shield className="h-4 w-4" /> Admin
+            </Link>
+          )}
           <a
             href="https://magento.pubsetup.com"
             target="_blank"

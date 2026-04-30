@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Clock, Check, ArrowRight } from "lucide-react";
-import { services } from "@/data/mock";
+import { useServices } from "@/data/catalog";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/services")({
 });
 
 function ServicesPage() {
+  const services = useServices();
   return (
     <>
       <section className="bg-hero">

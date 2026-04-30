@@ -68,6 +68,7 @@ function fromExtension(e: Extension): Form {
     support_months: e.supportMonths,
     features: e.features, use_cases: e.useCases, tags: e.tags,
     install_price: e.installPrice,
+    cover_image: e.coverImage, gallery: e.gallery, user_guide_url: e.userGuideUrl,
   };
 }
 

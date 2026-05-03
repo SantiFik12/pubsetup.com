@@ -111,54 +111,63 @@ function ExtensionsPage() {
       </section>
 
       <section className="container-page py-10">
-        <div className="grid gap-8 md:grid-cols-[260px_1fr]">
+        <div className={`grid gap-8 ${sidebarOpen ? "md:grid-cols-[260px_1fr]" : "md:grid-cols-[40px_1fr]"}`}>
           {/* Filters sidebar */}
           <aside className={`${mobileFilters ? "fixed inset-0 z-50 overflow-y-auto bg-background p-4" : "hidden"} md:static md:block md:p-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:pr-2`}>
-            <div className="mb-4 flex items-center justify-between lg:hidden">
-              <h2 className="text-lg font-semibold">Filters</h2>
-              <button onClick={() => setMobileFilters(false)} className="rounded-md p-1.5"><X className="h-5 w-5" /></button>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className={`text-lg font-semibold ${sidebarOpen ? "" : "md:hidden"}`}>Filters</h2>
+              <button
+                onClick={() => setSidebarOpen((v) => !v)}
+                className="hidden rounded-md border border-border bg-card p-1.5 text-muted-foreground hover:text-foreground md:inline-flex"
+                aria-label={sidebarOpen ? "Collapse filters" : "Expand filters"}
+              >
+                {sidebarOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+              </button>
+              <button onClick={() => setMobileFilters(false)} className="rounded-md p-1.5 md:hidden"><X className="h-5 w-5" /></button>
             </div>
-            <FilterGroup label="Category">
-              <FilterRadio name="cat" value="" current={search.cat} onChange={(v) => update({ cat: v })} label="All categories" />
-              {categories.map((c) => (
-                <FilterRadio key={c.id} name="cat" value={c.id} current={search.cat} onChange={(v) => update({ cat: v })} label={c.name} />
-              ))}
-            </FilterGroup>
-            <FilterGroup label="Partner">
-              <FilterRadio name="partner" value="" current={search.partner} onChange={(v) => update({ partner: v })} label="All partners" />
-              {partners.map((p) => (
-                <FilterRadio key={p.id} name="partner" value={p.id} current={search.partner} onChange={(v) => update({ partner: v })} label={p.name} />
-              ))}
-            </FilterGroup>
-            <FilterGroup label="Price">
-              {([["all","Any price"],["free","Free"],["lt300","Under $300"],["gte300","$300+"]] as const).map(([v, l]) => (
-                <FilterRadio key={v} name="price" value={v} current={search.price} onChange={(val) => update({ price: val as typeof search.price })} label={l} />
-              ))}
-            </FilterGroup>
-            <FilterGroup label="Compatibility">
-              <FilterCheck label="Hyvä compatible" checked={search.hyva} onChange={(v) => update({ hyva: v })} />
-              <FilterCheck label="PWA ready" checked={search.pwa} onChange={(v) => update({ pwa: v })} />
-            </FilterGroup>
-            <FilterGroup label="Tags">
-              <div className="flex flex-wrap gap-1.5">
-                {allTags.map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => update({ tag: search.tag === t ? "" : t })}
-                    className={`rounded-md border px-2 py-1 text-[11px] font-medium transition ${
-                      search.tag === t
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border bg-card text-muted-foreground hover:bg-surface"
-                    }`}
-                  >
-                    {t}
-                  </button>
+            <div className={sidebarOpen ? "" : "md:hidden"}>
+              <FilterGroup label="Category">
+                <FilterRadio name="cat" value="" current={search.cat} onChange={(v) => update({ cat: v })} label="All categories" />
+                {categories.map((c) => (
+                  <FilterRadio key={c.id} name="cat" value={c.id} current={search.cat} onChange={(v) => update({ cat: v })} label={c.name} />
                 ))}
-              </div>
-            </FilterGroup>
-            <button onClick={clearAll} className="mt-2 text-sm font-medium text-primary hover:text-primary-hover">
-              Reset all filters
-            </button>
+              </FilterGroup>
+              <FilterGroup label="Partner">
+                <FilterRadio name="partner" value="" current={search.partner} onChange={(v) => update({ partner: v })} label="All partners" />
+                {partners.map((p) => (
+                  <FilterRadio key={p.id} name="partner" value={p.id} current={search.partner} onChange={(v) => update({ partner: v })} label={p.name} />
+                ))}
+              </FilterGroup>
+              <FilterGroup label="Price">
+                {([["all","Any price"],["free","Free"],["lt300","Under $300"],["gte300","$300+"]] as const).map(([v, l]) => (
+                  <FilterRadio key={v} name="price" value={v} current={search.price} onChange={(val) => update({ price: val as typeof search.price })} label={l} />
+                ))}
+              </FilterGroup>
+              <FilterGroup label="Compatibility">
+                <FilterCheck label="Hyvä compatible" checked={search.hyva} onChange={(v) => update({ hyva: v })} />
+                <FilterCheck label="PWA ready" checked={search.pwa} onChange={(v) => update({ pwa: v })} />
+              </FilterGroup>
+              <FilterGroup label="Tags" defaultOpen={false}>
+                <div className="flex flex-wrap gap-1.5">
+                  {allTags.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => update({ tag: search.tag === t ? "" : t })}
+                      className={`rounded-md border px-2 py-1 text-[11px] font-medium transition ${
+                        search.tag === t
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-card text-muted-foreground hover:bg-surface"
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </FilterGroup>
+              <button onClick={clearAll} className="mt-2 text-sm font-medium text-primary hover:text-primary-hover">
+                Reset all filters
+              </button>
+            </div>
           </aside>
 
           {/* Results */}

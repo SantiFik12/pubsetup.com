@@ -62,13 +62,13 @@ function ExtensionPage() {
           {/* Left: gallery */}
           <div>
             {ext.gallery.length > 0 ? (
-              <>
+              <div className="lg:sticky lg:top-24">
                 <button
                   type="button"
                   onClick={() => setLightboxIndex(0)}
-                  className="block w-full overflow-hidden rounded-2xl border border-border bg-card"
+                  className="flex w-full items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface p-4"
                 >
-                  <img src={ext.gallery[0]} alt={ext.name} className="aspect-video w-full object-cover" />
+                  <img src={ext.gallery[0]} alt={ext.name} className="max-h-[480px] w-full object-contain" />
                 </button>
                 {ext.gallery.length > 1 && (
                   <div className="mt-3 grid grid-cols-4 gap-3">
@@ -77,14 +77,14 @@ function ExtensionPage() {
                         type="button"
                         key={url}
                         onClick={() => setLightboxIndex(idx)}
-                        className="overflow-hidden rounded-lg border border-border bg-card"
+                        className="flex items-center justify-center overflow-hidden rounded-lg border border-border bg-surface p-1"
                       >
-                        <img src={url} alt="" className="aspect-video w-full object-cover transition hover:scale-105" loading="lazy" />
+                        <img src={url} alt="" className="aspect-video w-full object-contain transition hover:scale-105" loading="lazy" />
                       </button>
                     ))}
                   </div>
                 )}
-              </>
+              </div>
             ) : (
               <div className="flex aspect-video w-full items-center justify-center rounded-2xl border border-dashed border-border bg-card text-sm text-muted-foreground">
                 No screenshots

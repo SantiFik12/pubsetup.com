@@ -1,0 +1,1 @@
+UPDATE public.services SET price = 60 WHERE slug = 'extension-installation';

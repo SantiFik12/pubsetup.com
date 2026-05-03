@@ -110,9 +110,9 @@ function ExtensionsPage() {
       </section>
 
       <section className="container-page py-10">
-        <div className="grid gap-8 lg:grid-cols-[260px,1fr]">
-          {/* Filters */}
-          <aside className={`${mobileFilters ? "fixed inset-0 z-50 overflow-y-auto bg-background p-4" : "hidden"} lg:static lg:block lg:p-0`}>
+        <div className="grid gap-8 md:grid-cols-[260px_1fr]">
+          {/* Filters sidebar */}
+          <aside className={`${mobileFilters ? "fixed inset-0 z-50 overflow-y-auto bg-background p-4" : "hidden"} md:static md:block md:p-0 md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:overflow-y-auto md:pr-2`}>
             <div className="mb-4 flex items-center justify-between lg:hidden">
               <h2 className="text-lg font-semibold">Filters</h2>
               <button onClick={() => setMobileFilters(false)} className="rounded-md p-1.5"><X className="h-5 w-5" /></button>

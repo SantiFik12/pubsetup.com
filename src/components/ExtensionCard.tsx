@@ -16,20 +16,27 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
   const inCompare = items.includes(ext.slug);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
-      <div className="flex items-start gap-3 p-5">
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
+      {ext.recommended && (
+        <div className="absolute right-3 top-3 z-10">
+          <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success ring-1 ring-success/20">
+            <Check className="h-3 w-3" /> Recommended
+          </span>
+        </div>
+      )}
+      <div className="flex items-start gap-3 p-5 pr-28">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">
           {partner?.logoLetter ?? "·"}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">{partner?.name ?? "Partner"}</span>
+            <span className="truncate text-xs font-medium text-muted-foreground">{partner?.name ?? "Partner"}</span>
             <span className="text-muted-foreground">·</span>
             {category ? (
               <Link
                 to="/category/$slug"
                 params={{ slug: category.slug }}
-                className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                className="truncate text-xs font-medium text-muted-foreground hover:text-foreground"
               >
                 {category.name}
               </Link>
@@ -43,11 +50,6 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
             {ext.name}
           </Link>
         </div>
-        {ext.recommended && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success">
-            <Check className="h-3 w-3" /> Recommended
-          </span>
-        )}
       </div>
 
       <p className="px-5 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>

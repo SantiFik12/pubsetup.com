@@ -202,11 +202,20 @@ function ExtensionsPage() {
   );
 }
 
-function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
+function FilterGroup({ label, children, defaultOpen = true }: { label: string; children: React.ReactNode; defaultOpen?: boolean }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="mb-6">
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</h3>
-      <div className="space-y-1.5">{children}</div>
+    <div className="mb-4 border-b border-border/60 pb-3 last:border-b-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="ring-focus mb-2 flex w-full items-center justify-between rounded-md text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground"
+        aria-expanded={open}
+      >
+        <span>{label}</span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "" : "-rotate-90"}`} />
+      </button>
+      {open && <div className="space-y-1.5">{children}</div>}
     </div>
   );
 }

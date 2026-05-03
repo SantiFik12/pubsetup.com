@@ -35,6 +35,7 @@ function ExtensionsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const [mobileFilters, setMobileFilters] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { items: compareItems, clear } = useCompare();
   const { extensions, partners, categories } = useCatalog();
   const allTags = useAllTags();

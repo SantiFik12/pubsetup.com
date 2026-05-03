@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { useMemo, useState } from "react";
-import { Search, X, SlidersHorizontal, Star } from "lucide-react";
+import { Search, X, SlidersHorizontal, Star, ChevronDown, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { useCatalog, useAllTags } from "@/data/catalog";
 import { useCompare } from "@/state/compare";

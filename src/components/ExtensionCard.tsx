@@ -17,14 +17,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
-      {ext.recommended && (
-        <div className="absolute right-3 top-3 z-10">
-          <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success ring-1 ring-success/20">
-            <Check className="h-3 w-3" /> Recommended
-          </span>
-        </div>
-      )}
-      <div className="flex items-start gap-3 p-5 pr-28">
+      <div className="flex items-start gap-3 p-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">
           {partner?.logoLetter ?? "·"}
         </div>
@@ -66,6 +59,14 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
           </Link>
         ))}
       </div>
+
+      {ext.recommended && (
+        <div className="mt-3 px-5">
+          <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success ring-1 ring-success/20">
+            <Check className="h-3 w-3" /> Recommended
+          </span>
+        </div>
+      )}
 
       <div className="mt-5 flex items-center justify-between border-t border-border px-5 py-3 text-sm">
         <div className="flex items-center gap-1.5">

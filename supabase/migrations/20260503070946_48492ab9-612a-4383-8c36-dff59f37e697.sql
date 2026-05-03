@@ -1,0 +1,1 @@
+INSERT INTO public.categories (slug, name, description, icon) VALUES ('checkout', 'Checkout & Conversion', 'One-step checkout, GDPR, abandoned cart and conversion-boosting extensions for Magento 2.', 'shopping-cart') ON CONFLICT (slug) DO NOTHING;

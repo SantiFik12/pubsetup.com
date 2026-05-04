@@ -27,7 +27,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
             src={ext.gallery?.[0] || ext.coverImage}
             alt={ext.name}
             loading="lazy"
-            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+            className="h-full w-full object-contain transition group-hover:scale-[1.02]"
           />
         </Link>
       )}

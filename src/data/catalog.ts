@@ -26,9 +26,6 @@ function mapCategory(r: Row): Category {
 }
 
 function mapExtension(r: Row): Extension {
-  const coverImage = r.cover_image ?? "";
-  const gallery = Array.isArray(r.gallery) ? r.gallery.filter(Boolean) : [];
-
   return {
     id: r.id,
     slug: r.slug,
@@ -57,8 +54,8 @@ function mapExtension(r: Row): Extension {
     tags: r.tags ?? [],
     installPrice: Number(r.install_price ?? 0),
     createdAt: r.created_at,
-    coverImage,
-    gallery: gallery.length > 0 ? gallery : (coverImage ? [coverImage] : []),
+    coverImage: r.cover_image ?? "",
+    gallery: Array.isArray(r.gallery) ? r.gallery : [],
     userGuideUrl: r.user_guide_url ?? "",
   };
 }

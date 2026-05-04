@@ -14,25 +14,9 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
   const category = useCategory(ext.categoryId);
   const { items, toggle } = useCompare();
   const inCompare = items.includes(ext.slug);
-  const previewImage = ext.coverImage || ext.gallery[0] || "";
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
-      {previewImage ? (
-        <Link
-          to="/extension/$slug"
-          params={{ slug: ext.slug }}
-          className="block overflow-hidden border-b border-border bg-surface"
-        >
-          <img
-            src={previewImage}
-            alt={ext.name}
-            loading="lazy"
-            className="aspect-[16/10] w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-          />
-        </Link>
-      ) : null}
-
       <div className="flex items-start gap-3 p-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">
           {partner?.logoLetter ?? "·"}
@@ -92,19 +76,6 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
         </div>
         <div className="text-sm font-semibold text-foreground">{formatPrice(ext)}</div>
       </div>
-
-      {ext.userGuideUrl ? (
-        <div className="px-5 pb-3">
-          <a
-            href={ext.userGuideUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
-          >
-            User Guide <ExternalLink className="h-3 w-3" />
-          </a>
-        </div>
-      ) : null}
 
       <div className="grid grid-cols-2 gap-2 px-5 pb-5">
         <a

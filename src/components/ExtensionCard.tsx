@@ -17,6 +17,20 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
+      {(ext.gallery?.[0] || ext.coverImage) && (
+        <Link
+          to="/extension/$slug"
+          params={{ slug: ext.slug }}
+          className="block aspect-[16/9] w-full overflow-hidden bg-surface"
+        >
+          <img
+            src={ext.gallery?.[0] || ext.coverImage}
+            alt={ext.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+          />
+        </Link>
+      )}
       <div className="flex items-start gap-3 p-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">
           {partner?.logoLetter ?? "·"}

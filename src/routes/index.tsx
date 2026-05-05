@@ -41,7 +41,7 @@ function HomePage() {
     <>
       {/* HERO */}
       <section className="bg-hero relative overflow-hidden">
-        <div className="container-page relative py-20 md:py-28">
+        <div className="container-page relative py-12 md:py-16">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-soft">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
@@ -78,7 +78,7 @@ function HomePage() {
       </section>
 
       {/* DEMO BLOCK */}
-      <section className="container-page py-16 md:py-20">
+      <section className="container-page py-10 md:py-12">
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-card">
           <div className="grid gap-8 p-8 md:grid-cols-2 md:p-12">
             <div className="flex flex-col justify-center">
@@ -136,7 +136,7 @@ function HomePage() {
 
       {/* FEATURED EXTENSIONS */}
       {featured.length > 0 && (
-        <section className="container-page py-16 md:py-20">
+        <section className="container-page py-10 md:py-12">
           <div className="flex items-end justify-between">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-foreground">Recommended extensions</h2>
@@ -156,7 +156,7 @@ function HomePage() {
 
       {/* SERVICES */}
       <section className="bg-surface">
-        <div className="container-page py-16 md:py-20">
+        <div className="container-page py-10 md:py-12">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground">Magento 2 services, fixed pricing</h2>
             <p className="mt-2 text-muted-foreground">No retainers, no hidden fees. Pick a service and we'll get to work.</p>
@@ -181,7 +181,7 @@ function HomePage() {
       </section>
 
       {/* SPECIAL OFFER */}
-      <section className="container-page py-16 md:py-24">
+      <section className="container-page py-10 md:py-14">
         <div className="overflow-hidden rounded-3xl border border-border bg-brand-gradient text-primary-foreground shadow-glow">
           <div className="grid gap-10 p-8 md:grid-cols-5 md:p-14">
             <div className="md:col-span-3">

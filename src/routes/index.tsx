@@ -204,7 +204,7 @@ function HomePage() {
             <div className="flex flex-col items-start justify-center rounded-2xl bg-white/10 p-6 backdrop-blur md:col-span-2">
               <div className="text-xs font-medium uppercase tracking-wider text-white/70">Fixed price</div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-5xl font-bold">€300</span>
+                <span className="text-5xl font-bold">$300</span>
                 <span className="text-sm text-white/70">one-time</span>
               </div>
               <p className="mt-3 text-sm text-white/80">Delivered in 3–5 business days. Includes documentation and a handover call.</p>

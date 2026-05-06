@@ -160,7 +160,7 @@ function ExtensionPage() {
               <h3 className="mt-3 text-lg font-semibold text-foreground">We can install and configure this extension for you</h3>
               <p className="mt-2 text-sm text-muted-foreground">Composer install, deploy, smoke-test and rollback plan included.</p>
               <div className="mt-4 flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-foreground">€{ext.installPrice}</span>
+                <span className="text-3xl font-bold text-foreground">${ext.installPrice}</span>
                 <span className="text-sm text-muted-foreground">fixed</span>
               </div>
               <Link

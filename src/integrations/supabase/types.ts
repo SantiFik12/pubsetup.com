@@ -377,6 +377,7 @@ export type Database = {
           id: string
           includes: string[]
           name: string
+          position: number
           price: number
           slug: string
           unit: string | null
@@ -390,6 +391,7 @@ export type Database = {
           id?: string
           includes?: string[]
           name: string
+          position?: number
           price?: number
           slug: string
           unit?: string | null
@@ -403,6 +405,7 @@ export type Database = {
           id?: string
           includes?: string[]
           name?: string
+          position?: number
           price?: number
           slug?: string
           unit?: string | null

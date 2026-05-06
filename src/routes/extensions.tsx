@@ -132,18 +132,18 @@ function ExtensionsPage() {
                   <FilterRadio key={c.id} name="cat" value={c.id} current={search.cat} onChange={(v) => update({ cat: v })} label={c.name} />
                 ))}
               </FilterGroup>
-              <FilterGroup label="Partner">
+              <FilterGroup label="Partner" defaultOpen={false}>
                 <FilterRadio name="partner" value="" current={search.partner} onChange={(v) => update({ partner: v })} label="All partners" />
                 {partners.map((p) => (
                   <FilterRadio key={p.id} name="partner" value={p.id} current={search.partner} onChange={(v) => update({ partner: v })} label={p.name} />
                 ))}
               </FilterGroup>
-              <FilterGroup label="Price">
+              <FilterGroup label="Price" defaultOpen={false}>
                 {([["all","Any price"],["free","Free"],["lt300","Under $300"],["gte300","$300+"]] as const).map(([v, l]) => (
                   <FilterRadio key={v} name="price" value={v} current={search.price} onChange={(val) => update({ price: val as typeof search.price })} label={l} />
                 ))}
               </FilterGroup>
-              <FilterGroup label="Compatibility">
+              <FilterGroup label="Compatibility" defaultOpen={false}>
                 <FilterCheck label="Hyvä compatible" checked={search.hyva} onChange={(v) => update({ hyva: v })} />
                 <FilterCheck label="PWA ready" checked={search.pwa} onChange={(v) => update({ pwa: v })} />
               </FilterGroup>

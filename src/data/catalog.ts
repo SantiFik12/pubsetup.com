@@ -106,7 +106,7 @@ async function fetchCatalog() {
     supabase.from("partners").select("*").order("name"),
     supabase.from("categories").select("*").order("name"),
     supabase.from("extensions").select("*").order("created_at", { ascending: false }),
-    supabase.from("services").select("*").order("price"),
+    supabase.from("services").select("*").order("position", { ascending: true }).order("price", { ascending: true }),
     supabase.from("blog_posts").select("*").eq("published", true).order("date", { ascending: false }),
     supabase.from("seo_landings").select("*").eq("published", true),
   ]);

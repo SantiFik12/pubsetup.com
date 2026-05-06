@@ -54,7 +54,7 @@ function ServicesPage() {
               </div>
 
               <div className="mt-5 flex items-baseline gap-1.5 border-t border-border pt-5">
-                <span className="text-3xl font-bold text-foreground">€{s.price}</span>
+                <span className="text-3xl font-bold text-foreground">${s.price}</span>
                 <span className="text-sm text-muted-foreground">{s.unit ?? "fixed"}</span>
               </div>
 

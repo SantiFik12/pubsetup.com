@@ -106,7 +106,7 @@ function CheckoutPage() {
                     className="ring-focus h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
                   >
                     {services.map((s) => (
-                      <option key={s.id} value={s.slug}>{s.name} — €{s.price}</option>
+                      <option key={s.id} value={s.slug}>{s.name} — ${s.price}</option>
                     ))}
                   </select>
                 </div>
@@ -143,7 +143,7 @@ function CheckoutPage() {
                   <Row k="Email" v={form.email} />
                   {form.site && <Row k="Website" v={form.site} />}
                   <div className="my-2 border-t border-border" />
-                  <Row k="Total" v={`€${service.price}`} bold />
+                  <Row k="Total" v={`$${service.price}`} bold />
                 </dl>
                 {error && <p className="mt-3 rounded bg-destructive/10 p-2 text-sm text-destructive">{error}</p>}
                 <button
@@ -151,7 +151,7 @@ function CheckoutPage() {
                   onClick={placeOrder}
                   className="ring-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-50"
                 >
-                  <Lock className="h-4 w-4" /> {submitting ? "Placing order…" : `Confirm order — €${service.price}`}
+                  <Lock className="h-4 w-4" /> {submitting ? "Placing order…" : `Confirm order — $${service.price}`}
                 </button>
                 <button onClick={() => setStep("form")} className="mt-2 text-center w-full text-xs text-muted-foreground hover:text-foreground">← Back to edit</button>
               </>
@@ -176,7 +176,7 @@ function CheckoutPage() {
             {extension && <div className="mt-2 rounded-lg border border-border bg-card p-2 text-xs text-muted-foreground">For: <span className="font-medium text-foreground">{extension.name}</span></div>}
             <p className="mt-3 text-sm text-muted-foreground">{service.description}</p>
             <div className="mt-4 flex items-baseline gap-2 border-t border-border pt-4">
-              <span className="text-3xl font-bold text-foreground">€{service.price}</span>
+              <span className="text-3xl font-bold text-foreground">${service.price}</span>
               <span className="text-sm text-muted-foreground">{service.unit ?? "fixed"}</span>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">Delivery: {service.duration}</p>

@@ -67,7 +67,7 @@ function ServicePage() {
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Fixed price</div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-foreground">€{service.price}</span>
+                <span className="text-4xl font-bold text-foreground">${service.price}</span>
                 <span className="text-sm text-muted-foreground">{service.unit ?? "one-time"}</span>
               </div>
               <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -87,7 +87,7 @@ function ServicePage() {
                 {others.map((s) => (
                   <li key={s.id}>
                     <Link to="/services/$slug" params={{ slug: s.slug }} className="flex items-center justify-between text-sm hover:text-primary">
-                      <span>{s.name}</span><span className="text-muted-foreground">€{s.price}</span>
+                      <span>{s.name}</span><span className="text-muted-foreground">${s.price}</span>
                     </Link>
                   </li>
                 ))}

@@ -41,6 +41,7 @@ export const Route = createRootRoute({
           "The trusted catalog of Magento 2 extensions. Discover proven modules from top partners, then have our team install and optimize your store.",
       },
       { name: "author", content: "pubsetup.com" },
+      { name: "google-site-verification", content: "VKqI55icHAyQs79euvUvHMP78ZXEKYtxqqcU7G7veQw" },
       { property: "og:title", content: "pubsetup.com — Magento 2 extensions catalog & services" },
       { property: "og:description", content: "Find the best Magento 2 extensions and get them installed by experts." },
       { property: "og:type", content: "website" },

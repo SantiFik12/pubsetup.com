@@ -42,6 +42,11 @@ export function Footer() {
       <div className="border-t border-border">
         <div className="container-page flex flex-col items-center justify-between gap-3 py-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} pubsetup.com — Independent Magento 2 catalog & services.</p>
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+            <Link to="/refund" className="hover:text-foreground">Refund</Link>
+          </nav>
           <p>Affiliate disclosure: we may earn a commission from links to partner sites.</p>
         </div>
       </div>

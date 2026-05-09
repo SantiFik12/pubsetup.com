@@ -105,6 +105,7 @@ function RootComponent() {
         </main>
         <Footer />
       </div>
+      <CookieConsent />
     </QueryClientProvider>
   );
 }

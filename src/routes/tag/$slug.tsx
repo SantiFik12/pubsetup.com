@@ -4,9 +4,22 @@ import { useExtensions, useAllTags, useCatalog } from "@/data/catalog";
 import { tagFromSlug } from "@/lib/slug";
 
 export const Route = createFileRoute("/tag/$slug")({
-  head: () => ({
-    meta: [{ title: "Tag — pubsetup.com" }],
-  }),
+  head: ({ params }) => {
+    const tag = decodeURIComponent(params.slug).replace(/-/g, " ");
+    const title = `Magento 2 extensions tagged "${tag}" — pubsetup.com`;
+    const desc = `Browse Magento 2 extensions tagged "${tag}" from trusted partners.`;
+    const url = `https://pubsetup.com/tag/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: TagPage,
 });
 

@@ -72,7 +72,6 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  }),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

@@ -9,8 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as RefundRouteImport } from './routes/refund'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
@@ -24,6 +27,11 @@ import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -32,6 +40,16 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExtensionsRoute = ExtensionsRouteImport.update({
@@ -102,8 +120,11 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/services': typeof ServicesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -118,8 +139,11 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/services': typeof ServicesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -135,8 +159,11 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
+  '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/services': typeof ServicesRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -153,8 +180,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/privacy'
+    | '/refund'
     | '/services'
     | '/sitemap.xml'
+    | '/terms'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -169,8 +199,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/privacy'
+    | '/refund'
     | '/services'
     | '/sitemap.xml'
+    | '/terms'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -185,8 +218,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/compare'
     | '/extensions'
+    | '/privacy'
+    | '/refund'
     | '/services'
     | '/sitemap.xml'
+    | '/terms'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -202,8 +238,11 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   CompareRoute: typeof CompareRoute
   ExtensionsRoute: typeof ExtensionsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RefundRoute: typeof RefundRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   CategorySlugRoute: typeof CategorySlugRoute
   ExtensionSlugRoute: typeof ExtensionSlugRoute
   PartnerSlugRoute: typeof PartnerSlugRoute
@@ -212,6 +251,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -224,6 +270,20 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/extensions': {
@@ -342,8 +402,11 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   CompareRoute: CompareRoute,
   ExtensionsRoute: ExtensionsRoute,
+  PrivacyRoute: PrivacyRoute,
+  RefundRoute: RefundRoute,
   ServicesRoute: ServicesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   CategorySlugRoute: CategorySlugRoute,
   ExtensionSlugRoute: ExtensionSlugRoute,
   PartnerSlugRoute: PartnerSlugRoute,
@@ -352,3 +415,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

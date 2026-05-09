@@ -27,6 +27,9 @@ async function buildSitemap(): Promise<string> {
     { loc: `${BASE}/extensions`, lastmod: today, changefreq: "daily", priority: 0.9 },
     { loc: `${BASE}/services`, lastmod: today, changefreq: "weekly", priority: 0.9 },
     { loc: `${BASE}/blog`, lastmod: today, changefreq: "weekly", priority: 0.7 },
+    { loc: `${BASE}/terms`, lastmod: today, changefreq: "yearly", priority: 0.3 },
+    { loc: `${BASE}/privacy`, lastmod: today, changefreq: "yearly", priority: 0.3 },
+    { loc: `${BASE}/refund`, lastmod: today, changefreq: "yearly", priority: 0.3 },
   ];
 
   const tagSet = new Set<string>();

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
@@ -23,6 +24,11 @@ import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
   '/services': typeof ServicesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
   '/services': typeof ServicesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
   '/services': typeof ServicesRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/extension/$slug': typeof ExtensionSlugRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/extensions'
     | '/services'
+    | '/sitemap.xml'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/extensions'
     | '/services'
+    | '/sitemap.xml'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/extensions'
     | '/services'
+    | '/sitemap.xml'
     | '/blog/$slug'
     | '/category/$slug'
     | '/extension/$slug'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   CompareRoute: typeof CompareRoute
   ExtensionsRoute: typeof ExtensionsRoute
   ServicesRoute: typeof ServicesRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CategorySlugRoute: typeof CategorySlugRoute
   ExtensionSlugRoute: typeof ExtensionSlugRoute
   PartnerSlugRoute: typeof PartnerSlugRoute
@@ -199,6 +212,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services': {
       id: '/services'
       path: '/services'
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompareRoute: CompareRoute,
   ExtensionsRoute: ExtensionsRoute,
   ServicesRoute: ServicesRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   CategorySlugRoute: CategorySlugRoute,
   ExtensionSlugRoute: ExtensionSlugRoute,
   PartnerSlugRoute: PartnerSlugRoute,
@@ -331,3 +352,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

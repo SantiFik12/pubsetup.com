@@ -7,12 +7,41 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, type CarouselApi } from "@/components/ui/carousel";
 
 export const Route = createFileRoute("/extension/$slug")({
-  head: () => ({
-    meta: [
-      { title: "Magento 2 extension — pubsetup.com" },
-      { name: "description", content: "Magento 2 extension details, pricing, features and Hyvä compatibility." },
-    ],
-  }),
+  loader: async ({ params }) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase
+      .from("extensions")
+      .select("name, short_description, gallery, cover_image")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { ext: data };
+  },
+  head: ({ loaderData, params }) => {
+    const ext = loaderData?.ext as { name?: string; short_description?: string; gallery?: string[]; cover_image?: string } | null;
+    const title = ext?.name
+      ? `${ext.name} for Magento 2 — pubsetup.com`
+      : "Magento 2 extension — pubsetup.com";
+    const desc = ext?.short_description
+      ? ext.short_description.slice(0, 158)
+      : "Magento 2 extension details, pricing, features and Hyvä compatibility.";
+    const img = ext?.cover_image || (ext?.gallery && ext.gallery[0]) || "https://pubsetup.com/favicon-512x512.png";
+    const url = `https://pubsetup.com/extension/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:image", content: img },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "product" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: desc },
+        { name: "twitter:image", content: img },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ExtensionPage,
 });
 

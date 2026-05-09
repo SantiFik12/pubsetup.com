@@ -3,11 +3,33 @@ import { ExtensionCard } from "@/components/ExtensionCard";
 import { useCategory, useExtensions, useCatalog } from "@/data/catalog";
 
 export const Route = createFileRoute("/category/$slug")({
-  head: () => ({
-    meta: [
-      { title: "Magento 2 Extensions Category — pubsetup.com" },
-    ],
-  }),
+  loader: async ({ params }) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase
+      .from("categories")
+      .select("name, description")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { cat: data };
+  },
+  head: ({ loaderData, params }) => {
+    const cat = loaderData?.cat as { name?: string; description?: string } | null;
+    const title = cat?.name
+      ? `${cat.name} extensions for Magento 2 — pubsetup.com`
+      : "Magento 2 Extensions Category — pubsetup.com";
+    const desc = cat?.description?.slice(0, 158) || "Browse Magento 2 extensions in this category.";
+    const url = `https://pubsetup.com/category/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: CategoryPage,
 });
 

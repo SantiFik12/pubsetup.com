@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "@tanstack/react-router";
+import { CookieConsent } from "@/components/CookieConsent";
 
 import appCss from "../styles.css?url";
 
@@ -71,14 +72,6 @@ export const Route = createRootRoute({
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
       },
     ],
-    scripts: [
-      {
-        src: "https://usejolt.io/jolt.js",
-        async: true,
-        "data-domain": "pubsetup.com",
-        "data-api-host": "https://usejolt.io/api/event",
-      },
-    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -112,6 +105,7 @@ function RootComponent() {
         </main>
         <Footer />
       </div>
+      <CookieConsent />
     </QueryClientProvider>
   );
 }

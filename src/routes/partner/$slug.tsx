@@ -3,9 +3,31 @@ import { ExtensionCard } from "@/components/ExtensionCard";
 import { usePartner, useExtensions, useCatalog } from "@/data/catalog";
 
 export const Route = createFileRoute("/partner/$slug")({
-  head: () => ({
-    meta: [{ title: "Partner — pubsetup.com" }],
-  }),
+  loader: async ({ params }) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase
+      .from("partners")
+      .select("name, description")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { partner: data };
+  },
+  head: ({ loaderData, params }) => {
+    const p = loaderData?.partner as { name?: string; description?: string } | null;
+    const title = p?.name ? `${p.name} Magento 2 extensions — pubsetup.com` : "Partner — pubsetup.com";
+    const desc = p?.description?.slice(0, 158) || `Browse Magento 2 extensions from ${p?.name ?? "trusted partners"}.`;
+    const url = `https://pubsetup.com/partner/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: PartnerPage,
 });
 

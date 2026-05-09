@@ -3,11 +3,31 @@ import { Check, Clock, ArrowRight } from "lucide-react";
 import { useService, useServices, useCatalog } from "@/data/catalog";
 
 export const Route = createFileRoute("/services/$slug")({
-  head: () => ({
-    meta: [
-      { title: "Magento 2 service — pubsetup.com" },
-    ],
-  }),
+  loader: async ({ params }) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase
+      .from("services")
+      .select("name, description, price, unit")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { svc: data };
+  },
+  head: ({ loaderData, params }) => {
+    const svc = loaderData?.svc as { name?: string; description?: string; price?: number; unit?: string | null } | null;
+    const title = svc?.name ? `${svc.name} — Magento 2 service | pubsetup.com` : "Magento 2 service — pubsetup.com";
+    const desc = svc?.description?.slice(0, 158) || "Fixed-price Magento 2 services delivered by experts.";
+    const url = `https://pubsetup.com/services/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: ServicePage,
 });
 

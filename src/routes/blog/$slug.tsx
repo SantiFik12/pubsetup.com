@@ -4,9 +4,33 @@ import { tagSlug } from "@/lib/slug";
 import { ExternalLink, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/blog/$slug")({
-  head: () => ({
-    meta: [{ title: "Article — pubsetup.com" }],
-  }),
+  loader: async ({ params }) => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("title, excerpt, cover")
+      .eq("slug", params.slug)
+      .maybeSingle();
+    return { post: data };
+  },
+  head: ({ loaderData, params }) => {
+    const post = loaderData?.post as { title?: string; excerpt?: string; cover?: string } | null;
+    const title = post?.title ? `${post.title} — pubsetup.com` : "Article — pubsetup.com";
+    const desc = post?.excerpt?.slice(0, 158) || "Magento 2 guides, reviews and comparisons.";
+    const url = `https://pubsetup.com/blog/${params.slug}`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:type", content: "article" },
+        { property: "og:url", content: url },
+        ...(post?.cover ? [{ property: "og:image", content: post.cover }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: BlogPostPage,
 });
 

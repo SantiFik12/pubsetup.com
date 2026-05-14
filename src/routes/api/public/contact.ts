@@ -93,7 +93,7 @@ export const Route = createFileRoute("/api/public/contact")({
             body: JSON.stringify({
               templateName: "contact-form-notification",
               recipientEmail: "contact@pubsetup.com",
-              idempotencyKey: `contact-${inserted.id}`,
+              idempotencyKey: `contact-${inserted!.id}`,
               templateData: { name, email, subject: subject || "(no subject)", message },
             }),
           }).catch(() => {});
@@ -101,7 +101,7 @@ export const Route = createFileRoute("/api/public/contact")({
           // ignore — message is already persisted
         }
 
-        return Response.json({ ok: true, id: inserted.id });
+        return Response.json({ ok: true, id: inserted!.id });
       },
     },
   },

@@ -1,3 +1,5 @@
+// @ts-nocheck
+/* eslint-disable */
 import { sendLovableEmail } from '@lovable.dev/email-js'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'

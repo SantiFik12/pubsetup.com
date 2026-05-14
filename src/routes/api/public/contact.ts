@@ -15,15 +15,25 @@ export const Route = createFileRoute("/api/public/contact")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Diagnostic: surface env presence (no values, just booleans)
+        console.log("[contact] env check", {
+          SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
+          VITE_SUPABASE_URL: Boolean(import.meta.env.VITE_SUPABASE_URL),
+          SUPABASE_SERVICE_ROLE_KEY: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+          SUPABASE_PUBLISHABLE_KEY: Boolean(process.env.SUPABASE_PUBLISHABLE_KEY),
+        });
+
         let payload: unknown;
         try {
           payload = await request.json();
-        } catch {
+        } catch (e) {
+          console.error("[contact] invalid JSON", e);
           return Response.json({ error: "Invalid JSON" }, { status: 400 });
         }
 
         const parsed = ContactSchema.safeParse(payload);
         if (!parsed.success) {
+          console.warn("[contact] validation failed", parsed.error.flatten());
           return Response.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 });
         }
         const { name, email, subject, message, website } = parsed.data;
@@ -37,22 +47,40 @@ export const Route = createFileRoute("/api/public/contact")({
           null;
         const userAgent = request.headers.get("user-agent") || null;
 
-        const { data: inserted, error } = await supabaseAdmin
-          .from("contact_messages")
-          .insert({
-            name,
-            email,
-            subject: subject || null,
-            message,
-            ip,
-            user_agent: userAgent,
-          })
-          .select("id")
-          .single();
+        let inserted: { id: string } | null = null;
+        try {
+          const { data, error } = await supabaseAdmin
+            .from("contact_messages")
+            .insert({
+              name,
+              email,
+              subject: subject || null,
+              message,
+              ip,
+              user_agent: userAgent,
+            })
+            .select("id")
+            .single();
 
-        if (error) {
-          console.error("contact_messages insert failed", error);
-          return Response.json({ error: "Failed to save message" }, { status: 500 });
+          if (error) {
+            console.error("[contact] insert error", {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint,
+            });
+            return Response.json(
+              { error: "Failed to save message", debug: error.message },
+              { status: 500 },
+            );
+          }
+          inserted = data;
+        } catch (e) {
+          console.error("[contact] insert threw", e instanceof Error ? { message: e.message, stack: e.stack } : e);
+          return Response.json(
+            { error: "Server error", debug: e instanceof Error ? e.message : String(e) },
+            { status: 500 },
+          );
         }
 
         // Best-effort email notification via Lovable Emails (only if configured).
@@ -65,7 +93,7 @@ export const Route = createFileRoute("/api/public/contact")({
             body: JSON.stringify({
               templateName: "contact-form-notification",
               recipientEmail: "contact@pubsetup.com",
-              idempotencyKey: `contact-${inserted.id}`,
+              idempotencyKey: `contact-${inserted!.id}`,
               templateData: { name, email, subject: subject || "(no subject)", message },
             }),
           }).catch(() => {});
@@ -73,7 +101,7 @@ export const Route = createFileRoute("/api/public/contact")({
           // ignore — message is already persisted
         }
 
-        return Response.json({ ok: true, id: inserted.id });
+        return Response.json({ ok: true, id: inserted!.id });
       },
     },
   },

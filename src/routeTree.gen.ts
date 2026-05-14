@@ -26,6 +26,8 @@ import { Route as PartnerSlugRouteImport } from './routes/partner/$slug'
 import { Route as ExtensionSlugRouteImport } from './routes/extension/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as ApiPublicContactRouteImport } from './routes/api/public/contact'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -112,6 +114,17 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const ApiPublicContactRoute = ApiPublicContactRouteImport.update({
+  id: '/api/public/contact',
+  path: '/api/public/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +144,8 @@ export interface FileRoutesByFullPath {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,6 +165,8 @@ export interface FileRoutesByTo {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,6 +187,8 @@ export interface FileRoutesById {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/api/public/contact': typeof ApiPublicContactRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -191,6 +210,8 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/api/public/contact'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -210,6 +231,8 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/api/public/contact'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -229,6 +252,8 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/api/public/contact'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -247,6 +272,8 @@ export interface RootRouteChildren {
   ExtensionSlugRoute: typeof ExtensionSlugRoute
   PartnerSlugRoute: typeof PartnerSlugRoute
   TagSlugRoute: typeof TagSlugRoute
+  ApiPublicContactRoute: typeof ApiPublicContactRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -370,6 +397,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/api/public/contact': {
+      id: '/api/public/contact'
+      path: '/api/public/contact'
+      fullPath: '/api/public/contact'
+      preLoaderRoute: typeof ApiPublicContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -411,6 +452,8 @@ const rootRouteChildren: RootRouteChildren = {
   ExtensionSlugRoute: ExtensionSlugRoute,
   PartnerSlugRoute: PartnerSlugRoute,
   TagSlugRoute: TagSlugRoute,
+  ApiPublicContactRoute: ApiPublicContactRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

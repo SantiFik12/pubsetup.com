@@ -108,29 +108,32 @@ function HomePage() {
                 </Link>
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-surface">
+            <a
+              href="https://magento.pubsetup.com"
+              target="_blank"
+              rel="noreferrer"
+              className="group relative block overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition hover:shadow-glow"
+            >
               <div className="flex items-center gap-1.5 border-b border-border bg-card px-4 py-2.5">
                 <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-warning/80" />
                 <span className="h-2.5 w-2.5 rounded-full bg-success/80" />
                 <span className="ml-3 text-xs text-muted-foreground">magento.pubsetup.com</span>
               </div>
-              <div className="space-y-3 p-5">
-                <div className="h-8 w-2/3 rounded-md bg-card shadow-soft" />
-                <div className="grid grid-cols-3 gap-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="aspect-[4/5] rounded-lg bg-card shadow-soft" />
-                  ))}
-                </div>
-                <div className="flex items-center justify-between rounded-lg bg-card p-3 shadow-soft">
-                  <div className="space-y-1.5">
-                    <div className="h-2 w-24 rounded bg-muted" />
-                    <div className="h-2 w-16 rounded bg-muted" />
-                  </div>
-                  <div className="h-7 w-20 rounded-md bg-primary/90" />
-                </div>
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-card">
+                <img
+                  src={magentoDemoPreview}
+                  alt="Live Magento 2 demo store on magento.pubsetup.com"
+                  loading="lazy"
+                  className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.02]"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+                <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-primary opacity-0 shadow-soft transition group-hover:opacity-100">
+                  Open live demo ↗
+                </span>
               </div>
-            </div>
+            </a>
+
           </div>
         </div>
       </section>

@@ -26,13 +26,12 @@ const featureServices = [
 ];
 
 const stack = [
-  "Hestia Control Panel — easy server management",
-  "phpMyAdmin — database management interface",
   "PHP-FPM — optimized PHP processing",
   "OpenSearch — lightning-fast product search",
   "Nginx + Apache — optimized dual web server",
   "Redis — high-speed session & cache",
   "Varnish — full page cache for instant loads",
+  "RabbitMQ — reliable async message queue",
 ];
 
 function HomePage() {

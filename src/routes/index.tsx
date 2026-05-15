@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ShoppingCart, Zap, FileText, Shield, RefreshCw, Palette, Boxes, Sparkles } from "lucide-react";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { useExtensions } from "@/data/catalog";
+import magentoDemoPreview from "@/assets/magento-demo-preview.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({

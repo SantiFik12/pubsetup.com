@@ -40,12 +40,6 @@ export function Header() {
           >
             Live demo ↗
           </a>
-          <a
-            href="mailto:contact@pubsetup.com"
-            className="ring-focus rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
-          >
-            Contact
-          </a>
           <Link
             to="/services/$slug"
             params={{ slug: "magento-2-setup-from-scratch" }}
@@ -75,13 +69,6 @@ export function Header() {
                 {n.label}
               </Link>
             ))}
-            <a
-              href="mailto:contact@pubsetup.com"
-              onClick={() => setOpen(false)}
-              className="rounded-md px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-surface hover:text-foreground"
-            >
-              Contact
-            </a>
             <Link
               to="/services/$slug"
               params={{ slug: "magento-2-setup-from-scratch" }}

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { ContactDialog } from "./ContactDialog";
+
 
 const nav = [
   { to: "/extensions", label: "Extensions" },
@@ -40,16 +40,6 @@ export function Header() {
           >
             Live demo ↗
           </a>
-          <ContactDialog
-            trigger={
-              <button
-                type="button"
-                className="ring-focus rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground"
-              >
-                Contact
-              </button>
-            }
-          />
           <Link
             to="/services/$slug"
             params={{ slug: "magento-2-setup-from-scratch" }}
@@ -79,17 +69,6 @@ export function Header() {
                 {n.label}
               </Link>
             ))}
-            <ContactDialog
-              trigger={
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="rounded-md px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-surface hover:text-foreground"
-                >
-                  Contact
-                </button>
-              }
-            />
             <Link
               to="/services/$slug"
               params={{ slug: "magento-2-setup-from-scratch" }}

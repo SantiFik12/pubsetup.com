@@ -10,6 +10,12 @@ export function Footer() {
           <p className="max-w-xs text-sm text-muted-foreground">
             The trusted catalog of Magento 2 extensions and expert installation services.
           </p>
+          <p className="text-sm text-muted-foreground">
+            Contact:{" "}
+            <a href="mailto:contact@pubsetup.com" className="font-medium text-foreground hover:underline">
+              contact@pubsetup.com
+            </a>
+          </p>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold text-foreground">Catalog</h4>

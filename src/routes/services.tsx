@@ -39,7 +39,7 @@ function ServicesPage() {
                 </span>
               )}
               <h2 className="text-lg font-semibold text-foreground">{s.name}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{s.description}</p>
+              <p className="mt-2 line-clamp-3 min-h-[60px] text-sm text-muted-foreground">{s.description}</p>
 
               <ul className="mt-5 space-y-1.5 text-sm">
                 {s.includes.map((it) => (
@@ -53,7 +53,7 @@ function ServicesPage() {
                 <Clock className="h-4 w-4" /> {s.duration}
               </div>
 
-              <div className="mt-5 flex items-baseline gap-1.5 border-t border-border pt-5">
+              <div className="mt-auto flex items-baseline gap-1.5 border-t border-border pt-5">
                 <span className="text-3xl font-bold text-foreground">${s.price}</span>
                 <span className="text-sm text-muted-foreground">{s.unit ?? "fixed"}</span>
               </div>
@@ -64,9 +64,6 @@ function ServicesPage() {
                 className="ring-focus mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
               >
                 Order Service <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link to="/services/$slug" params={{ slug: s.slug }} className="mt-2 text-center text-xs text-muted-foreground hover:text-foreground">
-                Learn more →
               </Link>
             </article>
           ))}

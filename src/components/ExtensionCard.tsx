@@ -59,7 +59,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
         </div>
       </div>
 
-      <p className="px-5 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>
+      <p className="line-clamp-3 min-h-[60px] px-5 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>
 
       <div className="mt-4 flex flex-wrap gap-1.5 px-5">
         {ext.tags.slice(0, 4).map((t) => (
@@ -82,7 +82,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
         </div>
       )}
 
-      <div className="mt-5 flex items-center justify-between border-t border-border px-5 py-3 text-sm">
+      <div className="mt-5 flex items-center justify-between border-t border-border px-5 py-3 text-sm" style={{ marginTop: "auto" }}>
         <div className="flex items-center gap-1.5">
           <Star className="h-4 w-4 fill-warning text-warning" />
           <span className="font-medium text-foreground">{ext.rating}</span>

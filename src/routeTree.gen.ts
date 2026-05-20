@@ -18,6 +18,7 @@ import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AffiliateDisclosureRouteImport } from './routes/affiliate-disclosure'
 import { Route as LandingRouteImport } from './routes/$landing'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TagSlugRouteImport } from './routes/tag/$slug'
@@ -73,6 +74,11 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AffiliateDisclosureRoute = AffiliateDisclosureRouteImport.update({
+  id: '/affiliate-disclosure',
+  path: '/affiliate-disclosure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LandingRoute = LandingRouteImport.update({
   id: '/$landing',
   path: '/$landing',
@@ -123,6 +129,7 @@ const LovableEmailQueueProcessRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
+  '/affiliate-disclosure': typeof AffiliateDisclosureRoute
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
+  '/affiliate-disclosure': typeof AffiliateDisclosureRoute
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
+  '/affiliate-disclosure': typeof AffiliateDisclosureRoute
   '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
@@ -186,6 +195,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$landing'
+    | '/affiliate-disclosure'
     | '/blog'
     | '/checkout'
     | '/compare'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$landing'
+    | '/affiliate-disclosure'
     | '/blog'
     | '/checkout'
     | '/compare'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$landing'
+    | '/affiliate-disclosure'
     | '/blog'
     | '/checkout'
     | '/compare'
@@ -247,6 +259,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LandingRoute: typeof LandingRoute
+  AffiliateDisclosureRoute: typeof AffiliateDisclosureRoute
   BlogRoute: typeof BlogRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   CompareRoute: typeof CompareRoute
@@ -326,6 +339,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/affiliate-disclosure': {
+      id: '/affiliate-disclosure'
+      path: '/affiliate-disclosure'
+      fullPath: '/affiliate-disclosure'
+      preLoaderRoute: typeof AffiliateDisclosureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$landing': {
@@ -419,6 +439,7 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LandingRoute: LandingRoute,
+  AffiliateDisclosureRoute: AffiliateDisclosureRoute,
   BlogRoute: BlogRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   CompareRoute: CompareRoute,
@@ -437,12 +458,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

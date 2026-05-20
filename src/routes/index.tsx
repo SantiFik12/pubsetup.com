@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
 const featureServices = [
   { icon: Boxes, title: "Magento 2 installation from scratch", body: "A clean, fully tuned production install on your server." },
   { icon: Zap, title: "Extension installation", body: "Composer install, deploy, smoke-test and rollback plan." },
-  { icon: RefreshCw, title: "Performance optimization", body: "Sub-second pages with Varnish, Redis, OpenSearch." },
+  { icon: RefreshCw, title: "Performance optimization", body: "Sub-second pages with Varnish, Redis, RabbitMQ." },
   { icon: Palette, title: "Theme setup", body: "Luma, Hyvä or custom theme — installed and configured." },
   { icon: Shield, title: "Security patches", body: "Magento and infrastructure patches with zero downtime." },
   { icon: RefreshCw, title: "Magento & server updates", body: "Stay on supported versions of Magento and your stack." },
@@ -210,7 +210,7 @@ function HomePage() {
                 <span className="text-5xl font-bold">$300</span>
                 <span className="text-sm text-white/70">one-time</span>
               </div>
-              <p className="mt-3 text-sm text-white/80">Delivered in 3–5 business days. Includes documentation and a handover call.</p>
+              <p className="mt-3 text-sm text-white/80">Delivered in 3–5 business days.</p>
               <Link
                 to="/checkout"
                 search={{ service: "magento-2-setup-from-scratch" }}

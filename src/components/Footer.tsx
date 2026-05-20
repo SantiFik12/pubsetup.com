@@ -52,8 +52,12 @@ export function Footer() {
             <Link to="/terms" className="hover:text-foreground">Terms</Link>
             <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
             <Link to="/refund" className="hover:text-foreground">Refund</Link>
+            <Link to="/affiliate-disclosure" className="hover:text-foreground">Affiliate disclosure</Link>
           </nav>
-          <p>Affiliate disclosure: we may earn a commission from links to partner sites.</p>
+          <p>
+            Affiliate disclosure: we may earn a commission from links to partner sites.{" "}
+            <Link to="/affiliate-disclosure" className="underline hover:text-foreground">Learn more</Link>.
+          </p>
         </div>
       </div>
     </footer>

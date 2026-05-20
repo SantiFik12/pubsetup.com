@@ -87,7 +87,7 @@ function CheckoutPage() {
             const active = i === idx, done = i < idx;
             return (
               <li key={label} className={`flex items-center gap-2 rounded-full border px-3 py-1 ${active ? "border-primary bg-brand-soft text-primary" : done ? "border-success/30 bg-success/10 text-success" : "border-border text-muted-foreground"}`}>
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-background text-[10px] font-bold">{done ? "✓" : i + 1}</span>
+                <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold leading-none ${active ? "bg-primary text-primary-foreground" : done ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground border border-border"}`}>{done ? "✓" : i + 1}</span>
                 {label}
               </li>
             );

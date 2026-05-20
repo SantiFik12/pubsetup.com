@@ -179,7 +179,7 @@ function ExtensionPage() {
                   </a>
                 )}
               </div>
-              <p className="mt-2 text-center text-[11px] text-muted-foreground">Affiliate link · we may earn a commission</p>
+              
             </div>
 
             <div className="rounded-2xl border border-primary/20 bg-brand-soft p-6">

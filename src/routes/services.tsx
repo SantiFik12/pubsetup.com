@@ -54,17 +54,32 @@ function ServicesPage() {
               </div>
 
               <div className="mt-auto flex items-baseline gap-1.5 border-t border-border pt-5">
-                <span className="text-3xl font-bold text-foreground">${s.price}</span>
-                <span className="text-sm text-muted-foreground">{s.unit ?? "fixed"}</span>
+                {s.price > 0 ? (
+                  <>
+                    <span className="text-3xl font-bold text-foreground">${s.price}</span>
+                    <span className="text-sm text-muted-foreground">{s.unit ?? "fixed"}</span>
+                  </>
+                ) : (
+                  <span className="text-2xl font-bold text-foreground">Quote on request</span>
+                )}
               </div>
 
-              <Link
-                to="/checkout"
-                search={{ service: s.slug }}
-                className="ring-focus mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
-              >
-                Order Service <ArrowRight className="h-4 w-4" />
-              </Link>
+              {s.price > 0 ? (
+                <Link
+                  to="/checkout"
+                  search={{ service: s.slug }}
+                  className="ring-focus mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
+                >
+                  Order Service <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : (
+                <a
+                  href="mailto:contact@pubsetup.com?subject=Custom%20Development%20Request"
+                  className="ring-focus mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
+                >
+                  Contact Us <ArrowRight className="h-4 w-4" />
+                </a>
+              )}
             </article>
           ))}
         </div>

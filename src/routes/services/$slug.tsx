@@ -85,21 +85,36 @@ function ServicePage() {
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Fixed price</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{service.price > 0 ? "Fixed price" : "Pricing"}</div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-foreground">${service.price}</span>
-                <span className="text-sm text-muted-foreground">{service.unit ?? "one-time"}</span>
+                {service.price > 0 ? (
+                  <>
+                    <span className="text-4xl font-bold text-foreground">${service.price}</span>
+                    <span className="text-sm text-muted-foreground">{service.unit ?? "one-time"}</span>
+                  </>
+                ) : (
+                  <span className="text-3xl font-bold text-foreground">Quote on request</span>
+                )}
               </div>
               <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" /> {service.duration}
               </div>
-              <Link
-                to="/checkout"
-                search={{ service: service.slug }}
-                className="ring-focus mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
-              >
-                Order Service <ArrowRight className="h-4 w-4" />
-              </Link>
+              {service.price > 0 ? (
+                <Link
+                  to="/checkout"
+                  search={{ service: service.slug }}
+                  className="ring-focus mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
+                >
+                  Order Service <ArrowRight className="h-4 w-4" />
+                </Link>
+              ) : (
+                <a
+                  href="mailto:contact@pubsetup.com?subject=Custom%20Development%20Request"
+                  className="ring-focus mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
+                >
+                  Contact Us <ArrowRight className="h-4 w-4" />
+                </a>
+              )}
             </div>
             <div className="rounded-2xl border border-border bg-surface p-5">
               <h3 className="text-sm font-semibold">Other services</h3>

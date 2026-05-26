@@ -1,0 +1,1 @@
+INSERT INTO public.categories (slug, name, description, icon) VALUES ('b2b', 'B2B & Wholesale', 'Modules for B2B commerce, wholesale, company accounts, quotes, and customer-group pricing.', 'briefcase');

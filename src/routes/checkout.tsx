@@ -4,6 +4,7 @@ const routeApi = getRouteApi("/checkout");
 import { useState } from "react";
 import { useService, useExtension, useServices, useCatalog } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
+import { sendOrderNotification } from "@/lib/order-email.functions";
 import { Check, ArrowRight, Lock } from "lucide-react";
 
 type CheckoutSearch = {
@@ -73,6 +74,19 @@ function CheckoutPage() {
     }
     setOrderCode(data.order_code);
     setStep("thanks");
+    // Fire-and-forget notification to contact@pubsetup.com
+    void sendOrderNotification({
+      data: {
+        orderCode: data.order_code,
+        customerName: form.name,
+        customerEmail: form.email,
+        website: form.site || null,
+        notes: form.access || null,
+        serviceName: service.name,
+        extensionName: extension?.name ?? null,
+        amount: service.price,
+      },
+    });
   };
 
   return (

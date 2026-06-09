@@ -4,7 +4,8 @@ const routeApi = getRouteApi("/checkout");
 import { useState } from "react";
 import { useService, useExtension, useServices, useCatalog } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, ArrowRight, Lock } from "lucide-react";
+import { sendOrderNotification } from "@/lib/order-email.functions";
+import { Check, ArrowRight } from "lucide-react";
 
 type CheckoutSearch = {
   service: string;
@@ -73,6 +74,19 @@ function CheckoutPage() {
     }
     setOrderCode(data.order_code);
     setStep("thanks");
+    // Fire-and-forget notification to contact@pubsetup.com
+    void sendOrderNotification({
+      data: {
+        orderCode: data.order_code,
+        customerName: form.name,
+        customerEmail: form.email,
+        website: form.site || null,
+        notes: form.access || null,
+        serviceName: service.name,
+        extensionName: extension?.name ?? null,
+        amount: service.price,
+      },
+    });
   };
 
   return (
@@ -151,7 +165,7 @@ function CheckoutPage() {
                   onClick={placeOrder}
                   className="ring-focus mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:opacity-50"
                 >
-                  <Lock className="h-4 w-4" /> {submitting ? "Placing order…" : `Confirm order — $${service.price}`}
+                  <Check className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit order"}
                 </button>
                 <button onClick={() => setStep("form")} className="mt-2 text-center w-full text-xs text-muted-foreground hover:text-foreground">← Back to edit</button>
               </>
@@ -163,8 +177,8 @@ function CheckoutPage() {
                   <Check className="h-6 w-6" />
                 </div>
                 <h2 className="mt-4 text-2xl font-bold">Thank you, {form.name.split(" ")[0]}!</h2>
-                <p className="mt-2 text-muted-foreground">Your order <span className="font-semibold text-foreground">{orderCode}</span> is now <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning-foreground">pending</span>.</p>
-                <p className="mt-4 text-sm text-muted-foreground">A confirmation email is on its way to <span className="font-medium text-foreground">{form.email}</span>.</p>
+                <p className="mt-2 text-muted-foreground">Your order <span className="font-semibold text-foreground">{orderCode}</span> has been received and is now <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning-foreground">pending</span>. We'll be in touch shortly — no payment required at this step.</p>
+                <p className="mt-4 text-sm text-muted-foreground">Our team has been notified and will reach out to <span className="font-medium text-foreground">{form.email}</span> shortly.</p>
                 <Link to="/" className="mt-6 inline-block text-sm font-semibold text-primary">← Back to home</Link>
               </div>
             )}

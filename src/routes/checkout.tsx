@@ -178,7 +178,7 @@ function CheckoutPage() {
                 </div>
                 <h2 className="mt-4 text-2xl font-bold">Thank you, {form.name.split(" ")[0]}!</h2>
                 <p className="mt-2 text-muted-foreground">Your order <span className="font-semibold text-foreground">{orderCode}</span> has been received and is now <span className="rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning-foreground">pending</span>. We'll be in touch shortly — no payment required at this step.</p>
-                <p className="mt-4 text-sm text-muted-foreground">A confirmation email is on its way to <span className="font-medium text-foreground">{form.email}</span>.</p>
+                <p className="mt-4 text-sm text-muted-foreground">Our team has been notified and will reach out to <span className="font-medium text-foreground">{form.email}</span> shortly.</p>
                 <Link to="/" className="mt-6 inline-block text-sm font-semibold text-primary">← Back to home</Link>
               </div>
             )}

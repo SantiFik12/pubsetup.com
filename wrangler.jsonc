@@ -8,40 +8,12 @@
     "production": {
       "name": "pubsetup",
       "compatibility_date": "2025-09-24",
-      "compatibility_flags": ["nodejs_compat"],
-      "main": "dist/server/index.js",
-      "assets": {
-        "directory": "dist/client"
-      },
-      "rules": [
-        {
-          "type": "ESModule",
-          "globs": ["**/*.js", "**/*.mjs"]
-        }
-      ],
-      "no_bundle": true,
-      "build": {
-        "command": "npm run build"
-      }
+      "compatibility_flags": ["nodejs_compat"]
     },
     "develop": {
       "name": "pubsetup-dev",
       "compatibility_date": "2025-09-24",
-      "compatibility_flags": ["nodejs_compat"],
-      "main": "dist/server/index.js",
-      "assets": {
-        "directory": "dist/client"
-      },
-      "rules": [
-        {
-          "type": "ESModule",
-          "globs": ["**/*.js", "**/*.mjs"]
-        }
-      ],
-      "no_bundle": true,
-      "build": {
-        "command": "npm run build:dev"
-      }
+      "compatibility_flags": ["nodejs_compat"]
     }
   }
 }

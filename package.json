@@ -8,6 +8,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "deploy:develop": "npm run build:dev && wrangler deploy --config wrangler.deploy.jsonc --env develop",
+    "deploy:production": "npm run build && wrangler deploy --config wrangler.deploy.jsonc --env production",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."

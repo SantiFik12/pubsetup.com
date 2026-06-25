@@ -17,10 +17,10 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ExtensionsRouteImport } from './routes/extensions'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AffiliateDisclosureRouteImport } from './routes/affiliate-disclosure'
 import { Route as LandingRouteImport } from './routes/$landing'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as TagSlugRouteImport } from './routes/tag/$slug'
 import { Route as ServicesSlugRouteImport } from './routes/services/$slug'
 import { Route as PartnerSlugRouteImport } from './routes/partner/$slug'
@@ -73,11 +73,6 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AffiliateDisclosureRoute = AffiliateDisclosureRouteImport.update({
   id: '/affiliate-disclosure',
   path: '/affiliate-disclosure',
@@ -91,6 +86,11 @@ const LandingRoute = LandingRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TagSlugRoute = TagSlugRouteImport.update({
@@ -124,9 +124,9 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BlogRoute,
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
@@ -156,7 +156,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
   '/affiliate-disclosure': typeof AffiliateDisclosureRoute
-  '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
@@ -172,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -181,7 +181,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
   '/affiliate-disclosure': typeof AffiliateDisclosureRoute
-  '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
@@ -197,6 +196,7 @@ export interface FileRoutesByTo {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/blog': typeof BlogIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -207,7 +207,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$landing': typeof LandingRoute
   '/affiliate-disclosure': typeof AffiliateDisclosureRoute
-  '/blog': typeof BlogRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/compare': typeof CompareRoute
   '/extensions': typeof ExtensionsRoute
@@ -223,6 +222,7 @@ export interface FileRoutesById {
   '/partner/$slug': typeof PartnerSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
@@ -234,7 +234,6 @@ export interface FileRouteTypes {
     | '/'
     | '/$landing'
     | '/affiliate-disclosure'
-    | '/blog'
     | '/checkout'
     | '/compare'
     | '/extensions'
@@ -250,6 +249,7 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/blog/'
     | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -259,7 +259,6 @@ export interface FileRouteTypes {
     | '/'
     | '/$landing'
     | '/affiliate-disclosure'
-    | '/blog'
     | '/checkout'
     | '/compare'
     | '/extensions'
@@ -275,6 +274,7 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/blog'
     | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -284,7 +284,6 @@ export interface FileRouteTypes {
     | '/'
     | '/$landing'
     | '/affiliate-disclosure'
-    | '/blog'
     | '/checkout'
     | '/compare'
     | '/extensions'
@@ -300,6 +299,7 @@ export interface FileRouteTypes {
     | '/partner/$slug'
     | '/services/$slug'
     | '/tag/$slug'
+    | '/blog/'
     | '/lovable/email/suppression'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
@@ -310,7 +310,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LandingRoute: typeof LandingRoute
   AffiliateDisclosureRoute: typeof AffiliateDisclosureRoute
-  BlogRoute: typeof BlogRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   CompareRoute: typeof CompareRoute
   ExtensionsRoute: typeof ExtensionsRoute
@@ -319,11 +318,13 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ExtensionSlugRoute: typeof ExtensionSlugRoute
   PartnerSlugRoute: typeof PartnerSlugRoute
   TagSlugRoute: typeof TagSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -388,13 +389,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/affiliate-disclosure': {
       id: '/affiliate-disclosure'
       path: '/affiliate-disclosure'
@@ -414,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tag/$slug': {
@@ -460,10 +461,10 @@ declare module '@tanstack/react-router' {
     }
     '/blog/$slug': {
       id: '/blog/$slug'
-      path: '/$slug'
+      path: '/blog/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof BlogRoute
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -496,16 +497,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface BlogRouteChildren {
-  BlogSlugRoute: typeof BlogSlugRoute
-}
-
-const BlogRouteChildren: BlogRouteChildren = {
-  BlogSlugRoute: BlogSlugRoute,
-}
-
-const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
-
 interface ServicesRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
 }
@@ -522,7 +513,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LandingRoute: LandingRoute,
   AffiliateDisclosureRoute: AffiliateDisclosureRoute,
-  BlogRoute: BlogRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   CompareRoute: CompareRoute,
   ExtensionsRoute: ExtensionsRoute,
@@ -531,11 +521,13 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ExtensionSlugRoute: ExtensionSlugRoute,
   PartnerSlugRoute: PartnerSlugRoute,
   TagSlugRoute: TagSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,

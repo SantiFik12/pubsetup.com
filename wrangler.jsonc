@@ -12,14 +12,7 @@
       "main": "dist/server/server.js",
       "assets": {
         "directory": "dist/client"
-      },
-      "rules": [
-        {
-          "type": "ESModule",
-          "globs": ["**/*.js", "**/*.mjs"]
-        }
-      ],
-      "no_bundle": true
+      }
     },
     "develop": {
       "name": "pubsetup-dev",
@@ -28,14 +21,7 @@
       "main": "dist/server/server.js",
       "assets": {
         "directory": "dist/client"
-      },
-      "rules": [
-        {
-          "type": "ESModule",
-          "globs": ["**/*.js", "**/*.mjs"]
-        }
-      ],
-      "no_bundle": true
+      }
     }
   }
 }

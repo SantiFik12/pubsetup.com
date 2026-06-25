@@ -3,7 +3,6 @@ import { createServerFn } from '@tanstack/react-start'
 import { render } from '@react-email/components'
 
 const SITE_NAME = 'pubsetup.com'
-const SENDER_DOMAIN = 'info.pubsetup.com'
 const FROM_DOMAIN = 'pubsetup.com'
 const FROM_LOCAL = 'noreply'
 const NOTIFICATION_RECIPIENT = 'contact@pubsetup.com'
@@ -24,8 +23,9 @@ export const sendOrderNotification = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { TEMPLATES } = await import('@/lib/email-templates/registry')
+    const { sendCloudflareEmail } = await import('@/lib/cloudflare-email.server')
 
-    async function enqueue(templateName: 'order-notification' | 'order-confirmation', recipient: string) {
+    async function send(templateName: 'order-notification' | 'order-confirmation', recipient: string) {
       const tpl = TEMPLATES[templateName]
       if (!tpl) {
         console.error('Template missing', templateName)
@@ -66,41 +66,42 @@ export const sendOrderNotification = createServerFn({ method: 'POST' })
         status: 'pending',
       })
 
-      const { error: enqErr } = await supabaseAdmin.rpc('enqueue_email', {
-        queue_name: 'transactional_emails',
-        payload: {
-          message_id: messageId,
+      try {
+        await sendCloudflareEmail({
           to: recipient,
-          from: `${SITE_NAME} <${FROM_LOCAL}@${FROM_DOMAIN}>`,
-          sender_domain: SENDER_DOMAIN,
+          fromName: SITE_NAME,
+          fromEmail: `${FROM_LOCAL}@${FROM_DOMAIN}`,
           subject,
           html,
           text,
-          purpose: 'transactional',
-          label: templateName,
-          reply_to: NOTIFICATION_RECIPIENT,
-          idempotency_key: `${templateName}-${data.orderCode}`,
-          queued_at: new Date().toISOString(),
-        },
-      })
+          replyTo: NOTIFICATION_RECIPIENT,
+          messageId,
+        })
 
-      if (enqErr) {
-        console.error('Failed to enqueue', templateName, enqErr)
+        await supabaseAdmin.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: recipient,
+          status: 'sent',
+        })
+        return { ok: true as const }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        console.error('Failed to send email', templateName, message)
         await supabaseAdmin.from('email_send_log').insert({
           message_id: messageId,
           template_name: templateName,
           recipient_email: recipient,
           status: 'failed',
-          error_message: `enqueue failed: ${enqErr.message}`,
+          error_message: message,
         })
-        return { ok: false as const, reason: 'enqueue_failed' }
+        return { ok: false as const, reason: 'send_failed' }
       }
-      return { ok: true as const }
     }
 
     const [internal, customer] = await Promise.all([
-      enqueue('order-notification', NOTIFICATION_RECIPIENT),
-      enqueue('order-confirmation', data.customerEmail),
+      send('order-notification', NOTIFICATION_RECIPIENT),
+      send('order-confirmation', data.customerEmail),
     ])
 
     return { internal, customer }

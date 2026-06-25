@@ -1,6 +1,33 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "pubsetup",
+  "name": "pubsetup-dev",
   "compatibility_date": "2025-09-24",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "main": ".output/server/index.mjs",
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".output/public"
+  },
+  "no_bundle": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": ["**/*.mjs", "**/*.js"]
+    }
+  ],
+  "env": {
+    "production": {
+      "name": "pubsetup",
+      "compatibility_date": "2025-09-24",
+      "compatibility_flags": ["nodejs_compat"]
+    },
+    "develop": {
+      "name": "pubsetup-dev",
+      "compatibility_date": "2025-09-24",
+      "compatibility_flags": ["nodejs_compat"]
+    }
+  }
 }

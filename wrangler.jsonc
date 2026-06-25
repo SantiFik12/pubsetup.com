@@ -3,7 +3,21 @@
   "name": "pubsetup-dev",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": ".output/server/index.mjs",
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".output/public"
+  },
+  "no_bundle": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": ["**/*.mjs", "**/*.js"]
+    }
+  ],
   "env": {
     "production": {
       "name": "pubsetup",

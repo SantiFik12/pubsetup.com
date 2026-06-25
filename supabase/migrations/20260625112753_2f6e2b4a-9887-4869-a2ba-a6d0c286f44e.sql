@@ -1,0 +1,1 @@
+update public.blog_posts set cover = 'https://rtfdngqixfsswkeyttkw.supabase.co/storage/v1/object/public/extension-images/blog%2Fconversion-2026-hero-v2.jpg' where slug = 'magento-2-conversion-rate-extensions-2026';

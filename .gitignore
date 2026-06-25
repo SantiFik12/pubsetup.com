@@ -18,6 +18,9 @@ dist-ssr
 
 # Wrangler / Cloudflare
 .wrangler/
+!.wrangler/
+!.wrangler/deploy/
+!.wrangler/deploy/config.json
 .dev.vars
 
 # Editor directories and files

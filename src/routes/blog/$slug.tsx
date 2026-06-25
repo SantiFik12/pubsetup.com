@@ -3,6 +3,9 @@ import { useBlogPost, useExtension, usePartner, useCatalog } from "@/data/catalo
 import { tagSlug } from "@/lib/slug";
 import { ExternalLink, Zap } from "lucide-react";
 
+const headingIdFromText = (text?: string) =>
+  text?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const { supabase } = await import("@/integrations/supabase/client");
@@ -74,6 +77,8 @@ function BlogPostPage() {
     );
   }
 
+  let headingIndex = 0;
+
   return (
     <article>
       <header className="border-b border-border bg-surface">
@@ -108,7 +113,8 @@ function BlogPostPage() {
           {post.content.map((block: { type: string; text?: string; items?: string[]; extensionSlug?: string }, i: number) => {
             if (block.type === "p") return <p key={i} className="leading-relaxed text-foreground">{block.text}</p>;
             if (block.type === "h2") {
-              const id = block.text?.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+              const id = post.toc[headingIndex]?.id ?? headingIdFromText(block.text);
+              headingIndex += 1;
               return <h2 key={i} id={id} className="mt-8 text-2xl font-bold tracking-tight text-foreground">{block.text}</h2>;
             }
             if (block.type === "list") return (

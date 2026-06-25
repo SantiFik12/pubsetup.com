@@ -3,31 +3,25 @@
   "name": "pubsetup-dev",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
-  "main": ".output/server/index.mjs",
-  "build": {
-    "command": "npm run build"
-  },
-  "assets": {
-    "binding": "ASSETS",
-    "directory": ".output/public"
-  },
-  "no_bundle": true,
-  "rules": [
-    {
-      "type": "ESModule",
-      "globs": ["**/*.mjs", "**/*.js"]
-    }
-  ],
+  "main": "@tanstack/react-start/server-entry",
   "env": {
     "production": {
       "name": "pubsetup",
       "compatibility_date": "2025-09-24",
-      "compatibility_flags": ["nodejs_compat"]
+      "compatibility_flags": ["nodejs_compat"],
+      "main": "dist/server/server.js",
+      "assets": {
+        "directory": "dist/client"
+      }
     },
     "develop": {
       "name": "pubsetup-dev",
       "compatibility_date": "2025-09-24",
-      "compatibility_flags": ["nodejs_compat"]
+      "compatibility_flags": ["nodejs_compat"],
+      "main": "dist/server/server.js",
+      "assets": {
+        "directory": "dist/client"
+      }
     }
   }
 }

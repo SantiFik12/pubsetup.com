@@ -19,7 +19,10 @@
           "globs": ["**/*.js", "**/*.mjs"]
         }
       ],
-      "no_bundle": true
+      "no_bundle": true,
+      "build": {
+        "command": "npm run build"
+      }
     },
     "develop": {
       "name": "pubsetup-dev",
@@ -35,7 +38,10 @@
           "globs": ["**/*.js", "**/*.mjs"]
         }
       ],
-      "no_bundle": true
+      "no_bundle": true,
+      "build": {
+        "command": "npm run build:dev"
+      }
     }
   }
 }

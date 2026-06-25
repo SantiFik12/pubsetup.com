@@ -1,9 +1,11 @@
+import * as React from 'react'
 import { createServerFn } from '@tanstack/react-start'
-import { sendLovableEmail } from '@lovable.dev/email-js'
+import { render } from '@react-email/components'
 
 const SITE_NAME = 'pubsetup.com'
 const SENDER_DOMAIN = 'info.pubsetup.com'
 const FROM_DOMAIN = 'pubsetup.com'
+const FROM_LOCAL = 'noreply'
 const NOTIFICATION_RECIPIENT = 'contact@pubsetup.com'
 
 interface OrderEmailInput {
@@ -17,80 +19,89 @@ interface OrderEmailInput {
   amount: number
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
-  )
-}
-
-function buildHtml(d: OrderEmailInput): string {
-  const rows: Array<[string, string]> = [
-    ['Order code', d.orderCode],
-    ['Service', d.serviceName],
-    ...(d.extensionName ? [['Extension', d.extensionName] as [string, string]] : []),
-    ['Customer', d.customerName],
-    ['Email', d.customerEmail],
-    ...(d.website ? [['Website', d.website] as [string, string]] : []),
-    ['Amount', `$${d.amount}`],
-  ]
-  const rowsHtml = rows
-    .map(
-      ([k, v]) =>
-        `<tr><td style="padding:6px 12px;color:#666;border-bottom:1px solid #eee">${escapeHtml(k)}</td><td style="padding:6px 12px;border-bottom:1px solid #eee"><strong>${escapeHtml(v)}</strong></td></tr>`,
-    )
-    .join('')
-  const notes = d.notes
-    ? `<h3 style="margin-top:24px;font-size:14px">Notes / requirements</h3><div style="white-space:pre-wrap;background:#f7f7f7;padding:12px;border-radius:6px;font-size:14px">${escapeHtml(d.notes)}</div>`
-    : ''
-  return `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#222;max-width:600px;margin:0 auto;padding:24px">
-<h2 style="margin:0 0 16px">New order ${escapeHtml(d.orderCode)}</h2>
-<table style="width:100%;border-collapse:collapse;font-size:14px">${rowsHtml}</table>
-${notes}
-</body></html>`
-}
-
-function buildText(d: OrderEmailInput): string {
-  return [
-    `New order ${d.orderCode}`,
-    `Service: ${d.serviceName}`,
-    d.extensionName ? `Extension: ${d.extensionName}` : null,
-    `Customer: ${d.customerName}`,
-    `Email: ${d.customerEmail}`,
-    d.website ? `Website: ${d.website}` : null,
-    `Amount: $${d.amount}`,
-    d.notes ? `\nNotes:\n${d.notes}` : null,
-  ]
-    .filter(Boolean)
-    .join('\n')
-}
-
 export const sendOrderNotification = createServerFn({ method: 'POST' })
   .inputValidator((input: OrderEmailInput) => input)
   .handler(async ({ data }) => {
-    const apiKey = process.env.LOVABLE_API_KEY
-    if (!apiKey) {
-      console.error('LOVABLE_API_KEY missing — cannot send order notification')
-      return { sent: false }
-    }
-    try {
-      await sendLovableEmail(
-        {
-          to: NOTIFICATION_RECIPIENT,
-          from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
+    const { TEMPLATES } = await import('@/lib/email-templates/registry')
+
+    async function enqueue(templateName: 'order-notification' | 'order-confirmation', recipient: string) {
+      const tpl = TEMPLATES[templateName]
+      if (!tpl) {
+        console.error('Template missing', templateName)
+        return { ok: false as const, reason: 'template_missing' }
+      }
+      const messageId = crypto.randomUUID()
+
+      // Suppression check (fail-closed)
+      const { data: suppressed, error: suppErr } = await supabaseAdmin
+        .from('suppressed_emails')
+        .select('id')
+        .eq('email', recipient.toLowerCase())
+        .maybeSingle()
+      if (suppErr) {
+        console.error('Suppression lookup failed', suppErr)
+        return { ok: false as const, reason: 'suppression_lookup_failed' }
+      }
+      if (suppressed) {
+        await supabaseAdmin.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: recipient,
+          status: 'suppressed',
+        })
+        return { ok: false as const, reason: 'suppressed' }
+      }
+
+      const element = React.createElement(tpl.component, data as any)
+      const html = await render(element)
+      const text = await render(element, { plainText: true })
+      const subject =
+        typeof tpl.subject === 'function' ? tpl.subject(data as any) : tpl.subject
+
+      await supabaseAdmin.from('email_send_log').insert({
+        message_id: messageId,
+        template_name: templateName,
+        recipient_email: recipient,
+        status: 'pending',
+      })
+
+      const { error: enqErr } = await supabaseAdmin.rpc('enqueue_email', {
+        queue_name: 'transactional_emails',
+        payload: {
+          message_id: messageId,
+          to: recipient,
+          from: `${SITE_NAME} <${FROM_LOCAL}@${FROM_DOMAIN}>`,
           sender_domain: SENDER_DOMAIN,
-          subject: `New order ${data.orderCode} — ${data.serviceName}`,
-          html: buildHtml(data),
-          text: buildText(data),
+          subject,
+          html,
+          text,
           purpose: 'transactional',
-          label: 'order_notification',
-          reply_to: data.customerEmail,
-          idempotency_key: `order-${data.orderCode}`,
+          label: templateName,
+          reply_to: NOTIFICATION_RECIPIENT,
+          idempotency_key: `${templateName}-${data.orderCode}`,
+          queued_at: new Date().toISOString(),
         },
-        { apiKey, sendUrl: process.env.LOVABLE_SEND_URL },
-      )
-      return { sent: true }
-    } catch (err) {
-      console.error('Failed to send order notification email', err)
-      return { sent: false }
+      })
+
+      if (enqErr) {
+        console.error('Failed to enqueue', templateName, enqErr)
+        await supabaseAdmin.from('email_send_log').insert({
+          message_id: messageId,
+          template_name: templateName,
+          recipient_email: recipient,
+          status: 'failed',
+          error_message: `enqueue failed: ${enqErr.message}`,
+        })
+        return { ok: false as const, reason: 'enqueue_failed' }
+      }
+      return { ok: true as const }
     }
+
+    const [internal, customer] = await Promise.all([
+      enqueue('order-notification', NOTIFICATION_RECIPIENT),
+      enqueue('order-confirmation', data.customerEmail),
+    ])
+
+    return { internal, customer }
   })

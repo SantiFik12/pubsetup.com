@@ -30,3 +30,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+/.codex
+# Symfony / Next.js migration
+.env
+.env.production
+.env.production.*
+!.env.production.example
+backend/vendor/
+backend/var/
+backend/.env.local
+frontend/.next/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+frontend/.env*
+backups/
+var/

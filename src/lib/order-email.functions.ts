@@ -23,7 +23,7 @@ export const sendOrderNotification = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server')
     const { TEMPLATES } = await import('@/lib/email-templates/registry')
-    const { sendCloudflareEmail } = await import('@/lib/cloudflare-email.server')
+    const { sendPostmarkEmail } = await import('@/lib/postmark-email.server')
 
     async function send(templateName: 'order-notification' | 'order-confirmation', recipient: string) {
       const tpl = TEMPLATES[templateName]
@@ -67,7 +67,7 @@ export const sendOrderNotification = createServerFn({ method: 'POST' })
       })
 
       try {
-        await sendCloudflareEmail({
+        await sendPostmarkEmail({
           to: recipient,
           fromName: SITE_NAME,
           fromEmail: `${FROM_LOCAL}@${FROM_DOMAIN}`,

@@ -1,0 +1,21 @@
+# Replace preview.example.com with the temporary hostname and set a caddy hash-password hash.
+preview.example.com {
+    basic_auth {
+        preview REPLACE_WITH_CADDY_PASSWORD_HASH
+    }
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8080
+}
+
+# Enable after DNS and application checks, removing the preview block if no longer needed.
+# pubsetup.com {
+#     encode zstd gzip
+#     header {
+#         X-Content-Type-Options nosniff
+#         X-Frame-Options SAMEORIGIN
+#         Referrer-Policy strict-origin-when-cross-origin
+#         -Server
+#     }
+#     reverse_proxy 127.0.0.1:8080
+# }
+# www.pubsetup.com { redir https://pubsetup.com{uri} permanent }

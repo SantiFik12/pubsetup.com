@@ -1,0 +1,18 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    App\:
+        resource: '../src/'
+    App\Service\Database:
+        arguments:
+            $databaseUrl: '%env(DATABASE_URL)%'
+    App\Service\OrderService:
+        arguments:
+            $notificationTo: '%env(MAIL_NOTIFICATION_TO)%'
+    App\Service\EmailWorker:
+        arguments:
+            $postmarkToken: '%env(POSTMARK_SERVER_TOKEN)%'
+            $messageStream: '%env(POSTMARK_MESSAGE_STREAM)%'
+            $mailFrom: '%env(MAIL_FROM)%'
+            $notificationTo: '%env(MAIL_NOTIFICATION_TO)%'

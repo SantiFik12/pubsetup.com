@@ -10,11 +10,6 @@
       "compatibility_date": "2025-09-24",
       "compatibility_flags": ["nodejs_compat"],
       "main": "dist/server/server.js",
-      "send_email": [
-        {
-          "name": "SEND_EMAIL"
-        }
-      ],
       "assets": {
         "directory": "dist/client"
       }
@@ -24,11 +19,6 @@
       "compatibility_date": "2025-09-24",
       "compatibility_flags": ["nodejs_compat"],
       "main": "dist/server/server.js",
-      "send_email": [
-        {
-          "name": "SEND_EMAIL"
-        }
-      ],
       "assets": {
         "directory": "dist/client"
       }

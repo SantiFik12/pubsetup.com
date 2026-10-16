@@ -1,0 +1,8 @@
+{
+  "partners":[{"id":"11111111-1111-4111-8111-111111111111","slug":"test-partner","name":"Test Partner","logo_letter":"T"}],
+  "categories":[{"id":"22222222-2222-4222-8222-222222222222","slug":"test-category","name":"Test Category"}],
+  "services":[{"id":"33333333-3333-4333-8333-333333333333","slug":"test-service","name":"Test Service","price":79,"description":"Test service description","duration":"1 day"}],
+  "extensions":[{"id":"44444444-4444-4444-8444-444444444444","slug":"test-extension","name":"Test Extension","short_description":"Test extension description","partner_id":"11111111-1111-4111-8111-111111111111","category_id":"22222222-2222-4222-8222-222222222222","tags":["test"],"price_from":199,"hyva_compatible":true}],
+  "blog_posts":[{"id":"55555555-5555-4555-8555-555555555555","slug":"test-post","title":"Test Article","published":true,"date":"2026-06-25","content":[{"type":"p","text":"Existing article content is rendered on the server."}]}],
+  "seo_landings":[{"id":"66666666-6666-4666-8666-666666666666","slug":"test-landing","title":"Test Landing","filter":{"tag":"test"}}]
+}

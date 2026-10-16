@@ -33,7 +33,7 @@ export default function ServicePage() {
       </section>
 
       <section className="container-page py-12">
-        <div className="grid gap-10 lg:grid-cols-[1fr,360px]">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-8">
             <div>
               <h2 className="text-xl font-semibold">What&apos;s included</h2>
@@ -60,7 +60,7 @@ export default function ServicePage() {
 
           <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{service.price > 0 ? "Fixed price" : "Pricing"}</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{service.price > 0 ? (service.unit?.includes("/hr") ? "Minimum budget" : "Service price") : "Pricing"}</div>
               <div className="mt-1 flex items-baseline gap-2">
                 {service.price > 0 ? (
                   <>
@@ -84,7 +84,7 @@ export default function ServicePage() {
                 </Link>
               ) : (
                 <a
-                  href="mailto:contact@pubsetup.com?subject=Custom%20Development%20Request"
+                  href={`mailto:contact@pubsetup.com?subject=${encodeURIComponent(service.name)}`}
                   className="ring-focus mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
                 >
                   Contact Us <ArrowRight className="h-4 w-4" />
@@ -97,7 +97,7 @@ export default function ServicePage() {
                 {others.map((s) => (
                   <li key={s.id}>
                     <Link to="/services/$slug" params={{ slug: s.slug }} className="flex items-center justify-between text-sm hover:text-primary">
-                      <span>{s.name}</span><span className="text-muted-foreground">${s.price}</span>
+                      <span>{s.name}</span><span className="ml-3 shrink-0 text-muted-foreground">{s.price > 0 ? `$${s.price}` : "On request"}</span>
                     </Link>
                   </li>
                 ))}

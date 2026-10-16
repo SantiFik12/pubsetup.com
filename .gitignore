@@ -45,3 +45,5 @@ frontend/next-env.d.ts
 frontend/.env*
 backups/
 var/
+__pycache__/
+*.pyc

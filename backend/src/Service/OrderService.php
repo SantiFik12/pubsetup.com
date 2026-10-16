@@ -16,6 +16,7 @@ final class OrderService
         if ((int) $limit[0]['count'] > 10) { throw new \OverflowException('Too many requests. Please try again later.'); }
         $service = $this->db->fetchAll('SELECT price FROM services WHERE id = :id', ['id' => $data['service_id']])[0] ?? null;
         if ($service === null) { throw new \InvalidArgumentException('Service not found'); }
+        if ((float) $service['price'] <= 0) { throw new \InvalidArgumentException('This service requires a quote. Please contact us before ordering.'); }
         if ($data['extension_id'] !== null && $this->db->fetchAll('SELECT id FROM extensions WHERE id = :id', ['id' => $data['extension_id']]) === []) {
             throw new \InvalidArgumentException('Extension not found');
         }

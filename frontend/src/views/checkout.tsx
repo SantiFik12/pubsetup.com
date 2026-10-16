@@ -2,9 +2,10 @@
 import { Link } from "@/components/Link";
 
 import { useCatalog,useExtension,useService,useServices } from "@/data/catalog";
+import { canonicalServiceSlug } from "@/lib/service-routes";
 import { createOrder } from "@/lib/api";
 import { useCheckoutSearch } from "@/lib/search";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { ArrowRight,Check } from "lucide-react";
 
@@ -19,7 +20,8 @@ export default function CheckoutPage() {
   const { isLoading } = useCatalog();
   const services = useServices();
   const fallbackService = services[0];
-  const service = useService(search.service) ?? fallbackService;
+  const selectedService = useService(canonicalServiceSlug(search.service));
+  const service = selectedService ?? (search.service ? undefined : fallbackService);
   const extension = useExtension(search.extension);
 
   const [form, setForm] = useState<FormState>({ name: "", email: "", site: "", access: "" });
@@ -33,6 +35,8 @@ export default function CheckoutPage() {
   }
 
   if (!service) return <div className="container-page py-20">Services are currently unavailable. Please contact contact@pubsetup.com.</div>;
+
+  if (service.price <= 0) return <section className="container-page py-20"><h1 className="text-3xl font-bold">Request a quote</h1><p className="mt-4 text-muted-foreground">{service.name} is quoted after reviewing your project.</p><a href={`mailto:contact@pubsetup.com?subject=${encodeURIComponent(service.name)}`} className="mt-6 inline-block font-semibold text-primary">Contact us for a quote</a></section>;
 
   const valid = form.name.trim() && /\S+@\S+\.\S+/.test(form.email);
 
@@ -70,7 +74,7 @@ export default function CheckoutPage() {
           })}
         </ol>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1fr,320px]">
+        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
             {step === "form" && (
               <>
@@ -81,7 +85,7 @@ export default function CheckoutPage() {
                     onChange={(e) => navigate({ search: (p: typeof search) => ({ ...p, service: e.target.value }) })}
                     className="ring-focus h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
                   >
-                    {services.map((s) => (
+                    {services.filter(s => s.price > 0).map((s) => (
                       <option key={s.id} value={s.slug}>{s.name} — ${s.price}</option>
                     ))}
                   </select>
@@ -164,10 +168,11 @@ export default function CheckoutPage() {
 }
 
 function Field({ label, value, onChange, type = "text", placeholder }: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string }) {
+  const inputId = useId();
   return (
     <div className="mb-4">
-      <label className="mb-1 block text-xs font-medium text-muted-foreground">{label}</label>
-      <input type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="ring-focus h-11 w-full rounded-lg border border-border bg-background px-3 text-sm placeholder:text-muted-foreground" />
+      <label htmlFor={inputId} className="mb-1 block text-xs font-medium text-muted-foreground">{label}</label>
+      <input id={inputId} type={type} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className="ring-focus h-11 w-full rounded-lg border border-border bg-background px-3 text-sm placeholder:text-muted-foreground" />
     </div>
   );
 }

@@ -46,3 +46,6 @@ try { $orders->create(array_replace($input,['service_id' => '99999999-9999-4999-
 for ($i = 0; $i < 9; ++$i) { $orders->create($input, 'test-ip'); }
 try { $orders->create($input, 'test-ip'); throw new RuntimeException('Rate limit bypassed'); } catch (OverflowException) {}
 echo "Integration passed: catalog visibility and types, server prices, atomic order queue, suppression, delivery, retries, missing service, rate limit.\n";
+$quoteId = $db->fetchAll("SELECT id FROM services WHERE slug = 'transfer-existing-store'")[0]['id'];
+try { $orders->create(array_replace($input,['service_id' => $quoteId]), 'quote-request'); throw new RuntimeException('Quote-only service accepted as a free order'); } catch (InvalidArgumentException) {}
+echo "Quote-only services cannot be ordered as free work.\n";

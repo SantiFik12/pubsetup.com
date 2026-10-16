@@ -11,7 +11,7 @@ python3 scripts/smoke.py http://127.0.0.1:8085
 
 Open http://localhost:8085. Only the nginx gateway is published, bound to localhost. PHP-FPM, Next.js and PostgreSQL are internal. The first start creates a database and applies migrations. `docker compose logs -f backend frontend worker` shows application logs; `docker compose down` stops containers while retaining data.
 
-The database starts empty. Import current content using [docs/migration.md](docs/migration.md); legacy SQL does not contain a complete catalog. The fixtures under `backend/tests` are for tests only.
+Migrations seed Amasty CCPA, its partner/category and all 10 services from the previous project. Service content and price sources are documented in [docs/services.md](docs/services.md). Other content is filled manually; see [docs/content.md](docs/content.md). Supabase import is optional, documented in [docs/migration.md](docs/migration.md). The fixtures under `backend/tests` are for tests only.
 
 Services:
 
@@ -48,6 +48,6 @@ bash scripts/deploy.sh
 python3 scripts/smoke.py http://127.0.0.1:8080 --require-content
 ```
 
-Import content before the final smoke check. Never run test fixtures on production. Existing Supabase orders, suppressions and unsubscribe links should be imported before cutover. PostgreSQL data resides in a named volume; `scripts/backup.sh` creates a custom-format dump. Media copied into `frontend/public/media` must be included in Git/deployment artifacts or backed up separately.
+Fill the remaining content and review the seeded module before launch. Never run test fixtures on production. Existing Supabase orders, suppressions and unsubscribe links should be imported before cutover. PostgreSQL data resides in a named volume; `scripts/backup.sh` creates a custom-format dump. Media copied into `frontend/public/media` must be included in Git/deployment artifacts or backed up separately.
 
 The previous TanStack/Supabase implementation remains under root `src/`, `supabase/`, and Vite/Cloudflare configuration files as a migration reference. It is not used by either Docker stack or root npm scripts. Existing local changes to those files were preserved. The former package manifest is saved in `docs/legacy-package.json`.

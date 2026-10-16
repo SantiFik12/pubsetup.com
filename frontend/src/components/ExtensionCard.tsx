@@ -1,125 +1,63 @@
 "use client";
-import { Link } from "@/components/Link";
-import { useCategory,usePartner } from "@/data/catalog";
-import type { Extension } from "@/data/types";
-import { useCompare } from "@/state/compare";
-import { Check,ExternalLink,Star,X,Zap } from "lucide-react";
 
-function formatPrice(e: Extension) {
-  if (e.priceType === "free") return "Free";
-  return `from $${e.priceFrom}`;
+import { Link } from "@/components/Link";
+import { useCategory, usePartner, useServices } from "@/data/catalog";
+import type { Extension } from "@/data/types";
+import { tagSlug } from "@/lib/slug";
+import { useCompare } from "@/state/compare";
+import { BookOpen, Check, ExternalLink, Plus, Star, X, Zap } from "lucide-react";
+
+function formatPrice(extension: Extension) {
+  return extension.priceType === "free" ? "Free" : `from $${extension.priceFrom}`;
 }
 
 export function ExtensionCard({ ext }: { ext: Extension }) {
   const partner = usePartner(ext.partnerId);
   const category = useCategory(ext.categoryId);
+  const services = useServices();
+  const installation = services.find(service => ["install-magento-2-extension", "extension-installation"].includes(service.slug));
   const { items, toggle } = useCompare();
   const inCompare = items.includes(ext.slug);
+  const cover = ext.coverImage || ext.gallery[0];
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
-      {(ext.gallery?.[0] || ext.coverImage) && (
-        <Link
-          to="/extension/$slug"
-          params={{ slug: ext.slug }}
-          className="block aspect-[16/9] w-full overflow-hidden bg-surface"
-        >
-          <img
-            src={ext.gallery?.[0] || ext.coverImage}
-            alt={ext.name}
-            loading="lazy"
-            className="h-full w-full object-cover object-top transition group-hover:scale-[1.02]"
-          />
+    <article data-testid="extension-card" className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-card">
+      {cover && (
+        <Link to="/extension/$slug" params={{ slug: ext.slug }} className="block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
+          <img src={cover} alt={ext.name} loading="lazy" width={960} height={540} className="h-full w-full object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
         </Link>
       )}
-      <div className="flex items-start gap-3 p-5">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">
-          {partner?.logoLetter ?? "·"}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="truncate text-xs font-medium text-muted-foreground">{partner?.name ?? "Partner"}</span>
-            <span className="text-muted-foreground">·</span>
-            {category ? (
-              <Link
-                to="/category/$slug"
-                params={{ slug: category.slug }}
-                className="truncate text-xs font-medium text-muted-foreground hover:text-foreground"
-              >
-                {category.name}
-              </Link>
-            ) : null}
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-sm font-bold text-primary" aria-hidden="true">{partner?.logoLetter}</div>
+          <div className="min-w-0 flex-1 py-0.5">
+            <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground">
+              <span className="shrink-0">{partner?.name ?? "Partner"}</span><span aria-hidden="true">·</span>
+              {category && <Link to="/category/$slug" params={{ slug: category.slug }} className="truncate hover:text-foreground">{category.name}</Link>}
+            </div>
+            <h2 className="mt-2 truncate text-base font-semibold text-foreground"><Link to="/extension/$slug" params={{ slug: ext.slug }} className="hover:text-primary" title={ext.name}>{ext.name}</Link></h2>
           </div>
-          <Link
-            to="/extension/$slug"
-            params={{ slug: ext.slug }}
-            className="mt-1 block truncate text-base font-semibold text-foreground hover:text-primary"
-          >
-            {ext.name}
-          </Link>
+        </div>
+        <p className="mt-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {ext.tags.slice(0, 4).map(tag => <Link key={tag} to="/tag/$slug" params={{ slug: tagSlug(tag) }} className="rounded-full bg-surface px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground">{tag}</Link>)}
+        </div>
+        {ext.recommended && <div className="mt-3"><span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success ring-1 ring-success/20"><Check className="h-3 w-3"/> Recommended</span></div>}
+        {ext.userGuideUrl && <a href={ext.userGuideUrl} target="_blank" rel="noopener noreferrer" className="ring-focus mt-4 inline-flex w-fit items-center gap-1.5 rounded-sm text-xs font-medium text-primary hover:underline" aria-label={`Read README for ${ext.name}`}><BookOpen className="h-3.5 w-3.5"/> README <ExternalLink className="h-3 w-3"/></a>}
+      </div>
+      <div className="border-t border-border px-5 pb-5 pt-3">
+        <div className="mb-3 flex items-center justify-between gap-2 text-sm">
+          <div className="flex items-center gap-1.5">
+            {ext.reviews > 0 ? <><Star className="h-4 w-4 fill-warning text-warning"/><span className="font-medium">{ext.rating}</span><span className="text-muted-foreground">({ext.reviews})</span></> : <span className="text-xs text-muted-foreground">No reviews yet</span>}
+          </div>
+          <span className="font-semibold text-foreground">{formatPrice(ext)}</span>
+        </div>
+        <div className="grid grid-cols-1 gap-2 min-[370px]:grid-cols-2">
+          <a href={ext.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex min-h-9 items-center justify-center gap-1 rounded-xl bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover">View Partner Offer <ExternalLink className="h-3 w-3"/></a>
+          <Link to={installation ? "/checkout" : "/services"} search={installation ? {service: installation.slug, extension: ext.slug} : undefined} className="ring-focus inline-flex min-h-9 items-center justify-center gap-1 rounded-xl border border-border bg-background px-2 py-2 text-xs font-semibold text-foreground transition hover:bg-surface"><Zap className="h-3 w-3"/> Order Installation</Link>
         </div>
       </div>
-
-      <p className="line-clamp-3 min-h-[60px] px-5 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>
-
-      <div className="mt-4 flex flex-wrap gap-1.5 px-5">
-        {ext.tags.slice(0, 4).map((t) => (
-          <Link
-            key={t}
-            to="/tag/$slug"
-            params={{ slug: t.toLowerCase().replace(/\s+/g, "-") }}
-            className="rounded-md bg-surface px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          >
-            {t}
-          </Link>
-        ))}
-      </div>
-
-      {ext.recommended && (
-        <div className="mt-3 px-5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success ring-1 ring-success/20">
-            <Check className="h-3 w-3" /> Recommended
-          </span>
-        </div>
-      )}
-
-      <div className="mt-5 flex items-center justify-between border-t border-border px-5 py-3 text-sm" style={{ marginTop: "auto" }}>
-        <div className="flex items-center gap-1.5">
-          <Star className="h-4 w-4 fill-warning text-warning" />
-          <span className="font-medium text-foreground">{ext.rating}</span>
-          <span className="text-muted-foreground">({ext.reviews})</span>
-        </div>
-        <div className="text-sm font-semibold text-foreground">{formatPrice(ext)}</div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 px-5 pb-5">
-        <a
-          href={ext.affiliateUrl}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-          className="ring-focus inline-flex items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover"
-        >
-          View Partner Offer <ExternalLink className="h-3 w-3" />
-        </a>
-        <Link
-          to="/checkout"
-          search={{ service: "install-magento-2-extension", extension: ext.slug }}
-          className="ring-focus inline-flex items-center justify-center gap-1 rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-surface"
-        >
-          <Zap className="h-3 w-3" /> Order Installation
-        </Link>
-      </div>
-
-      <button
-        onClick={() => toggle(ext.slug)}
-        className="ring-focus border-t border-border px-5 py-2 text-xs font-medium text-muted-foreground transition hover:bg-surface hover:text-foreground"
-      >
-        {inCompare ? (
-          <span className="inline-flex items-center gap-1 text-primary"><X className="h-3 w-3" /> Remove from compare</span>
-        ) : (
-          "+ Add to compare"
-        )}
-      </button>
+      <button type="button" onClick={() => toggle(ext.slug)} aria-pressed={inCompare} className="ring-focus inline-flex min-h-11 items-center justify-center gap-1 border-t border-border px-5 py-2 text-xs font-medium text-muted-foreground transition hover:bg-surface hover:text-foreground">{inCompare ? <X className="h-3 w-3"/> : <Plus className="h-3 w-3"/>}{inCompare ? "Remove from compare" : "Add to compare"}</button>
     </article>
   );
 }

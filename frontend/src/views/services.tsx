@@ -12,9 +12,9 @@ export default function ServicesPage() {
       <section className="bg-hero">
         <div className="container-page py-16 md:py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">Magento 2 services with fixed pricing</h1>
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">Magento 2 services & pricing</h1>
             <p className="mt-4 text-balance text-lg text-muted-foreground">
-              No retainers, no surprises. Pick a service and we&apos;ll deliver on time, every time.
+              Installation, performance, security and migration. Choose a fixed-price service, an hourly package or request a quote.
             </p>
           </div>
         </div>
@@ -26,11 +26,11 @@ export default function ServicesPage() {
             <article key={s.id} className={`flex flex-col rounded-2xl border bg-card p-6 shadow-soft transition hover:shadow-card ${s.featured ? "border-primary/40 ring-1 ring-primary/30" : "border-border"}`}>
               {s.featured && (
                 <span className="mb-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                  Most popular
+                  Featured service
                 </span>
               )}
               <h2 className="text-lg font-semibold text-foreground">{s.name}</h2>
-              <p className="mt-2 line-clamp-3 min-h-[60px] text-sm text-muted-foreground">{s.description}</p>
+              <p className="mt-2 min-h-[60px] text-sm leading-relaxed text-muted-foreground">{s.description}</p>
 
               <ul className="mt-5 space-y-1.5 text-sm">
                 {s.includes.map((it) => (
@@ -40,7 +40,7 @@ export default function ServicesPage() {
                 ))}
               </ul>
 
-              <div className="mt-5 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <div className="mb-5 mt-5 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" /> {s.duration}
               </div>
 
@@ -65,7 +65,7 @@ export default function ServicesPage() {
                 </Link>
               ) : (
                 <a
-                  href="mailto:contact@pubsetup.com?subject=Custom%20Development%20Request"
+                  href={`mailto:contact@pubsetup.com?subject=${encodeURIComponent(s.name)}`}
                   className="ring-focus mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover"
                 >
                   Contact Us <ArrowRight className="h-4 w-4" />

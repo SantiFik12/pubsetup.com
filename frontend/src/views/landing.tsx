@@ -1,17 +1,17 @@
 "use client";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
-import { useCatalog,useCategories,useExtensions,useSeoLanding } from "@/data/catalog";
+import { useCatalog,useSeoLanding } from "@/data/catalog";
+import { landingExtensions } from "@/lib/seo";
 import { useParams } from "next/navigation";
 
 
 
 export default function LandingPage() {
   const { landing: slug } = useParams<{ slug: string; landing: string }>();
-  const { isLoading } = useCatalog();
+  const catalog = useCatalog();
+  const { isLoading } = catalog;
   const landing = useSeoLanding(slug);
-  const exts = useExtensions();
-  const categories = useCategories();
   if (isLoading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
   if (!landing) {
     return (
@@ -21,15 +21,7 @@ export default function LandingPage() {
       </div>
     );
   }
-  let list = exts.slice();
-  const f = landing.filter;
-  if (f.categorySlug) {
-    const cat = categories.find((c) => c.slug === f.categorySlug);
-    if (cat) list = list.filter((e) => e.categoryId === cat.id);
-  }
-  if (f.tag) list = list.filter((e) => e.tags.includes(f.tag!));
-  if (f.hyvaCompatible) list = list.filter((e) => e.hyvaCompatible);
-  if (typeof f.priceMax === "number") list = list.filter((e) => e.priceFrom <= f.priceMax!);
+  const list = landingExtensions(catalog, landing);
   return (
     <>
       <section className="border-b border-border bg-hero">

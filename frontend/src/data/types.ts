@@ -1,4 +1,5 @@
 export type Partner = {
+  updatedAt?: string;
   id: string;
   slug: string;
   name: string;
@@ -8,6 +9,7 @@ export type Partner = {
 };
 
 export type Category = {
+  updatedAt?: string;
   id: string;
   slug: string;
   name: string;
@@ -16,6 +18,8 @@ export type Category = {
 };
 
 export type Extension = {
+  updatedAt?: string;
+  originalUrl?: string;
   id: string;
   slug: string;
   name: string;
@@ -49,6 +53,7 @@ export type Extension = {
 };
 
 export type Service = {
+  updatedAt?: string;
   id: string;
   slug: string;
   name: string;
@@ -61,6 +66,7 @@ export type Service = {
 };
 
 export type BlogPost = {
+  updatedAt?: string;
   id: string;
   slug: string;
   title: string;
@@ -76,6 +82,7 @@ export type BlogPost = {
 };
 
 export type SeoLanding = {
+  updatedAt?: string;
   slug: string;
   title: string;
   metaDescription: string;

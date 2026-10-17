@@ -5,6 +5,7 @@ type Row = Record<string, any>; // Database rows are normalized below.
 
 function mapPartner(r: Row): Partner {
   return {
+    updatedAt: r.updated_at ?? undefined,
     id: r.id,
     slug: r.slug,
     name: r.name,
@@ -16,6 +17,7 @@ function mapPartner(r: Row): Partner {
 
 function mapCategory(r: Row): Category {
   return {
+    updatedAt: r.updated_at ?? undefined,
     id: r.id,
     slug: r.slug,
     name: r.name,
@@ -26,6 +28,7 @@ function mapCategory(r: Row): Category {
 
 function mapExtension(r: Row): Extension {
   return {
+    updatedAt: r.updated_at ?? undefined,
     id: r.id,
     slug: r.slug,
     name: r.name,
@@ -40,6 +43,7 @@ function mapExtension(r: Row): Extension {
     recommended: !!r.recommended,
     bestSeller: !!r.best_seller,
     affiliateUrl: r.affiliate_url ?? "",
+    originalUrl: r.original_url ?? "",
     magentoVersions: r.magento_versions ?? [],
     hyvaCompatible: !!r.hyva_compatible,
     pwaReady: !!r.pwa_ready,
@@ -61,6 +65,7 @@ function mapExtension(r: Row): Extension {
 
 function mapService(r: Row): Service {
   return {
+    updatedAt: r.updated_at ?? undefined,
     id: r.id,
     slug: r.slug,
     name: r.name,
@@ -75,6 +80,7 @@ function mapService(r: Row): Service {
 
 function mapBlog(r: Row): BlogPost {
   return {
+    updatedAt: r.updated_at ?? undefined,
     id: r.id,
     slug: r.slug,
     title: r.title,
@@ -92,6 +98,7 @@ function mapBlog(r: Row): BlogPost {
 
 function mapLanding(r: Row): SeoLanding {
   return {
+    updatedAt: r.updated_at ?? undefined,
     slug: r.slug,
     title: r.title,
     metaDescription: r.meta_description ?? "",

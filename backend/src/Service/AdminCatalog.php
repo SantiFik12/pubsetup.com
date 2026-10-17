@@ -240,7 +240,8 @@ final readonly class AdminCatalog
             return null;
         }
         $category ??= ['slug' => 'other', 'name' => 'Other Extensions', 'icon' => 'Package'];
-        $this->db->execute('INSERT INTO categories(slug,name,icon) VALUES (:slug,:name,:icon) ON CONFLICT(slug) DO NOTHING', $category);
+        $description = 'Explore '.$category['name'].' Magento 2 extensions. Compare features, compatibility and partner prices, with professional installation from pubsetup.com.';
+        $this->db->execute("INSERT INTO categories(slug,name,icon,description) VALUES (:slug,:name,:icon,:description) ON CONFLICT(slug) DO UPDATE SET description=EXCLUDED.description WHERE trim(categories.description)=''", $category + ['description' => $description]);
 
         return $this->db->fetchAll('SELECT id FROM categories WHERE slug=:slug', ['slug' => $category['slug']])[0]['id'];
     }

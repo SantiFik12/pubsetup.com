@@ -17,7 +17,11 @@ final class AdminResponseSubscriber implements EventSubscriberInterface
 
     public function onResponse(ResponseEvent $event): void
     {
-        if (!str_starts_with($event->getRequest()->getPathInfo(), '/admin_panel')) {
+        $path = $event->getRequest()->getPathInfo();
+        if (preg_match('#^/(?:api(?:/|$)|email(?:/|$)|health$)#', $path)) {
+            $event->getResponse()->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+        if (!str_starts_with($path, '/admin_panel')) {
             return;
         }
         $headers = $event->getResponse()->headers;

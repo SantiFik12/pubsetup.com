@@ -24,7 +24,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
     <article data-testid="extension-card" className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-card">
       {cover && (
         <a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
-          <img src={cover} alt={ext.name} loading="lazy" width={960} height={540} className="h-full w-full object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
+          <img src={cover} alt={ext.name} title={ext.name} loading="lazy" width={960} height={540} className="h-full w-full object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
         </a>
       )}
       <div className="flex flex-1 flex-col p-5">

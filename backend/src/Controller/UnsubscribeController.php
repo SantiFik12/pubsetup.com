@@ -37,6 +37,6 @@ final class UnsubscribeController
             return new Response('You have been unsubscribed.', 200, ['Cache-Control' => 'no-store']);
         }
 
-        return new Response('<!doctype html><html lang="en"><meta charset="utf-8"><title>Unsubscribe</title><h1>Unsubscribe from emails</h1><form method="post"><button>Confirm unsubscribe</button></form></html>', 200, ['Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer']);
+        return new Response('<!doctype html><html lang="en"><meta charset="utf-8"><title>Unsubscribe</title><meta name="robots" content="noindex,nofollow"><h1>Unsubscribe from emails</h1><form method="post"><button>Confirm unsubscribe</button></form></html>', 200, ['Cache-Control' => 'no-store', 'Referrer-Policy' => 'no-referrer']);
     }
 }

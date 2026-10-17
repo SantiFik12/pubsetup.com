@@ -1,19 +1,23 @@
+import { JsonLd } from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog.server";
+import { breadcrumbs, pageMetadata } from "@/lib/seo";
+import { articleSchema } from "@/lib/structured-data";
 import View from "@/views/blog-slug";
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-type Props = {params:Promise<{slug:string}>};
-async function details(props:Props) {
- const { slug:slug } = await props.params;
- const catalog = await getCatalog();
- const item = catalog.blogPosts.find(i => i.slug === slug);
- if (!item) notFound();
- return {title:`${item.title} — pubsetup.com`, description:item.excerpt};
+
+type Props = { params: Promise<{ slug: string }> };
+async function details({ params }: Props) {
+  const { slug } = await params;
+  const catalog = await getCatalog();
+  const item = catalog.blogPosts.find(post => post.slug === slug);
+  if (!item) notFound();
+  return item;
 }
-export async function generateMetadata(props:Props):Promise<Metadata> {
- const item = await details(props);
- const { slug:slug } = await props.params;
- const url = "/blog/"+encodeURIComponent(slug);
- return {...item,alternates:{canonical:url},openGraph:{...item,url}};
+export async function generateMetadata(props: Props) {
+  const item = await details(props);
+  return pageMetadata({ title: `${item.title} — pubsetup.com`, description: item.excerpt, path: `/blog/${item.slug}`, image: item.cover, article: true });
 }
-export default async function Page(props:Props) { await details(props); return <View/>; }
+export default async function Page(props: Props) {
+  const item = await details(props);
+  return <><JsonLd data={articleSchema(item)} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }, { name: item.title, path: `/blog/${item.slug}` }])} /><View /></>;
+}

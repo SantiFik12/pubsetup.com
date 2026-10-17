@@ -1,19 +1,25 @@
+import { JsonLd } from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog.server";
+import { breadcrumbs, collectionSchema, metaDescription, pageMetadata } from "@/lib/seo";
 import View from "@/views/category-slug";
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-type Props = {params:Promise<{slug:string}>};
-async function details(props:Props) {
- const { slug:slug } = await props.params;
- const catalog = await getCatalog();
- const item = catalog.categories.find(i => i.slug === slug);
- if (!item) notFound();
- return {title:`${item.name} — pubsetup.com`, description:item.description};
+
+type Props = { params: Promise<{ slug: string }> };
+async function details({ params }: Props) {
+  const { slug } = await params;
+  const catalog = await getCatalog();
+  const item = catalog.categories.find(item => item.slug === slug);
+  if (!item) notFound();
+  const extensions = catalog.extensions.filter(extension => extension.categoryId === item.id);
+  const description = metaDescription(item.description, `Explore ${item.name} Magento 2 extensions. Compare features, compatibility and partner prices, with professional installation from pubsetup.com.`);
+  return { item, extensions, description };
 }
-export async function generateMetadata(props:Props):Promise<Metadata> {
- const item = await details(props);
- const { slug:slug } = await props.params;
- const url = "/category/"+encodeURIComponent(slug);
- return {...item,alternates:{canonical:url},openGraph:{...item,url}};
+export async function generateMetadata(props: Props) {
+  const { item, extensions, description } = await details(props);
+  return pageMetadata({ title: `${item.name} — pubsetup.com`, description, path: `/category/${item.slug}`, image: extensions[0]?.coverImage, index: extensions.length > 0 });
 }
-export default async function Page(props:Props) { await details(props); return <View/>; }
+export default async function Page(props: Props) {
+  const { item, extensions } = await details(props);
+  const path = `/category/${item.slug}`;
+  return <><JsonLd data={collectionSchema(item.name, path, extensions.map(extension => ({ name: extension.name, path: `/extension/${extension.slug}` })))} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Magento 2 Extensions", path: "/extensions" }, { name: item.name, path }])} /><View /></>;
+}

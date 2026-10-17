@@ -19,7 +19,7 @@
 
 ## Редактирование
 
-В этой версии нет веб-админки. Доступны SQL внутри Docker и JSON-импорт, без открытия PostgreSQL в интернет.
+Вендоры и модули теперь редактируются через `/admin_panel`, см. `docs/admin-panel.md`. SQL и JSON-импорт остаются доступны для массового наполнения и остальных таблиц, без открытия PostgreSQL в интернет.
 
 ```bash
 docker compose exec postgres psql -U pubsetup -d pubsetup

@@ -23,7 +23,7 @@ function ExtensionCardBlock({ extensionSlug }: { extensionSlug: string }) {
           <Link to="/extension/$slug" params={{ slug: ext.slug }} className="text-base font-semibold text-foreground hover:text-primary">{ext.name}</Link>
           <p className="mt-1 text-sm text-muted-foreground">{ext.shortDescription}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <a href={ext.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover">
+            <a href={`/go/affiliate/${encodeURIComponent(ext.slug)}`} target="_blank" rel="noopener noreferrer sponsored" className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary-hover">
               Buy via partner <ExternalLink className="h-3 w-3" />
             </a>
             <Link to="/checkout" search={{ service: "install-magento-2-extension", extension: ext.slug }} className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-surface">

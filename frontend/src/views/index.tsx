@@ -115,6 +115,7 @@ export default function HomePage() {
                 <img
                   src={magentoDemoPreview}
                   alt="Live Magento 2 demo store on magento.pubsetup.com"
+                  title="Live Magento 2 demo store on magento.pubsetup.com"
                   loading="lazy"
                   className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-[1.02]"
                 />

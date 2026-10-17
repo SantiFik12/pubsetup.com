@@ -1,0 +1,18 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Добавить модуль по ссылке{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ path('admin_dashboard',selected ? {vendor:selected.id} : {}) }}">К модулям</a>
+<div class="page-heading"><div><div class="eyebrow">{{ selected ? selected.name : 'КАТАЛОГ' }}</div><h1>Добавить модуль по ссылке</h1><p class="muted">Вставьте ссылку на оригинальный модуль — содержимое загрузится автоматически.</p></div></div>
+{% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
+<section class="panel edit-panel import-panel">
+<form method="post" class="form-stack">
+<input type="hidden" name="_token" value="{{ csrf_token('module_new') }}">
+<input type="hidden" name="partner_id" value="{{ vendor_id }}">
+<label>Ссылка на оригинальный модуль<input type="url" name="original_url" value="{{ original_url }}" maxlength="2048" required autofocus placeholder="https://amasty.com/module-for-magento-2.html"></label>
+<label>Моя affiliate-ссылка <span class="hint">Необязательно. Можно добавить позже.</span><input type="url" name="affiliate_url" value="{{ affiliate_url }}" maxlength="2048" placeholder="https://vendor.com/module.html?ref=..."></label>
+<div class="notice">Название, описания, главное фото, галерея, цена и ссылка на README / User Guide будут взяты со страницы модуля.{{ selected ? ' Вендор: ' ~ selected.name ~ '.' : ' Вендор определится по сайту.' }}</div>
+<button class="button primary" type="submit">Загрузить модуль по ссылке</button>
+<p class="hint">После загрузки модуль появится в каталоге. При повторном импорте той же ссылки обновится существующая карточка.</p>
+</form>
+</section>
+{% endblock %}

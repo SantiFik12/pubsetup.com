@@ -3,14 +3,20 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": ">=8.4",
+        "ext-dom": "*",
+        "ext-fileinfo": "*",
         "ext-pdo": "*",
         "ext-pdo_pgsql": "*",
+        "php": ">=8.4",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
         "symfony/framework-bundle": "7.4.*",
         "symfony/http-client": "7.4.*",
+        "symfony/rate-limiter": "7.4.*",
         "symfony/runtime": "7.4.*",
+        "symfony/security-bundle": "7.4.*",
+        "symfony/security-csrf": "7.4.*",
+        "symfony/twig-bundle": "7.4.*",
         "symfony/yaml": "7.4.*"
     },
     "autoload": {
@@ -26,9 +32,24 @@
     },
     "scripts": {
         "qa": [
+            "@qa:phpstan",
+            "@qa:cs-fixer",
+            "@qa:rector",
             "@php bin/console lint:yaml config",
+            "@php bin/console lint:twig templates",
             "@php bin/console lint:container",
-            "@php tests/run.php"
-        ]
+            "@php tests/run.php",
+            "@php tests/admin.php"
+        ],
+        "qa:phpstan": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=512M",
+        "qa:cs-fixer": "@php vendor/bin/php-cs-fixer fix --dry-run --diff --sequential",
+        "qa:rector": "@php vendor/bin/rector process --dry-run --no-progress-bar",
+        "cs:fix": "@php vendor/bin/php-cs-fixer fix --sequential",
+        "rector:fix": "@php vendor/bin/rector process --no-progress-bar"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/phpstan": "^2.3",
+        "rector/rector": "^2.7"
     }
 }

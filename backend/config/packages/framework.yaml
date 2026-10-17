@@ -6,3 +6,10 @@ framework:
         log: true
     router:
         utf8: true
+    csrf_protection: true
+    session:
+        name: pubsetup_admin
+        cookie_httponly: true
+        cookie_samesite: lax
+        cookie_secure: auto
+        gc_maxlifetime: 28800

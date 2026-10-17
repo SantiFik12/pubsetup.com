@@ -82,3 +82,7 @@ Backup сохраняет БД в `backups/*.dump` с правами, огран
 Проверить реальные данные и изображения, metadata/canonical для основных страниц, sitemap и robots, HTTP 404, мобильное меню/фильтры/сравнение/галерею, заявку и доставку Postmark, подавление адресов и отписку. Запустить frontend lint/build, `composer qa` в backend и smoke с `--require-content`. Серверные SEO-страницы уже допускают индексацию; предпросмотр защищать Basic Auth.
 
 В репозитории не выполнялся live-деплой и не менялся DNS домена. Настройка Hetzner, Caddy и проверка внешнего HTTPS выполняются отдельно на целевом сервере.
+
+## Админ-панель
+
+После deploy миграция 005 добавляет защищённую панель `/admin_panel`. Создать пользователя: `bash scripts/prod.sh exec backend php bin/console admin:user:create admin@example.com`; пароль вводится интерактивно. Панель описана в `docs/admin-panel.md`. Новый named volume `module_uploads` хранит фотографии из панели; резервировать его вместе с БД. Сессия администратора завершается при замене backend-контейнера.

@@ -1,11 +1,12 @@
 FROM php:8.4-fpm-alpine AS base
 WORKDIR /app
-RUN apk add --no-cache libpq-dev fcgi && docker-php-ext-install pdo_pgsql opcache
+RUN apk add --no-cache libpq-dev libxml2-dev fcgi && docker-php-ext-install pdo_pgsql opcache dom
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
 RUN composer install --no-interaction --prefer-dist --no-scripts --no-autoloader
 COPY . .
-RUN composer dump-autoload --optimize --no-scripts && mkdir -p var/cache var/log && chown -R www-data:www-data var
+COPY docker/uploads.ini /usr/local/etc/php/conf.d/zz-uploads.ini
+RUN composer dump-autoload --optimize --no-scripts && mkdir -p var/cache var/log var/storage/modules && chown -R www-data:www-data var
 
 FROM base AS development
 USER www-data

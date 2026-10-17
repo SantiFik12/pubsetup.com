@@ -3,6 +3,7 @@
 declare(strict_types=1);
 require dirname(__DIR__).'/vendor/autoload.php';
 use App\Service\Database;
+
 $db = new Database(getenv('DATABASE_URL'));
 $expected = [
     'magento-2-setup-from-scratch' => 299,
@@ -20,7 +21,7 @@ $rows = $db->fetchAll('SELECT slug,price,description,duration,cardinality(includ
 $bySlug = array_column($rows, null, 'slug');
 foreach ($expected as $slug => $price) {
     $row = $bySlug[$slug] ?? null;
-    if ($row === null || (float) $row['price'] !== (float) $price || trim($row['description']) === '' || trim($row['duration']) === '' || (int) $row['included'] === 0) {
+    if (null === $row || (float) $row['price'] !== (float) $price || '' === trim($row['description']) || '' === trim($row['duration']) || 0 === (int) $row['included']) {
         throw new RuntimeException('Missing or incomplete seeded service: '.$slug);
     }
 }

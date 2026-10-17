@@ -79,7 +79,7 @@ export default function ComparePage() {
               <td className="bg-surface px-4 py-3"></td>
               {exts.map((e) => (
                 <td key={e.id} className="space-y-2 px-4 py-3">
-                  <a href={e.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex w-full items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover">
+                  <a href={`/go/affiliate/${encodeURIComponent(e.slug)}`} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex w-full items-center justify-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-hover">
                     Buy <ExternalLink className="h-3 w-3" />
                   </a>
                   <Link to="/checkout" search={{ service: "install-magento-2-extension", extension: e.slug }} className="ring-focus inline-flex w-full items-center justify-center gap-1 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-foreground hover:bg-surface">

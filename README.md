@@ -51,3 +51,7 @@ python3 scripts/smoke.py http://127.0.0.1:8080 --require-content
 Fill the remaining content and review the seeded module before launch. Never run test fixtures on production. Existing Supabase orders, suppressions and unsubscribe links should be imported before cutover. PostgreSQL data resides in a named volume; `scripts/backup.sh` creates a custom-format dump. Media copied into `frontend/public/media` must be included in Git/deployment artifacts or backed up separately.
 
 The previous TanStack/Supabase implementation remains under root `src/`, `supabase/`, and Vite/Cloudflare configuration files as a migration reference. It is not used by either Docker stack or root npm scripts. Existing local changes to those files were preserved. The former package manifest is saved in `docs/legacy-package.json`.
+
+## Admin panel
+
+Open `/admin_panel`. Create an administrator with `docker compose exec backend php bin/console admin:user:create admin@example.com` (production: `bash scripts/prod.sh exec backend php bin/console admin:user:create admin@example.com`). The command prompts for a password. Vendor/module management, image uploads, source refresh and click counters are described in [docs/admin-panel.md](docs/admin-panel.md). Uploaded images are stored in the persistent `module_uploads` volume.

@@ -1,0 +1,32 @@
+security:
+    password_hashers:
+        App\Security\AdminUser: auto
+    providers:
+        admins:
+            id: App\Security\AdminUserProvider
+    firewalls:
+        public:
+            pattern: ^/(?!admin_panel(?:/|$))
+            security: false
+        admin:
+            pattern: ^/admin_panel(?:/|$)
+            lazy: true
+            provider: admins
+            form_login:
+                login_path: admin_login
+                check_path: admin_login
+                username_parameter: email
+                password_parameter: password
+                enable_csrf: true
+                default_target_path: admin_dashboard
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
+            logout:
+                path: admin_logout
+                target: admin_login
+                enable_csrf: true
+    access_control:
+        - { path: ^/admin_panel/assets/, roles: PUBLIC_ACCESS }
+        - { path: ^/admin_panel/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/admin_panel(?:/|$), roles: ROLE_ADMIN }

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>{% block title %}Каталог{% endblock %} · pubsetup admin</title><link rel="stylesheet" href="{{ path('admin_css') }}"></head>
+<body>
+{% block shell %}
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="{{ path('admin_dashboard') }}" aria-label="Pubsetup — панель администратора"><img class="brand-logo" src="/assets/logo.png" alt="Pubsetup"><span class="brand-badge">ADMIN</span></a>
+    <div class="workspace-label">УПРАВЛЕНИЕ КАТАЛОГОМ</div>
+    <a class="nav-link" href="{{ path('admin_dashboard') }}">Все модули</a>
+    <div class="sidebar-heading"><span>Вендоры</span><a href="{{ path('admin_vendor_new') }}" aria-label="Добавить вендора">Добавить</a></div>
+    {% for item in vendors|default([]) %}<a class="vendor-link {{ selected is defined and selected and selected.id == item.id ? 'active' : '' }}" href="{{ path('admin_dashboard', {vendor:item.id}) }}"><span>{{ item.name }}</span><span class="count">{{ item.modules }}</span></a>{% endfor %}
+    <div class="sidebar-footer"><a href="/extensions">Открыть каталог</a></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar"><span>Панель администратора</span><div class="account"><span>{{ app.user.userIdentifier }}</span><form method="post" action="{{ path('admin_logout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}"><button class="text-button" type="submit">Выйти</button></form></div></header>
+    <main class="main-content">
+      {% for type, messages in app.flashes %}{% for message in messages %}<div role="status" class="notice {{ type }}">{{ message }}</div>{% endfor %}{% endfor %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+</body></html>

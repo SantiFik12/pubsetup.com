@@ -2,6 +2,28 @@
 
 Стандартные команды приведены в README. Тесты не отправляют настоящих писем: `integration.php` использует Symfony MockHttpClient.
 
+## Проверки backend
+
+Из папки `backend`:
+
+```bash
+composer qa
+```
+
+Команда запускает PHPStan (уровень 5, PHP 8.4, весь `src`), PHP CS Fixer (правила Symfony), Rector (совместимость с PHP 8.4), lint YAML/Twig/контейнера и существующие тесты. В `qa` PHP CS Fixer и Rector работают с `--dry-run` и не изменяют файлы. Baseline для PHPStan не используется.
+
+Отдельные команды:
+
+```bash
+composer qa:phpstan
+composer qa:cs-fixer
+composer qa:rector
+composer rector:fix
+composer cs:fix
+```
+
+Инструменты находятся в `require-dev`. Для запуска `docker compose exec backend composer qa` после изменения зависимостей нужно пересобрать development-контейнер backend. В production зависимости для разработки не устанавливаются. Браузерные проверки не входят в `composer qa`; визуальные изменения проверяет владелец проекта.
+
 Для интеграционного прогона создать отдельную БД, применить миграции, запустить тест. Имя должно оканчиваться на `_test`. Пример для локального development-кластера:
 
 ```bash

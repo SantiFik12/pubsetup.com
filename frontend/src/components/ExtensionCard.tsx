@@ -23,9 +23,9 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
   return (
     <article data-testid="extension-card" className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-card">
       {cover && (
-        <Link to="/extension/$slug" params={{ slug: ext.slug }} className="block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
+        <a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
           <img src={cover} alt={ext.name} loading="lazy" width={960} height={540} className="h-full w-full object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
-        </Link>
+        </a>
       )}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start gap-3">
@@ -35,7 +35,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
               <span className="shrink-0">{partner?.name ?? "Partner"}</span><span aria-hidden="true">·</span>
               {category && <Link to="/category/$slug" params={{ slug: category.slug }} className="truncate hover:text-foreground">{category.name}</Link>}
             </div>
-            <h2 className="mt-2 truncate text-base font-semibold text-foreground"><Link to="/extension/$slug" params={{ slug: ext.slug }} className="hover:text-primary" title={ext.name}>{ext.name}</Link></h2>
+            <h2 className="mt-2 truncate text-base font-semibold text-foreground"><a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="hover:text-primary" title={ext.name}>{ext.name}</a></h2>
           </div>
         </div>
         <p className="mt-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>
@@ -53,7 +53,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
           <span className="font-semibold text-foreground">{formatPrice(ext)}</span>
         </div>
         <div className="grid grid-cols-1 gap-2 min-[370px]:grid-cols-2">
-          <a href={ext.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex min-h-9 items-center justify-center gap-1 rounded-xl bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover">View Partner Offer <ExternalLink className="h-3 w-3"/></a>
+          <a href={`/go/affiliate/${encodeURIComponent(ext.slug)}`} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex min-h-9 items-center justify-center gap-1 rounded-xl bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover">View Partner Offer <ExternalLink className="h-3 w-3"/></a>
           <Link to={installation ? "/checkout" : "/services"} search={installation ? {service: installation.slug, extension: ext.slug} : undefined} className="ring-focus inline-flex min-h-9 items-center justify-center gap-1 rounded-xl border border-border bg-background px-2 py-2 text-xs font-semibold text-foreground transition hover:bg-surface"><Zap className="h-3 w-3"/> Order Installation</Link>
         </div>
       </div>

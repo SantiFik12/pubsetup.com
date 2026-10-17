@@ -29,6 +29,9 @@ services:
       - ./backend/config:/app/config
       - ./backend/migrations:/app/migrations
       - ./backend/tests:/app/tests
+      - ./backend/templates:/app/templates
+      - ./backend/public/admin:/app/public/admin
+      - module_uploads:/app/var/storage
     depends_on:
       postgres:
         condition: service_healthy
@@ -77,8 +80,10 @@ services:
       - "127.0.0.1:${DEV_HTTP_PORT:-8085}:8082"
     volumes:
       - ./ops/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - module_uploads:/srv/uploads:ro
     depends_on:
       - backend
       - frontend
 volumes:
+  module_uploads:
   postgres_data:

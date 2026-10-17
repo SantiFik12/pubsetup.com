@@ -102,13 +102,13 @@ final class AdminController extends AbstractController
                     AdminCatalog::url($url, true);
                     AdminCatalog::url($affiliate);
                     $fields = $source->fetch($url);
-                    $saved = $this->catalog->importModule($url, $affiliate, $vendor, $fields);
+                    $this->catalog->importModule($url, $affiliate, $vendor, $fields);
                     $this->addFlash('success', 'Модуль загружен по ссылке.');
                     foreach ($fields['_warnings'] ?? [] as $warning) {
                         $this->addFlash('warning', $warning);
                     }
 
-                    return $this->redirectToRoute('admin_module_edit', ['id' => $saved]);
+                    return $this->redirectToRoute('admin_dashboard');
                 } catch (\InvalidArgumentException $e) {
                     $error = $e->getMessage();
                 } catch (\Throwable) {
@@ -177,6 +177,8 @@ final class AdminController extends AbstractController
                 $this->addFlash('warning', $warning);
             }
             $this->addFlash('success', 'Данные из источника обновлены. Affiliate-ссылка, slug и счётчики сохранены. Проверьте содержимое модуля.');
+
+            return $this->redirectToRoute('admin_dashboard');
         } catch (\Throwable) {
             $this->addFlash('error', 'Источник не удалось прочитать. Сайт может блокировать автоматическую загрузку. Данные модуля сохранены; отредактируйте их вручную.');
         }

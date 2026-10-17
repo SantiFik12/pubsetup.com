@@ -202,21 +202,7 @@ final readonly class AdminCatalog
                 $known = $this->db->fetchAll('SELECT id FROM partners WHERE slug=:slug', ['slug' => $vendorSlug])[0] ?? null;
                 $vendor = $known['id'] ?? $this->saveVendor(['name' => $name, 'slug' => $vendorSlug, 'website' => 'https://'.$host], null);
             }
-            $category = null;
-            $haystack = mb_strtolower($fields['name'].' '.($fields['short_description'] ?? ''));
-            $groups = ['compliance' => 'privacy|gdpr|ccpa|consent|compliance', 'seo' => 'seo|search engine', 'checkout' => 'checkout', 'shipping' => 'shipping|delivery', 'marketing' => 'promotion|discount|coupon|marketing', 'catalog' => 'catalog|product feed|navigation'];
-            foreach ($this->categories() as $candidate) {
-                foreach ($groups as $slug => $keywords) {
-                    if (str_contains($candidate['slug'], $slug) && preg_match('/'.$keywords.'/iu', $haystack)) {
-                        $category = $candidate['id'];
-                        break 2;
-                    }
-                }
-            }
-            if (null === $category) {
-                $this->db->execute("INSERT INTO categories(slug,name,description,icon) VALUES ('other','Other Extensions','Magento extensions','Package') ON CONFLICT(slug) DO NOTHING");
-                $category = $this->db->fetchAll("SELECT id FROM categories WHERE slug='other'")[0]['id'];
-            }
+            $category = $this->sourceCategory($fields, true);
             $slugBase = $this->slug('', $fields['name']);
             $slug = $slugBase;
             $suffix = 2;
@@ -247,9 +233,25 @@ final readonly class AdminCatalog
         }
     }
 
+    private function sourceCategory(array $fields, bool $fallback = false): ?string
+    {
+        $category = ModuleCategory::detect($fields);
+        if (null === $category && !$fallback) {
+            return null;
+        }
+        $category ??= ['slug' => 'other', 'name' => 'Other Extensions', 'icon' => 'Package'];
+        $this->db->execute('INSERT INTO categories(slug,name,icon) VALUES (:slug,:name,:icon) ON CONFLICT(slug) DO NOTHING', $category);
+
+        return $this->db->fetchAll('SELECT id FROM categories WHERE slug=:slug', ['slug' => $category['slug']])[0]['id'];
+    }
+
     public function updateFromSource(string $id, array $fields): void
     {
-        $allowed = ['name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
+        $category = $this->sourceCategory($fields);
+        if (null !== $category) {
+            $fields['category_id'] = $category;
+        }
+        $allowed = ['category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
         $fields = array_intersect_key($fields, array_flip($allowed));
         if ([] === $fields) {
             throw new \InvalidArgumentException('Источник не вернул данные модуля.');

@@ -92,6 +92,46 @@ final readonly class ModuleSourceImporter
             $result['description'] = $description;
             $result['short_description'] = mb_substr($description, 0, 240);
         }
+        $categories = [];
+        $productCategories = [];
+        $collectCategories = static function (array $value) use (&$collectCategories, &$categories, &$productCategories, $clean, $title): void {
+            $types = (array) ($value['@type'] ?? []);
+            if (in_array('Product', $types, true) || in_array('SoftwareApplication', $types, true)) {
+                foreach ((array) ($value['category'] ?? []) as $category) {
+                    $name = $clean(is_array($category) ? ($category['name'] ?? '') : $category, 200);
+                    if ('' !== $name) {
+                        $productCategories[] = $name;
+                    }
+                }
+            }
+            if (in_array('BreadcrumbList', $types, true)) {
+                foreach ($value['itemListElement'] ?? [] as $entry) {
+                    $name = $clean($entry['name'] ?? ($entry['item']['name'] ?? ''), 200);
+                    if ('' !== $name && $name !== $title) {
+                        $categories[] = $name;
+                    }
+                }
+            }
+            foreach ($value as $entry) {
+                if (is_array($entry)) {
+                    $collectCategories($entry);
+                }
+            }
+        };
+        foreach ($xpath->query('//script[@type="application/ld+json"]') as $node) {
+            $value = json_decode($node->textContent, true);
+            if (is_array($value)) {
+                $collectCategories($value);
+            }
+        }
+        foreach ($xpath->query('//*[contains(concat(" ",normalize-space(@class)," ")," breadcrumbs ")]//a | //nav[@aria-label="Breadcrumb"]//a') as $node) {
+            $name = $clean($node->textContent, 200);
+            if ('' !== $name && $name !== $title) {
+                $categories[] = $name;
+            }
+        }
+        $result['_categories'] = array_values(array_unique([...$productCategories, ...array_reverse($categories)]));
+        $result['_source_url'] = $url;
         $offer = $product['offers'] ?? [];
         if (isset($offer[0])) {
             $offer = $offer[0];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 require dirname(__DIR__).'/vendor/autoload.php';
 use App\Service\AdminCatalog;
 use App\Service\Database;
+use App\Service\ModuleCategory;
 use App\Service\ModuleImages;
 use App\Service\ModuleSourceImporter;
 
@@ -40,6 +41,29 @@ $check('Full description with product details and useful information about the e
 $check('https://example.com/user-guides/privacy/' === $parsed['user_guide_url'], 'Relative User Guide URL not resolved');
 $check($parsed['_images'] === ['https://example.com/shot-1.png', 'https://cdn.example.com/shot-2.png'], 'Product gallery missing');
 $check($parsed['hyva_compatible'] && $parsed['magento_versions'] === ['2.4.8-p5', '2.4.7-p10'], 'Compatibility not extracted');
+$categoryCases = [
+    [['name' => 'Improved Layered Navigation for Magento 2', 'short_description' => 'SEO-friendly URLs and checkout support'], 'navigation-search'],
+    [['name' => 'California Consumer Privacy Act for Magento 2'], 'compliance'],
+    [['name' => 'One Step Checkout'], 'checkout'],
+    [['name' => 'Shipping Table Rates'], 'shipping-payments'],
+    [['name' => 'SEO Toolkit'], 'seo-performance'],
+    [['name' => 'Product Feed'], 'catalog-management'],
+    [['name' => 'Special Promotions'], 'promotions'],
+    [['name' => 'Advanced Reports'], 'analytics-reporting'],
+    [['name' => 'Company Accounts B2B'], 'b2b'],
+    [['name' => 'Loyalty Rewards'], 'sales-marketing'],
+    [['name' => 'Custom Extension', '_categories' => ['Magento 2 Extensions', 'Navigation & Search']], 'navigation-search'],
+    [['name' => 'Checkout Helper', '_categories' => ['Compliance & Legal']], 'compliance'],
+    [['name' => 'Custom Extension', '_source_url' => 'https://example.com/layered-navigation.html'], 'navigation-search'],
+    [['name' => 'Unclassified Extension'], null],
+];
+foreach ($categoryCases as [$input, $expected]) {
+    $check((ModuleCategory::detect($input)['slug'] ?? null) === $expected, 'Incorrect category for '.$input['name']);
+}
+$categoryHtml = '<script type="application/ld+json">{"@type":"Product","name":"Custom Extension","category":"Navigation & Search"}</script><script type="application/ld+json">{"@type":"BreadcrumbList","itemListElement":[{"item":{"name":"Magento 2 Extensions"}},{"item":{"name":"Catalog Management"}},{"item":{"name":"Custom Extension"}}]}</script><nav><a>SEO</a><a>Checkout</a></nav>';
+$categoryFields = ModuleSourceImporter::extract($categoryHtml);
+$check($categoryFields['_categories'] === ['Navigation & Search', 'Catalog Management', 'Magento 2 Extensions'], 'Product categories or breadcrumbs missing, or site navigation leaked');
+$check('navigation-search' === ModuleCategory::detect($categoryFields)['slug'], 'Specific product category lost to a broader breadcrumb');
 $images = new ModuleImages(sys_get_temp_dir().'/pubsetup-invalid-image-test');
 try {
     $images->store('<?php echo "unsafe";');
@@ -61,6 +85,12 @@ if (!str_ends_with($db->fetchAll('SELECT current_database() AS name')[0]['name']
     throw new RuntimeException('Use a disposable _test database');
 }
 $admin = new AdminCatalog($db);
+$navigationId = $admin->importModule('https://fixture-vendor.example/layered-navigation.html', '', '', ['name' => 'Improved Layered Navigation', 'description' => 'Product filters with SEO-friendly URLs.']);
+$navigationCategory = $db->fetchAll('SELECT c.slug FROM categories c JOIN extensions e ON e.category_id=c.id WHERE e.id=:id', ['id' => $navigationId])[0]['slug'];
+$check('navigation-search' === $navigationCategory, 'Missing navigation category was not created on import');
+$otherId = $admin->importModule('https://fixture-vendor.example/custom.html', '', '', ['name' => 'Unclassified Extension', 'description' => 'A custom extension.']);
+$admin->updateFromSource($otherId, ['name' => 'Custom Extension', '_categories' => ['Navigation & Search']]);
+$check($admin->module($otherId)['category_id'] === $admin->module($navigationId)['category_id'], 'Refresh did not correct a module category');
 $imported = $admin->importModule('https://fixture-vendor.example/privacy.html', 'https://fixture-vendor.example/privacy.html?ref=ours', '', array_diff_key($parsed, ['_images' => true, '_image' => true]));
 $importedAgain = $admin->importModule('https://fixture-vendor.example/privacy.html', '', '', ['name' => 'Updated privacy module', 'description' => 'Refreshed source']);
 $importedModule = $admin->module($imported);

@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 import "../styles.css";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
- ...pageMetadata({title:"pubsetup.com — Magento 2 extensions catalog & expert services", description:"Find the best Magento 2 extensions from trusted partners and get them installed by experts.", path:"/"}),
+ ...pageMetadata({title:"Magento 2 extensions catalog & expert services", description:"Find the best Magento 2 extensions from trusted partners and get them installed by experts.", path:"/"}),
  metadataBase: new URL(siteUrl),
  verification: {google:"VKqI55icHAyQs79euvUvHMP78ZXEKYtxqqcU7G7veQw"},
  icons: {icon:"/favicon.ico",apple:"/apple-touch-icon.png"}, manifest:"/site.webmanifest",

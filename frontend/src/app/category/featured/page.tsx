@@ -8,7 +8,7 @@ import { pageMetadata } from "@/lib/seo";
 export async function generateMetadata() {
   const catalog = await getCatalog();
   const featured = featuredExtensions(catalog.extensions);
-  return pageMetadata({ title: "Featured Magento 2 Extensions — pubsetup.com", description: "Explore the six most-viewed Magento 2 extensions in our catalog. Compare features, partner prices and professional installation options.", path: "/category/featured", image: featured[0]?.coverImage, index: featured.length > 0 });
+  return pageMetadata({ title: "Featured Magento 2 Extensions", description: "Explore the six most-viewed Magento 2 extensions in our catalog. Compare features, partner prices and professional installation options.", path: "/category/featured", image: featured[0]?.coverImage, index: featured.length > 0 });
 }
 
 export default async function Page() {

@@ -5,7 +5,7 @@ import View from "@/views/extensions";
 
 export async function generateMetadata() {
   const catalog = await getCatalog();
-  return pageMetadata({ title: "Magento 2 Extensions Catalog \u2014 pubsetup.com", description: "Browse curated Magento 2 extensions. Compare features, partner prices, Hyv\u00e4 compatibility and professional installation options.", path: "/extensions", index: catalog.extensions.length > 0 });
+  return pageMetadata({ title: "Magento 2 Extensions Catalog", description: "Browse curated Magento 2 extensions. Compare features, partner prices, Hyv\u00e4 compatibility and professional installation options.", path: "/extensions", index: catalog.extensions.length > 0 });
 }
 export default async function Page() {
   const catalog = await getCatalog();

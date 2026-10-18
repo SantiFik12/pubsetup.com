@@ -15,7 +15,7 @@ async function details({ params }: Props) {
 }
 export async function generateMetadata(props: Props) {
   const { slug, tag, extensions } = await details(props);
-  return pageMetadata({ title: `Magento 2 extensions tagged "${tag}" — pubsetup.com`, description: `Browse Magento 2 extensions tagged "${tag}". Compare features, partner prices and Magento compatibility, with expert installation available.`, path: `/tag/${slug}`, image: extensions[0]?.coverImage });
+  return pageMetadata({ title: `Magento 2 extensions tagged "${tag}"`, description: `Browse Magento 2 extensions tagged "${tag}". Compare features, partner prices and Magento compatibility, with expert installation available.`, path: `/tag/${slug}`, image: extensions[0]?.coverImage });
 }
 export default async function Page(props: Props) {
   const { slug, tag, extensions } = await details(props);

@@ -18,7 +18,7 @@ async function details({ params }: Props) {
 }
 export async function generateMetadata(props: Props) {
   const item = await details(props);
-  return pageMetadata({ title: `${item.name} — pubsetup.com`, description: item.description, path: `/services/${item.slug}` });
+  return pageMetadata({ title: `${item.name}`, description: item.description, path: `/services/${item.slug}` });
 }
 export default async function Page(props: Props) {
   const item = await details(props);

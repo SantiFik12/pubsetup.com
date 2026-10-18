@@ -3,6 +3,7 @@ import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
 import { useAllTags,useCatalog } from "@/data/catalog";
 import { useCatalogSearch } from "@/lib/search";
+import { featuredCategory, featuredExtensions } from "@/lib/featured";
 import { useCompare } from "@/state/compare";
 import { ChevronDown,PanelLeftClose,PanelLeftOpen,Search,SlidersHorizontal,Star,X } from "lucide-react";
 import { useMemo,useState } from "react";
@@ -24,12 +25,12 @@ export default function ExtensionsPage() {
   };
 
   const filtered = useMemo(() => {
-    let list = extensions.slice();
+    let list = search.cat === featuredCategory ? featuredExtensions(extensions) : extensions.slice();
     if (search.q) {
       const q = search.q.toLowerCase();
       list = list.filter((e) => e.name.toLowerCase().includes(q) || e.shortDescription.toLowerCase().includes(q) || e.description.toLowerCase().includes(q));
     }
-    if (search.cat) list = list.filter((e) => e.categoryId === search.cat);
+    if (search.cat && search.cat !== featuredCategory) list = list.filter((e) => e.categoryId === search.cat);
     if (search.partner) list = list.filter((e) => e.partnerId === search.partner);
     if (search.tag) list = list.filter((e) => e.tags.includes(search.tag));
     if (search.hyva) list = list.filter((e) => e.hyvaCompatible);
@@ -42,7 +43,7 @@ export default function ExtensionsPage() {
       case "newest": list.sort((a, b) => b.createdAt.localeCompare(a.createdAt)); break;
       case "cheapest": list.sort((a, b) => a.priceFrom - b.priceFrom); break;
       case "best-rated": list.sort((a, b) => b.rating - a.rating); break;
-      default: list.sort((a, b) => b.reviews - a.reviews);
+      default: list.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
     }
     return list;
   }, [search, extensions]);
@@ -107,6 +108,7 @@ export default function ExtensionsPage() {
             <div className={sidebarOpen ? "" : "md:hidden"}>
               <FilterGroup label="Category">
                 <FilterRadio name="cat" value="" current={search.cat} onChange={(v) => update({ cat: v })} label="All categories" />
+                <FilterRadio name="cat" value={featuredCategory} current={search.cat} onChange={(v) => update({ cat: v })} label="Featured extensions" />
                 {categories.map((c) => (
                   <FilterRadio key={c.id} name="cat" value={c.id} current={search.cat} onChange={(v) => update({ cat: v })} label={c.name} />
                 ))}

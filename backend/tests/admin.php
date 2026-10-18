@@ -109,4 +109,10 @@ $check(false === $admin->module($id)['published'], 'Module draft was not saved')
 $public = new App\Service\CatalogService($db)->all();
 $check(!in_array('qa-module', array_column($public['extensions'], 'slug'), true), 'Draft leaked into public catalog');
 $check($admin->totals()['modules'] > 0 && [] !== $admin->modules($vendor, 'QA'), 'Vendor modules unavailable');
+$db->execute('INSERT INTO module_metrics(extension_id,module_clicks,affiliate_clicks) VALUES (:id,73,900) ON CONFLICT(extension_id) DO UPDATE SET module_clicks=73,affiliate_clicks=900', ['id' => $navigationId]);
+$public = new App\Service\CatalogService($db)->all();
+$navigation = array_values(array_filter($public['extensions'], static fn (array $item): bool => $item['id'] === $navigationId))[0];
+$check(73 === (int) $navigation['views'], 'Catalog views must use module opens, not affiliate clicks');
+$zeroViews = array_values(array_filter($public['extensions'], static fn (array $item): bool => $item['id'] === $otherId))[0];
+$check(0 === (int) $zeroViews['views'], 'Modules without metrics must have zero views');
 echo "Admin database checks passed: vendor/module edits, refresh invariants, drafts and counters.\n";

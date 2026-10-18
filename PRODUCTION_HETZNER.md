@@ -20,6 +20,8 @@
 
 Публичные порты — 80/443 на Caddy. Только gateway опубликован на localhost; PostgreSQL, frontend и backend не публикуют порты. Не добавлять `ports` для них. Caddy завершает TLS и передаёт gateway корректный `X-Forwarded-For`, который используется для ограничения заявок.
 
+Если на этом сервере также разворачивается Magento demo: [совместное размещение двух Compose-проектов](docs/production-shared-server.md). В этой схеме используется один Caddy на хосте; контейнерный `proxy` из Magento-руководства заменяется локальным входом Varnish на `127.0.0.1:8081`. Готовый пример общего Caddyfile: `ops/Caddyfile.shared-server.example`.
+
 ## Первый запуск
 
 От пользователя deploy, после настройки хоста:

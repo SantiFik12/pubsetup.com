@@ -15,7 +15,7 @@ final readonly class CatalogService
         $queries = [
             'partners' => 'SELECT * FROM partners ORDER BY name',
             'categories' => 'SELECT * FROM categories ORDER BY name',
-            'extensions' => 'SELECT * FROM extensions WHERE published = true ORDER BY created_at DESC',
+            'extensions' => 'SELECT e.*,COALESCE(m.module_clicks,0) AS views FROM extensions e LEFT JOIN module_metrics m ON m.extension_id=e.id WHERE e.published = true ORDER BY e.created_at DESC',
             'services' => 'SELECT * FROM services ORDER BY position, price',
             'blogPosts' => 'SELECT * FROM blog_posts WHERE published = true ORDER BY date DESC',
             'seoLandings' => 'SELECT * FROM seo_landings WHERE published = true ORDER BY slug',

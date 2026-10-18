@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import type { Catalog } from "@/data/mappers";
 import { absoluteUrl, landingExtensions, latestDate, validDate } from "./seo.ts";
+import { featuredCategory } from "./featured.ts";
 import { tagSlug } from "./slug.ts";
 
 export function catalogSitemap(catalog: Catalog): MetadataRoute.Sitemap {
@@ -11,7 +12,10 @@ export function catalogSitemap(catalog: Catalog): MetadataRoute.Sitemap {
   const blogDate = latestDate(catalog.blogPosts.map(item => item.updatedAt || item.date));
   add("/", latestDate([extensionDate, serviceDate, blogDate]));
   for (const path of ["/privacy", "/terms", "/refund", "/affiliate-disclosure"]) add(path);
-  if (catalog.extensions.length) add("/extensions", extensionDate);
+  if (catalog.extensions.length) {
+    add("/extensions", extensionDate);
+    add(`/category/${featuredCategory}`);
+  }
   if (catalog.services.length) add("/services", serviceDate);
   if (catalog.blogPosts.length) add("/blog", blogDate);
   for (const item of catalog.extensions) add(`/extension/${item.slug}`, validDate(item.updatedAt || item.createdAt));

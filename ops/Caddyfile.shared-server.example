@@ -1,0 +1,28 @@
+# Caddy runs on the HOST as a systemd service, outside both Compose projects.
+# DNS for these three hostnames must point to this server.
+pubsetup.com {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+    reverse_proxy 127.0.0.1:8080
+}
+
+www.pubsetup.com {
+    redir https://pubsetup.com{uri} permanent
+}
+
+magento.pubsetup.com {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options SAMEORIGIN
+        Referrer-Policy strict-origin-when-cross-origin
+        X-Robots-Tag "noindex, nofollow"
+        -Server
+    }
+    reverse_proxy 127.0.0.1:8081
+}

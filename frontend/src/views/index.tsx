@@ -2,18 +2,19 @@
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
 import { useExtensions, useService } from "@/data/catalog";
-import { ArrowRight,Boxes,Check,Palette,RefreshCw,Shield,Sparkles,Zap } from "lucide-react";
+import { ArrowRight,BadgeCheck,Check,Gauge,Puzzle,Rocket,ShieldCheck,Sparkles,Star,Wrench } from "lucide-react";
+import { featuredExtensions } from "@/lib/featured";
 const magentoDemoPreview = "/assets/magento-demo-preview.png";
 
 
 
 const featureServices = [
-  { icon: Boxes, title: "Magento 2 installation from scratch", body: "A clean, fully tuned production install on your server." },
-  { icon: Zap, title: "Extension installation", body: "Composer install, deploy, smoke-test and rollback plan." },
-  { icon: RefreshCw, title: "Performance optimization", body: "Sub-second pages with Varnish, Redis, RabbitMQ." },
-  { icon: Palette, title: "Theme setup", body: "Luma, Hyvä or custom theme — installed and configured." },
-  { icon: Shield, title: "Security patches", body: "Magento and infrastructure patches with zero downtime." },
-  { icon: RefreshCw, title: "Magento & server updates", body: "Stay on supported versions of Magento and your stack." },
+  { icon: Rocket, title: "Magento 2 installation from scratch", body: "A clean, fully tuned production install on your server." },
+  { icon: Puzzle, title: "Extension installation", body: "Composer install, deploy, smoke-test and rollback plan." },
+  { icon: Gauge, title: "Performance optimization", body: "Sub-second pages with Varnish, Redis, RabbitMQ." },
+  { icon: Wrench, title: "Theme setup", body: "Luma, Hyvä or custom theme — installed and configured." },
+  { icon: ShieldCheck, title: "Security patches", body: "Magento and infrastructure patches with zero downtime." },
+  { icon: BadgeCheck, title: "Magento & server updates", body: "Stay on supported versions of Magento and your stack." },
 ];
 
 const stack = [
@@ -28,7 +29,7 @@ const stack = [
 export default function HomePage() {
   const extensions = useExtensions();
   const setup = useService("magento-2-setup-from-scratch");
-  const featured = extensions.filter((e) => e.recommended).slice(0, 6);
+  const featured = featuredExtensions(extensions);
   return (
     <>
       {/* HERO */}
@@ -60,10 +61,10 @@ export default function HomePage() {
                 Get Magento 2 Setup
               </Link>
             </div>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> Independent reviews</span>
-              <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> Transparent pricing</span>
-              <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-success" /> Magento-certified team</span>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5"><Star aria-hidden="true" className="h-4 w-4 shrink-0 text-warning" /> Independent reviews</span>
+              <span className="inline-flex items-center gap-1.5"><BadgeCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-success" /> Transparent pricing</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-primary" /> Magento-certified team</span>
             </div>
           </div>
         </div>
@@ -132,14 +133,14 @@ export default function HomePage() {
 
       {/* FEATURED EXTENSIONS */}
       {featured.length > 0 && (
-        <section className="container-page py-10 md:py-12">
-          <div className="flex items-end justify-between">
+        <section id="featured-extensions" aria-labelledby="featured-heading" className="container-page py-10 md:py-12">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-foreground">Recommended extensions</h2>
-              <p className="mt-2 text-muted-foreground">Hand-picked by our team — proven on real client stores.</p>
+              <h2 id="featured-heading" className="text-3xl font-bold tracking-tight text-foreground">Featured extensions</h2>
+              <p className="mt-2 text-muted-foreground">Explore the most-viewed modules in our catalog.</p>
             </div>
-            <Link to="/extensions" className="hidden text-sm font-semibold text-primary hover:text-primary-hover sm:inline-flex">
-              View all extensions →
+            <Link to="/category/featured" className="ring-focus inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary-hover">
+              View featured extensions <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
           </div>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -157,20 +158,18 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold tracking-tight text-foreground">Magento 2 services, fixed pricing</h2>
             <p className="mt-2 text-muted-foreground">No retainers, no hidden fees. Pick a service and we&apos;ll get to work.</p>
           </div>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {featureServices.map((s) => (
-              <div key={s.title} className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft transition hover:shadow-card">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-primary">
-                  <s.icon className="h-5 w-5" />
-                </div>
+              <div key={s.title} className="flex flex-col rounded-2xl border border-border bg-card p-6">
+                <s.icon aria-hidden="true" className="h-6 w-6 text-primary" />
                 <h3 className="mt-4 text-base font-semibold text-foreground">{s.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{s.body}</p>
               </div>
             ))}
           </div>
           <div className="mt-8 text-center">
-            <Link to="/services" className="text-sm font-semibold text-primary hover:text-primary-hover">
-              See all services & pricing →
+            <Link to="/services" className="ring-focus inline-flex min-h-10 items-center justify-center gap-3 rounded-xl border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-soft transition hover:bg-background">
+              See all services &amp; pricing <ArrowRight aria-hidden="true" className="h-4 w-4" />
             </Link>
           </div>
         </div>

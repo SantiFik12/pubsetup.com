@@ -18,6 +18,7 @@ export type Category = {
 };
 
 export type Extension = {
+  views: number;
   updatedAt?: string;
   originalUrl?: string;
   id: string;

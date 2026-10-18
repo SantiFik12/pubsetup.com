@@ -18,6 +18,8 @@ export type Category = {
 };
 
 export type Extension = {
+  seoTitle?: string;
+  seoDescription?: string;
   views: number;
   updatedAt?: string;
   originalUrl?: string;

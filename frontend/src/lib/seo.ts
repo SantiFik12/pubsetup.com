@@ -26,6 +26,10 @@ export function pageMetadata({ title, description, path, image, index = true, ar
   };
 }
 
+export function extensionMetadata(item: Extension): Metadata {
+  return pageMetadata({ title: item.seoTitle || item.name, description: item.seoDescription || item.shortDescription || item.description, path: `/extension/${item.slug}`, image: item.coverImage || item.gallery[0] });
+}
+
 export function serializeJsonLd(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
 }

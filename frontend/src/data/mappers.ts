@@ -28,6 +28,8 @@ function mapCategory(r: Row): Category {
 
 function mapExtension(r: Row): Extension {
   return {
+    seoTitle: r.seo_title ?? "",
+    seoDescription: r.seo_description ?? "",
     views: Number(r.views ?? 0),
     updatedAt: r.updated_at ?? undefined,
     id: r.id,

@@ -6,6 +6,7 @@ use App\Service\AdminCatalog;
 use App\Service\Database;
 use App\Service\ModuleCategory;
 use App\Service\ModuleImages;
+use App\Service\ModuleSeo;
 use App\Service\ModuleSourceImporter;
 
 $check = static function (bool $condition, string $message): void { if (!$condition) { throw new RuntimeException($message); } };
@@ -64,6 +65,20 @@ $categoryHtml = '<script type="application/ld+json">{"@type":"Product","name":"C
 $categoryFields = ModuleSourceImporter::extract($categoryHtml);
 $check($categoryFields['_categories'] === ['Navigation & Search', 'Catalog Management', 'Magento 2 Extensions'], 'Product categories or breadcrumbs missing, or site navigation leaked');
 $check('navigation-search' === ModuleCategory::detect($categoryFields)['slug'], 'Specific product category lost to a broader breadcrumb');
+$seoHtml = <<<'HTML'
+<html><head><title>Magento 2 Faq Extension | Magento 2 Product Questions Module | Ask A Question | Knowledge Base | Questions And Answers | Magento Product Question</title><meta name="description" content="Empower your customers to ask questions and find answers with Magento 2 FAQ Extension. Enhance user experience and build a comprehensive knowledge base."><script type="application/ld+json">{"@type":"Product","name":"FAQ Extension for Magento 2","description":"A detailed product overview that is independent from the SEO metadata."}</script></head></html>
+HTML;
+$seo = ModuleSourceImporter::extract($seoHtml);
+$check('FAQ Extension for Magento 2' === $seo['name'], 'SEO changed the product name');
+$check('Magento 2 FAQ Extension | Product Questions' === $seo['seo_title'], 'Bloated vendor title was not reduced to useful search terms');
+$check('Empower your customers to ask questions and find answers with Magento 2 FAQ Extension. Enhance user experience and build a comprehensive knowledge base.' === $seo['seo_description'], 'Good source meta description was lost');
+$check(mb_strlen($seo['seo_title']) <= 65 && mb_strlen($seo['seo_description']) <= 160, 'SEO limits exceeded');
+$check(str_contains($seo['seo_source_title'], 'Knowledge Base'), 'Original source title was not preserved');
+$longSeo = ModuleSeo::generate(['name' => 'Layered Navigation for Magento 2', 'short_description' => str_repeat('Long product overview without a sentence break ', 20), 'features' => ['Filter products by multiple attributes']]);
+$check('Explore Layered Navigation for Magento 2. Filter products by multiple attributes.' === $longSeo['seo_description'], 'Long descriptions must use complete feature sentences, not clipped words');
+$sentenceSeo = ModuleSeo::generate(['name' => 'FAQ', 'seo_source_description' => 'Add product questions and answers to your Magento 2 store, and help shoppers find information. '.str_repeat('More product information ', 20)]);
+$check('Add product questions and answers to your Magento 2 store, and help shoppers find information.' === $sentenceSeo['seo_description'], 'Description was clipped in the middle of a sentence');
+$check(!str_contains(ModuleSeo::generate(['name' => 'Useful module', 'seo_source_title' => 'Unrelated Magento 2 Checkout | Other Vendor'])['seo_title'], 'Checkout'), 'Unrelated source title was reused');
 $images = new ModuleImages(sys_get_temp_dir().'/pubsetup-invalid-image-test');
 try {
     $images->store('<?php echo "unsafe";');
@@ -103,6 +118,8 @@ $id = $admin->saveModule($input, null);
 $admin->updateFromSource($id, ['name' => 'Updated source title', 'description' => 'New description', 'affiliate_url' => 'https://attacker.example', 'slug' => 'changed-slug']);
 $module = $admin->module($id);
 $check($module['affiliate_url'] === $input['affiliate_url'] && 'qa-module' === $module['slug'] && 'Updated source title' === $module['name'], 'Refresh replaced affiliate URL or slug');
+$check('' !== $module['seo_title'] && '' !== $module['seo_description'], 'Imported module SEO was not saved');
+$check(mb_strlen($module['seo_title']) <= 65 && mb_strlen($module['seo_description']) <= 160, 'Stored SEO exceeds limits');
 $check($module['features'] === ['One', 'Two'] && $module['tags'] === ['one', 'two'], 'Arrays lost their types');
 $admin->saveModule(array_diff_key($input, ['published' => true]), $id);
 $check(false === $admin->module($id)['published'], 'Module draft was not saved');

@@ -1,6 +1,6 @@
 import { JsonLd } from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog.server";
-import { breadcrumbs, pageMetadata } from "@/lib/seo";
+import { breadcrumbs, extensionMetadata } from "@/lib/seo";
 import { extensionSchema } from "@/lib/structured-data";
 import View from "@/views/extension-slug";
 import { notFound } from "next/navigation";
@@ -15,7 +15,7 @@ async function details({ params }: Props) {
 }
 export async function generateMetadata(props: Props) {
   const { item } = await details(props);
-  return pageMetadata({ title: `${item.name}`, description: item.shortDescription || item.description, path: `/extension/${item.slug}`, image: item.coverImage || item.gallery[0] });
+  return extensionMetadata(item);
 }
 export default async function Page(props: Props) {
   const { item, partner, category } = await details(props);

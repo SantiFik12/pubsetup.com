@@ -150,6 +150,20 @@ final readonly class AdminCatalog
             'magento_versions' => array_values(array_filter(array_map(trim(...), explode(',', $this->text($input, 'magento_versions', 500))))),
             'hyva_compatible' => isset($input['hyva_compatible']), 'published' => isset($input['published']),
         ];
+        $previous = $id ? ($this->module($id) ?? []) : [];
+        $generated = ModuleSeo::generate(array_replace($previous, $input, $payload));
+        foreach (['seo_title' => ModuleSeo::TITLE_LIMIT, 'seo_description' => ModuleSeo::DESCRIPTION_LIMIT] as $key => $limit) {
+            $value = $this->text($input, $key, $limit * 4);
+            if (mb_strlen($value) > $limit) {
+                throw new \InvalidArgumentException('Проверьте длину поля '.$key.'.');
+            }
+            $payload[$key] = '' !== $value ? $value : $generated[$key];
+        }
+        foreach (['seo_source_title' => 4000, 'seo_source_description' => 16000] as $key => $limit) {
+            if (array_key_exists($key, $input)) {
+                $payload[$key] = $this->text($input, $key, $limit);
+            }
+        }
         // json_populate_record preserves PostgreSQL array/JSON/enum types and restricts writable columns.
         $columns = array_keys($payload);
         $quoted = array_map(static fn (string $key): string => '"'.$key.'"', $columns);
@@ -248,11 +262,16 @@ final readonly class AdminCatalog
 
     public function updateFromSource(string $id, array $fields): void
     {
+        if ([] === $fields) {
+            throw new \InvalidArgumentException('Источник не вернул данные модуля.');
+        }
         $category = $this->sourceCategory($fields);
         if (null !== $category) {
             $fields['category_id'] = $category;
         }
-        $allowed = ['category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
+        $stored = $this->module($id) ?? [];
+        $fields = array_replace($fields, ModuleSeo::generate(array_replace($stored, $fields)));
+        $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
         $fields = array_intersect_key($fields, array_flip($allowed));
         if ([] === $fields) {
             throw new \InvalidArgumentException('Источник не вернул данные модуля.');

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { pageMetadata, metaDescription, serializeJsonLd, landingExtensions, siteUrl } from '../src/lib/seo.ts';
+import { extensionMetadata, pageMetadata, metaDescription, serializeJsonLd, landingExtensions, siteUrl } from '../src/lib/seo.ts';
 import { catalogSitemap } from '../src/lib/sitemap.ts';
 import { extensionSchema, serviceSchema } from '../src/lib/structured-data.ts';
 
@@ -57,4 +57,16 @@ test('landing filters match the page contents, including partner and missing cat
   assert.equal(landingExtensions(catalog, catalog.seoLandings[0]).length, 1);
   assert.equal(landingExtensions(catalog, catalog.seoLandings[1]).length, 0);
   assert.equal(landingExtensions(catalog, { filter: { partnerSlug: 'missing' } }).length, 0);
+});
+
+
+test('module SEO fields control search and social metadata independently of card content', () => {
+  const item = { ...extension, seoTitle: 'Magento 2 Navigation | Product Filters', seoDescription: 'Find products using configurable filters in Magento 2. Compare module features and installation options.' };
+  const metadata = extensionMetadata(item);
+  assert.equal(metadata.title, item.seoTitle);
+  assert.equal(metadata.description, item.seoDescription);
+  assert.equal(metadata.openGraph.title, item.seoTitle);
+  assert.equal(metadata.twitter.description, item.seoDescription);
+  assert.equal(item.name, 'Navigation');
+  assert.equal(extensionMetadata(extension).title, extension.name);
 });

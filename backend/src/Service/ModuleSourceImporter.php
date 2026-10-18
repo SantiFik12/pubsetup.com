@@ -130,6 +130,8 @@ final readonly class ModuleSourceImporter
                 $categories[] = $name;
             }
         }
+        $result['seo_source_title'] = $clean($xpath->query('//title')->item(0)?->textContent ?: $meta('og:title'), 1000);
+        $result['seo_source_description'] = $clean($meta('description') ?: $meta('og:description'), 4000);
         $result['_categories'] = array_values(array_unique([...$productCategories, ...array_reverse($categories)]));
         $result['_source_url'] = $url;
         $offer = $product['offers'] ?? [];
@@ -265,7 +267,7 @@ final readonly class ModuleSourceImporter
             $result['_image'] = $result['_images'][0];
         }
 
-        return $result;
+        return array_replace($result, ModuleSeo::generate($result));
     }
 
     public static function resolveUrl(string $base, string $reference): string

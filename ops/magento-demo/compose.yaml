@@ -1,0 +1,118 @@
+name: ${COMPOSE_PROJECT_NAME:-magento-demo}
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+x-php: &php
+  image: ${COMPOSE_PROJECT_NAME:-magento-demo}-php:local
+  restart: unless-stopped
+  user: www-data
+  working_dir: /var/www/html
+  environment:
+    COMPOSER_HOME: /var/www/.composer
+  volumes:
+    - ./app:/var/www/html
+    - composer_home:/var/www/.composer
+  networks: [frontend, backend]
+  logging: *logging
+services:
+  php:
+    <<: *php
+    build: ./php
+    depends_on:
+      mariadb: {condition: service_healthy}
+      valkey: {condition: service_healthy}
+      opensearch: {condition: service_healthy}
+  cli:
+    <<: *php
+    profiles: [tools]
+    restart: "no"
+    env_file: .env
+    command: ["php", "bin/magento", "--version"]
+    volumes:
+      - ./app:/var/www/html
+      - composer_home:/var/www/.composer
+      - ./scripts:/tools:ro
+  cron:
+    <<: *php
+    command: ["sh", "-c", "while true; do php bin/magento cron:run; sleep 60; done"]
+    depends_on: [php]
+  nginx:
+    image: nginx:1.30-alpine
+    restart: unless-stopped
+    volumes:
+      - ./app:/var/www/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [php]
+    networks: [backend]
+    logging: *logging
+  varnish:
+    image: varnish:8.0-alpine
+    restart: unless-stopped
+    command: ["varnishd", "-F", "-f", "/etc/varnish/default.vcl", "-s", "malloc,128M", "-a", ":80"]
+    ports: ["127.0.0.1:8081:80"]
+    volumes:
+      - ./varnish:/etc/varnish:ro
+    depends_on: [nginx]
+    networks: [frontend, backend]
+    logging: *logging
+  mariadb:
+    image: mariadb:11.4
+    restart: unless-stopped
+    command: ["--innodb-buffer-pool-size=512M", "--max-allowed-packet=256M", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      MARIADB_DATABASE: ${MYSQL_DATABASE:-magento}
+      MARIADB_USER: ${MYSQL_USER:-magento}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD:?Run scripts/init.sh}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run scripts/init.sh}
+    volumes: ["mariadb_data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [backend]
+    logging: *logging
+  valkey:
+    image: valkey/valkey:8.1-alpine
+    restart: unless-stopped
+    command: ["valkey-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+    volumes: ["valkey_data:/data"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [backend]
+    logging: *logging
+  opensearch:
+    image: opensearchproject/opensearch:3.1.0
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      bootstrap.memory_lock: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms1g -Xmx1g"
+      DISABLE_INSTALL_DEMO_CONFIG: "true"
+      DISABLE_SECURITY_PLUGIN: "true"
+    ulimits:
+      memlock: {soft: -1, hard: -1}
+      nofile: {soft: 65536, hard: 65536}
+    volumes: ["opensearch_data:/usr/share/opensearch/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+    networks: [backend]
+    logging: *logging
+networks:
+  frontend:
+  backend:
+    internal: true
+volumes:
+  mariadb_data:
+  valkey_data:
+  opensearch_data:
+  composer_home:

@@ -13,7 +13,7 @@ USER www-data
 CMD ["php-fpm", "-F"]
 
 FROM base AS production
-ENV APP_ENV=prod APP_DEBUG=0
+ENV APP_ENV=prod APP_DEBUG=0 APP_RUNTIME_OPTIONS='{"disable_dotenv":true}'
 RUN composer install --no-dev --no-interaction --prefer-dist --no-scripts --classmap-authoritative
 COPY docker/production.ini /usr/local/etc/php/conf.d/zz-production.ini
 COPY docker/entrypoint.sh /usr/local/bin/pubsetup-entrypoint

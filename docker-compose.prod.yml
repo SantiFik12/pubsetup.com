@@ -13,6 +13,7 @@ x-backend: &backend
   environment: &backend-env
     APP_ENV: prod
     APP_DEBUG: "0"
+    APP_RUNTIME_OPTIONS: '{"disable_dotenv":true}'
     APP_SECRET: ${APP_SECRET:?Set APP_SECRET}
     DATABASE_URL: postgresql://pubsetup_app:${APP_DB_PASSWORD:?Set APP_DB_PASSWORD}@postgres:5432/${POSTGRES_DB:-pubsetup}
     POSTMARK_SERVER_TOKEN: ${POSTMARK_SERVER_TOKEN:-}

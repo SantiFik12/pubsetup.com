@@ -2,6 +2,19 @@
 set -eu
 cd /var/www/html
 umask 0022
+# Allow Magento to generate missing proxies while installing or resuming setup,
+# even when a previous attempt already wrote production mode into env.php.
+export MAGE_MODE=default
+
+refresh_generated_autoload() {
+    # Composer/sample-data operations can leave classmap and DI cache entries
+    # pointing at generated classes which have already been removed.
+    # Only disposable generated code and caches are removed; DB/media stay intact.
+    mkdir -p generated/code generated/metadata var/cache var/page_cache var/di
+    find generated/code generated/metadata var/cache var/page_cache var/di \
+        -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+    composer dump-autoload --no-dev --optimize --no-scripts --no-plugins --no-interaction
+}
 if [ ! -f composer.json ]; then
     if [ -n "$(ls -A .)" ]; then
         echo 'The app directory is not empty; refusing to overwrite it.' >&2
@@ -12,10 +25,13 @@ if [ ! -f composer.json ]; then
         magento/project-community-edition /tmp/magento "$MAGENTO_VERSION"
     cp -a /tmp/magento/. .
 fi
+composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+refresh_generated_autoload
 if [ ! -d vendor/magento/module-catalog-sample-data ]; then
     php bin/magento sampledata:deploy --no-interaction
+    composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+    refresh_generated_autoload
 fi
-composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 if [ ! -f app/etc/env.php ]; then
     php bin/magento setup:install \
       --base-url="https://${DOMAIN}/" --base-url-secure="https://${DOMAIN}/" \

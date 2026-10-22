@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
-if [[ ! -f app/etc/env.php ]]; then
+if [[ ! -f app/app/etc/env.php ]]; then
     printf '%s\n' 'Install Magento first with bash scripts/install.sh.' >&2
     exit 1
 fi

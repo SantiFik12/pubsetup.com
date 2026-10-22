@@ -53,7 +53,7 @@ bash scripts/install.sh
 
 Скрипт собирает PHP, запускает MariaDB/Valkey/OpenSearch и ждёт их готовности, устанавливает Magento зафиксированной версии, добавляет sample data, создаёт администратора, настраивает HTTPS и кеши, компилирует код, публикует static content, строит индексы и генерирует штатный Magento VCL. Затем запускает PHP/nginx/Varnish/cron. Пакеты образов и Magento загружаются из сети; доступность приватного репозитория определяется вашими ключами Marketplace.
 
-Ключи Composer хранятся только в отдельном `composer_home` volume. Секреты Magento записываются в `app/etc/env.php`. Не использовать `docker compose down -v`: это удалит данные.
+Ключи Composer хранятся только в отдельном `composer_home` volume. Корень Magento внутри контейнера — `/var/www/html`, на хосте — `/home/deploy/magento-demo/app`. Поэтому файл конфигурации `app/etc/env.php` внутри контейнера находится на хосте по пути `/home/deploy/magento-demo/app/app/etc/env.php`. Не использовать `docker compose down -v`: это удалит данные.
 
 Индексация demo отключается настройкой Magento и заголовком Caddy. Установщик также включает модуль `Pubsetup_Demo`: исходящая почта и оформление заказов запрещены, каталог и корзина доступны. Модуль предназначен только для изолированного demo, не для рабочего магазина.
 
@@ -100,7 +100,17 @@ docker compose run --rm --no-deps cli php bin/magento security:tfa:google:set-se
 
 ## 6. Включить защищённое демо на существующей установке
 
-Сначала сделайте резервную копию БД, `app/etc`, кода и `.env`. Обновите `compose.yaml`, каталог `module/` и файлы из `scripts/` в `/home/deploy/magento-demo`. Не перезаписывайте `.env`, `app/` или рабочий `varnish/default.vcl` файлами из шаблона.
+Сначала сделайте резервную копию БД, `app/app/etc` на хосте, кода и `.env`. Для конфигурации Magento используйте контейнерного пользователя, у которого есть доступ к файлу `env.php`:
+
+```bash
+cd /home/deploy/magento-demo
+umask 077
+mkdir -p backups
+docker compose run --rm --no-deps -T cli tar -czf - app/etc > backups/magento-app-etc-before-demo.tar.gz
+tar -czf backups/demo-compose-env-before-demo.tar.gz .env compose.yaml
+```
+
+Обновите `compose.yaml`, каталог `module/` и файлы из `scripts/` в `/home/deploy/magento-demo`. Не перезаписывайте `.env`, `app/` или рабочий `varnish/default.vcl` файлами из шаблона.
 
 Новый `init.sh` генерирует `DEMO_VIEWER_PASSWORD`. В существующий `.env` добавьте отдельный пароль для публичного пользователя: минимум 12 символов, строчные/заглавные буквы и цифры. Это публичный пароль, он не должен совпадать с паролем полноценного администратора. Имя пользователя фиксировано: `demo_viewer`.
 
@@ -173,7 +183,7 @@ docker compose run --rm --no-deps cli php bin/magento cache:flush
 docker compose logs --tail=100 php nginx varnish opensearch
 ```
 
-После изменения PHP-кода или установки модуля нужна штатная процедура Magento: maintenance, setup:upgrade, di:compile, static-content:deploy, reindex/cache:flush, maintenance:disable, затем перезапуск `php` (OPcache validate_timestamps=0). Перед изменениями резервируйте базу, `app/pub/media`, `app/etc/env.php`, `.env` и Composer-файлы. Без команд pubsetup Compose его контейнеры не перезапускаются.
+После изменения PHP-кода или установки модуля нужна штатная процедура Magento: maintenance, setup:upgrade, di:compile, static-content:deploy, reindex/cache:flush, maintenance:disable, затем перезапуск `php` (OPcache validate_timestamps=0). Перед изменениями резервируйте базу и файлы на хосте: `app/pub/media`, `app/app/etc`, `.env`, `app/composer.json` и `app/composer.lock`. Без команд pubsetup Compose его контейнеры не перезапускаются.
 
 ## Статус проверки
 

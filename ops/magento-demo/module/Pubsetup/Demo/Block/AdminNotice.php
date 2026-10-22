@@ -18,4 +18,9 @@ class AdminNotice extends Template
     {
         return $this->viewer->isDemo() ? parent::_toHtml() : '';
     }
+
+    public function shouldLockForms(): bool
+    {
+        return str_starts_with(strtolower((string) $this->getRequest()->getActionName()), 'edit');
+    }
 }

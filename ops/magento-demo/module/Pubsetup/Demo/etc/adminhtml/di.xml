@@ -6,4 +6,7 @@
     <type name="Magento\TwoFactorAuth\Observer\ControllerActionPredispatch">
         <plugin name="pubsetup_demo_public_login" type="Pubsetup\Demo\Plugin\DemoTwoFactor" sortOrder="1"/>
     </type>
+    <type name="Magento\Config\Block\System\Config\Form\Field">
+        <plugin name="pubsetup_demo_config_fields" type="Pubsetup\Demo\Plugin\ConfigReadOnly" sortOrder="1"/>
+    </type>
 </config>

@@ -14,7 +14,7 @@ export function AdminDemo({ access }: { access?: AdminDemoAccess }) {
               <Eye aria-hidden="true" className="h-3 w-3" /> {access.pending ? "Admin demo · Coming soon" : access.preview ? "Admin demo · Preview" : "Admin demo"}
             </span>
             <h2 id="admin-demo-heading" className="mt-3 text-3xl font-bold tracking-tight text-foreground">Explore Magento 2 behind the scenes.</h2>
-            <p className="mt-3 text-muted-foreground">{access.pending ? "A read-only tour of the Magento dashboard, products, categories and sample orders is coming soon." : "Browse the dashboard, products, categories and sample orders in our live admin demo. Access is read-only, so you can explore without changing the store."}</p>
+            <p className="mt-3 text-muted-foreground">{access.pending ? "A read-only tour of the Magento dashboard, marketing, content, reports and store settings is coming soon." : "Browse products, customers, marketing, content, reports and store settings in our live admin demo. Access is read-only, so you can explore without changing the store."}</p>
             {!access.pending && <dl className="mt-5 grid gap-3 rounded-xl border border-border bg-surface p-4 text-sm sm:grid-cols-2">
               <div><dt className="text-muted-foreground">Username</dt><dd className="mt-1 select-all break-all font-mono text-foreground">demo_viewer</dd></div>
               <div><dt className="text-muted-foreground">Password</dt><dd className="mt-1 select-all break-all font-mono text-foreground">{access.preview ? "Not configured" : access.password}</dd></div>
@@ -34,7 +34,7 @@ export function AdminDemo({ access }: { access?: AdminDemoAccess }) {
               <span className="ml-3 text-xs text-muted-foreground">Magento Admin · Read-only demo</span>
             </div>
             <div aria-hidden="true" className="flex min-h-80 text-xs">
-              <div className="flex w-16 shrink-0 flex-col items-center gap-6 bg-[#373330] py-6 text-white/80 sm:w-24"><span className="text-2xl font-bold text-[#f26322]">M</span>{["Dashboard", "Sales", "Catalog"].map(label => <span key={label}>{label}</span>)}</div>
+              <div className="flex w-16 shrink-0 flex-col items-center gap-3 bg-[#373330] py-6 text-white/80 sm:w-24"><span className="text-2xl font-bold text-[#f26322]">M</span>{["Dashboard", "Sales", "Catalog", "Customers", "Marketing", "Content", "Reports", "Stores", "System"].map(label => <span key={label}>{label}</span>)}</div>
               <div className="min-w-0 flex-1 p-5 sm:p-6">
                 <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xl font-semibold text-foreground">Dashboard</span><span className="rounded-full bg-brand-soft px-2 py-1 text-primary">View only</span></div>
                 <div className="mt-5 grid grid-cols-2 gap-3">{[["Sample orders", "3"], ["Sample revenue", "$81.00"]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-card p-3"><div className="text-muted-foreground">{label}</div><div className="mt-2 text-xl font-semibold text-foreground">{value}</div></div>)}</div>

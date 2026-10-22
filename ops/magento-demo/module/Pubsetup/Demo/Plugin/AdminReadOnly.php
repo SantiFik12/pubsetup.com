@@ -25,9 +25,17 @@ final class AdminReadOnly
             return $proceed();
         }
         $action = $this->request->getFullActionName();
+        // Grids automatically save their current view. Acknowledge the request without
+        // executing Magento's controller or persisting settings shared by demo visitors.
+        if ($this->viewer->isPublicViewer()
+            && $this->policy->ignoresBookmarkSave($action, $this->request->getMethod(), $this->request->getParam('namespace'))) {
+            return $this->rawFactory->create()->setHttpResponseCode(200)
+                ->setHeader('Content-Type', 'application/json; charset=UTF-8', true)
+                ->setContents('{}');
+        }
         // A public username accidentally assigned another role must fail closed.
         if (($this->viewer->isPublicViewer() || $action === 'adminhtml_auth_logout')
-            && $this->policy->allows($action, $this->request->getMethod(), $this->request->getParam('namespace'))) {
+            && $this->policy->allows($action, $this->request->getMethod(), $this->request->getParam('namespace'), $this->request->getParam('section'))) {
             return $proceed();
         }
         return $this->rawFactory->create()->setHttpResponseCode(403)

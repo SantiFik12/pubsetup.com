@@ -42,13 +42,16 @@ $role->load(AdminPolicy::ROLE, 'role_name');
 if (!$role->getId()) {
     $role->setRoleName(AdminPolicy::ROLE)->setRoleType('G')->setParentId(0)->setTreeLevel(1)->save();
 }
-$resources = [
-    'Magento_Backend::dashboard',
-    'Magento_Catalog::catalog', 'Magento_Catalog::catalog_inventory',
-    'Magento_Catalog::products', 'Magento_Catalog::categories',
-    'Magento_Sales::sales', 'Magento_Sales::sales_operation',
-    'Magento_Sales::sales_order', 'Magento_Sales::actions_view',
-];
+// Optional Magento modules differ by installation. Grant only registered, explicit resources.
+$registered = [];
+$collectResources = function (array $nodes) use (&$collectResources, &$registered): void {
+    foreach ($nodes as $node) {
+        $registered[] = $node['id'];
+        $collectResources($node['children'] ?? []);
+    }
+};
+$collectResources($om->get(\Magento\Framework\Acl\AclResource\ProviderInterface::class)->getAclResources());
+$resources = array_values(array_intersect(AdminPolicy::aclResources(), $registered));
 $om->get(RulesFactory::class)->create()->setRoleId($role->getId())->setResources($resources)->saveRel();
 $rules = $om->get(RulesFactory::class)->create()->getCollection()->addFieldToFilter('role_id', $role->getId());
 $allowed = [];
@@ -63,6 +66,7 @@ sort($expected);
 if ($allowed !== $expected) {
     throw new RuntimeException('Demo role ACL verification failed. Keep the admin demo unpublished.');
 }
+$om->get(\Magento\User\Model\ResourceModel\User::class)->updateRoleUsersAcl($role);
 
 // Set the password only on creation: rerunning deployment must not add duplicate password history.
 if (!$user->getId()) {

@@ -19,19 +19,24 @@ export function AdminDemo({ enabled = true }: { enabled?: boolean }) {
             </div>
             <p className="mt-4 flex items-start gap-2 text-sm text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" />Sample data only. Ordering and outgoing emails are disabled.</p>
           </div>
-          <a href={demoUrl} target="_blank" rel="noreferrer" aria-label="Open the read-only Magento admin demo" className="ring-focus group block overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition hover:shadow-glow">
+          <a href={demoUrl} target="_blank" rel="noreferrer" aria-label="Open the read-only Magento admin demo" className="ring-focus group block self-center overflow-hidden rounded-2xl border border-border bg-surface shadow-card transition hover:shadow-glow">
             <div className="flex items-center gap-1.5 border-b border-border bg-card px-4 py-2.5">
               <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" /><span className="h-2.5 w-2.5 rounded-full bg-warning/80" /><span className="h-2.5 w-2.5 rounded-full bg-success/80" />
               <span className="ml-3 text-xs text-muted-foreground">Magento Admin · Read-only demo</span>
             </div>
-            <div aria-hidden="true" className="flex min-h-80 text-xs">
-              <div className="flex w-16 shrink-0 flex-col items-center gap-3 bg-[#373330] py-6 text-white/80 sm:w-24"><span className="text-2xl font-bold text-[#f26322]">M</span>{["Dashboard", "Sales", "Catalog", "Customers", "Marketing", "Content", "Reports", "Stores", "System"].map(label => <span key={label}>{label}</span>)}</div>
-              <div className="min-w-0 flex-1 p-5 sm:p-6">
-                <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xl font-semibold text-foreground">Dashboard</span><span className="rounded-full bg-brand-soft px-2 py-1 text-primary">View only</span></div>
-                <div className="mt-5 grid grid-cols-2 gap-3">{[["Sample orders", "3"], ["Sample revenue", "$81.00"]].map(([label, value]) => <div key={label} className="rounded-lg border border-border bg-card p-3"><div className="text-muted-foreground">{label}</div><div className="mt-2 text-xl font-semibold text-foreground">{value}</div></div>)}</div>
-                <div className="mt-5 rounded-lg border border-border bg-card p-4"><div className="mb-3 font-semibold text-foreground">Sample orders</div>{[["Alex Demo", "$34.00"], ["Sam Sample", "$29.00"], ["Taylor Example", "$18.00"]].map(([name, amount]) => <div key={name} className="flex justify-between gap-2 border-t border-border py-3 text-muted-foreground"><span>{name}</span><span>{amount}</span></div>)}</div>
-                <span className="mt-4 inline-flex items-center gap-1 font-semibold text-primary">Open admin demo <ArrowUpRight className="h-3 w-3" /></span>
-              </div>
+            <div className="relative aspect-[1440/782] w-full overflow-hidden bg-card">
+              <img
+                src="/assets/magento-admin-demo-preview.webp"
+                alt="Magento admin dashboard with Customers, Marketing, Content, Reports, Stores and System sections"
+                width={1440}
+                height={782}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.02]"
+              />
+              <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-primary opacity-0 shadow-soft transition group-hover:opacity-100 group-focus-visible:opacity-100">
+                Open admin demo <ArrowUpRight aria-hidden="true" className="h-3 w-3" />
+              </span>
             </div>
           </a>
         </div>

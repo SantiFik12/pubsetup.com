@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace Magento\Framework\App {
     interface ActionInterface { public function execute(); }
 }
+namespace Magento\Framework\App\Action {
+    interface HttpGetActionInterface extends \Magento\Framework\App\ActionInterface {}
+}
+namespace Magento\Backend\Block {
+    class Template { protected function _toHtml() {} }
+}
 namespace Magento\Framework\App\Request {
     class Http {
         public function __construct(public string $action = '', public string $method = 'GET', public mixed $namespace = null) {}
@@ -78,6 +84,12 @@ namespace {
         }
         check(false, $label);
     }
+
+    // Magento generates subclasses for intercepted controllers and blocks.
+    class TestAdminInterceptor extends \Pubsetup\Demo\Controller\Admin\Index {}
+    class TestNoticeInterceptor extends \Pubsetup\Demo\Block\AdminNotice {}
+    check(is_subclass_of(TestAdminInterceptor::class, \Pubsetup\Demo\Controller\Admin\Index::class), 'Controller supports generated interception');
+    check(is_subclass_of(TestNoticeInterceptor::class, \Pubsetup\Demo\Block\AdminNotice::class), 'Block supports generated interception');
 
     $policy = new \Pubsetup\Demo\Model\AdminPolicy();
     $session = new \Magento\Backend\Model\Auth\Session(new TestUser($policy::USERNAME, $policy::ROLE));

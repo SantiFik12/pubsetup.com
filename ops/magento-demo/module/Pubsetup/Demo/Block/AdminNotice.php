@@ -7,7 +7,7 @@ use Magento\Backend\Block\Template;
 use Magento\Backend\Block\Template\Context;
 use Pubsetup\Demo\Model\ViewerSession;
 
-final class AdminNotice extends Template
+class AdminNotice extends Template
 {
     public function __construct(Context $context, private ViewerSession $viewer, array $data = [])
     {

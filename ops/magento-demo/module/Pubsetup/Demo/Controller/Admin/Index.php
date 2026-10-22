@@ -8,7 +8,7 @@ use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 
 /** A stable public link; never hard-code the installation's backend front name. */
-final class Index implements HttpGetActionInterface
+class Index implements HttpGetActionInterface
 {
     public function __construct(private UrlInterface $backendUrl, private RedirectFactory $redirects)
     {

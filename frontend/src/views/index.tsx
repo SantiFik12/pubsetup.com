@@ -4,7 +4,7 @@ import { Link } from "@/components/Link";
 import { useExtensions, useService } from "@/data/catalog";
 import { ArrowRight,BadgeCheck,Check,Gauge,Puzzle,Rocket,ShieldCheck,Sparkles,Star,Wrench } from "lucide-react";
 import { featuredExtensions } from "@/lib/featured";
-import { AdminDemo, type AdminDemoAccess } from "@/components/AdminDemo";
+import { AdminDemo } from "@/components/AdminDemo";
 const magentoDemoPreview = "/assets/magento-demo-preview.png";
 
 
@@ -27,7 +27,7 @@ const stack = [
   "RabbitMQ — reliable async message queue",
 ];
 
-export default function HomePage({ demoAdmin }: { demoAdmin?: AdminDemoAccess } = {}) {
+export default function HomePage({ showAdminDemo = true }: { showAdminDemo?: boolean } = {}) {
   const extensions = useExtensions();
   const setup = useService("magento-2-setup-from-scratch");
   const featured = featuredExtensions(extensions);
@@ -132,7 +132,7 @@ export default function HomePage({ demoAdmin }: { demoAdmin?: AdminDemoAccess } 
         </div>
       </section>
 
-      <AdminDemo access={demoAdmin} />
+      <AdminDemo enabled={showAdminDemo} />
 
       {/* FEATURED EXTENSIONS */}
       {featured.length > 0 && (

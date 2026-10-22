@@ -24,6 +24,16 @@ services:
       APP_DEBUG: "1"
       APP_SECRET: local-development-only
       DATABASE_URL: postgresql://pubsetup_app:pubsetup@postgres:5432/pubsetup
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
+      SMTP_HOST: ${SMTP_HOST:-smtppro.zoho.eu}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-ssl}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-contact@pubsetup.com}
+      MAIL_NOTIFICATION_TO: ${MAIL_NOTIFICATION_TO:-contact@pubsetup.com}
+      POSTMARK_SERVER_TOKEN: ${POSTMARK_SERVER_TOKEN:-}
+      POSTMARK_MESSAGE_STREAM: ${POSTMARK_MESSAGE_STREAM:-outbound}
     volumes:
       - ./backend/src:/app/src
       - ./backend/config:/app/config
@@ -58,7 +68,16 @@ services:
       APP_ENV: dev
       APP_SECRET: local-development-only
       DATABASE_URL: postgresql://pubsetup_app:pubsetup@postgres:5432/pubsetup
+      MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
+      SMTP_HOST: ${SMTP_HOST:-smtppro.zoho.eu}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-ssl}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-contact@pubsetup.com}
+      MAIL_NOTIFICATION_TO: ${MAIL_NOTIFICATION_TO:-contact@pubsetup.com}
       POSTMARK_SERVER_TOKEN: ${POSTMARK_SERVER_TOKEN:-}
+      POSTMARK_MESSAGE_STREAM: ${POSTMARK_MESSAGE_STREAM:-outbound}
     command: ["php", "bin/console", "app:email-worker"]
     depends_on:
       postgres:

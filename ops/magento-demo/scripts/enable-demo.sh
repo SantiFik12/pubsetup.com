@@ -19,6 +19,7 @@ cp -R /demo-module/. app/code/Pubsetup/Demo/
 php bin/magento module:enable Pubsetup_Demo
 php bin/magento setup:upgrade
 php bin/magento config:set system/smtp/disable 1
+php bin/magento config:set admin/usage/enabled 0
 php /tools/configure-demo.php
 php bin/magento setup:di:compile
 php bin/magento setup:static-content:deploy -f en_US --jobs=1

@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand(name: 'app:email-worker', description: 'Deliver queued order emails through Postmark')]
+#[AsCommand(name: 'app:email-worker', description: 'Deliver queued order emails through SMTP or Postmark')]
 final class EmailWorkerCommand extends Command
 {
     public function __construct(private readonly EmailWorker $worker)
@@ -26,6 +26,11 @@ final class EmailWorkerCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (null !== $error = $this->worker->configurationError()) {
+            $output->writeln('<error>'.$error.'</error>');
+
+            return Command::FAILURE;
+        }
         while (true) {
             $processed = $this->worker->processOne();
             if (!$processed) {

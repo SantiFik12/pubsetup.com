@@ -16,7 +16,7 @@
 | Роль миграций/backup | `POSTGRES_USER`, владелец БД |
 | PHP | Symfony 7.4, PHP 8.4 FPM |
 | Frontend | Next.js 16 standalone, Node.js 24 |
-| Дополнительный сервис | `worker`, очередь Postmark |
+| Дополнительный сервис | `worker`, очередь SMTP / Postmark |
 
 Публичные порты — 80/443 на Caddy. Только gateway опубликован на localhost; PostgreSQL, frontend и backend не публикуют порты. Не добавлять `ports` для них. Caddy завершает TLS и передаёт gateway корректный `X-Forwarded-For`, который используется для ограничения заявок.
 
@@ -36,7 +36,7 @@ chmod 600 .env.production
 git check-ignore .env.production
 ```
 
-Установить `SITE_URL`, `HTTP_PORT=8080`, `RELEASE_TAG=git-<commit>`, Postmark token/stream и подтверждённый sender `MAIL_FROM`. Для предпросмотра поставить нужный временный URL и закрыть весь hostname Basic Auth в Caddy, используя `ops/Caddyfile.example`. После переключения установить `SITE_URL=https://pubsetup.com`. Сгенерированные `POSTGRES_PASSWORD`, `APP_DB_PASSWORD` и `APP_SECRET` независимы, состоят из hex-символов и пригодны для URL подключения. Если задавать пароль вручную, percent-encode зарезервированные символы для DATABASE_URL.
+Установить `SITE_URL`, `HTTP_PORT=8080`, `RELEASE_TAG=git-<commit>`, почтовый транспорт (`MAIL_TRANSPORT=smtp` для Zoho), SMTP-параметры и sender `MAIL_FROM`. Для предпросмотра поставить нужный временный URL и закрыть весь hostname Basic Auth в Caddy, используя `ops/Caddyfile.example`. После переключения установить `SITE_URL=https://pubsetup.com`. Сгенерированные `POSTGRES_PASSWORD`, `APP_DB_PASSWORD` и `APP_SECRET` независимы, состоят из hex-символов и пригодны для URL подключения. Если задавать пароль вручную, percent-encode зарезервированные символы для DATABASE_URL.
 
 ```bash
 bash scripts/prod.sh config --quiet
@@ -50,7 +50,7 @@ Deploy сначала собирает frontend/backend, запускает Post
 
 Если первый запуск остановился с `Unable to read the "/app/.env" environment file`, обновить код с этим исправлением и повторить `bash scripts/deploy.sh`. Уже созданные volumes и PostgreSQL сохраняются; удалять их не нужно.
 
-Первый модуль CCPA добавляется миграцией автоматически. Заполнить остальной контент по `docs/content.md` и проверить цены перед открытием сайта. Перенос Supabase по `docs/migration.md` необязателен. После наполнения и включения Postmark:
+Первый модуль CCPA добавляется миграцией автоматически. Заполнить остальной контент по `docs/content.md` и проверить цены перед открытием сайта. Перенос Supabase по `docs/migration.md` необязателен. После наполнения и настройки почтового транспорта:
 
 ```bash
 python3 scripts/smoke.py http://127.0.0.1:8080 --require-content
@@ -58,7 +58,7 @@ bash scripts/prod.sh exec backend php bin/console app:email-worker --once
 bash scripts/prod.sh logs --tail=50 worker
 ```
 
-Проверить реальную тестовую заявку и доставку писем на контролируемый адрес. Отправка Postmark требует действующего токена и подтверждённого домена/sender; локальные автоматические тесты используют mock и не подтверждают доставляемость настоящей почты.
+Проверить реальную тестовую заявку и доставку писем на контролируемый адрес. SMTP требует действующих учётных данных и разрешённого From-адреса. При выборе Postmark нужен токен и подтверждённый sender. Локальные проверки используют подставной транспорт и не подтверждают настоящую доставку.
 
 ## Caddy и HTTPS
 
@@ -85,10 +85,34 @@ Backup сохраняет БД в `backups/*.dump` с правами, огран
 
 ## Перед публичным запуском
 
-Проверить реальные данные и изображения, metadata/canonical для основных страниц, sitemap и robots, HTTP 404, мобильное меню/фильтры/сравнение/галерею, заявку и доставку Postmark, подавление адресов и отписку. Запустить frontend lint/build, `composer qa` в backend и smoke с `--require-content`. Серверные SEO-страницы уже допускают индексацию; предпросмотр защищать Basic Auth.
+Проверить реальные данные и изображения, metadata/canonical для основных страниц, sitemap и robots, HTTP 404, мобильное меню/фильтры/сравнение/галерею, заявку и доставку писем, подавление адресов и отписку. Запустить frontend lint/build, `composer qa` в backend и smoke с `--require-content`. Серверные SEO-страницы уже допускают индексацию; предпросмотр защищать Basic Auth.
 
 В репозитории не выполнялся live-деплой и не менялся DNS домена. Настройка Hetzner, Caddy и проверка внешнего HTTPS выполняются отдельно на целевом сервере.
 
 ## Админ-панель
 
 После deploy миграция 005 добавляет защищённую панель `/admin_panel`. Создать пользователя: `bash scripts/prod.sh exec backend php bin/console admin:user:create admin@example.com`; пароль вводится интерактивно. Панель описана в `docs/admin-panel.md`. Новый named volume `module_uploads` хранит фотографии из панели; резервировать его вместе с БД. Сессия администратора завершается при замене backend-контейнера.
+
+
+## SMTP Zoho для заказов
+
+После обновления кода в `.env.production` установить (значение пароля заменить на настоящее):
+
+```dotenv
+MAIL_TRANSPORT=smtp
+SMTP_HOST=smtppro.zoho.eu
+SMTP_PORT=465
+SMTP_ENCRYPTION=ssl
+SMTP_USERNAME=kontakt@artwelve.com
+SMTP_PASSWORD='ZOHO_APP_PASSWORD'
+MAIL_FROM=contact@pubsetup.com
+MAIL_NOTIFICATION_TO=contact@pubsetup.com
+```
+
+В этой конфигурации `contact@pubsetup.com` — разрешённый алиас ящика `kontakt@artwelve.com`. Пароль приложения создаётся для основного ящика. Значение хранится только на сервере; спецсимволы не нужно URL-кодировать. Используйте одинарные кавычки в env-файле, чтобы Compose не подставлял значения вместо `$` в пароле. SMTP-параметры нужно брать из настроек конкретного аккаунта Zoho; текущие EU-настройки показаны владельцем. Для STARTTLS используются `SMTP_ENCRYPTION=tls` и порт 587. Проверка сертификата и обязательный TLS включены.
+
+После первого обновления SMTP-кода выполнить `bash scripts/deploy.sh`: необходимо пересобрать backend с Symfony Mailer. Очередь `email_outbox` сохраняется; worker отправляет доступные неотправленные задания автоматически. Новую заявку создавать для повторной отправки не требуется. Если меняются только SMTP-параметры после сборки, достаточно `bash scripts/prod.sh up -d --no-deps --force-recreate backend worker`.
+
+Если настройки отсутствуют, worker завершится с явным сообщением в логе, не расходуя попытки заданий. Статусы и безопасные сообщения об ошибках доступны в `email_outbox` и `email_send_log`; SMTP-пароли и AUTH-транскрипты не записываются. Статус `sent` означает принятие письма транспортом, а не гарантированное появление во входящих. Проверить логи: `bash scripts/prod.sh logs --tail=80 worker`. Если задание уже исчерпало 8 попыток, автоматическая отправка не возобновится без отдельного сброса попыток этого задания.
+
+Postmark остаётся доступен при `MAIL_TRANSPORT=postmark`, с `POSTMARK_SERVER_TOKEN` и `POSTMARK_MESSAGE_STREAM`. SMTP-пароль в этом режиме не нужен. Локальная проверка отправки без сетевых соединений: `php backend/tests/email.php`.

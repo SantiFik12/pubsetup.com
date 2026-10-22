@@ -1,6 +1,8 @@
 framework:
     secret: '%env(APP_SECRET)%'
     handle_all_throwables: true
+    mailer:
+        enabled: false
     http_method_override: false
     php_errors:
         log: true

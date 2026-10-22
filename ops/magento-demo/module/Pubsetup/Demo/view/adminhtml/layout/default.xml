@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
+        <referenceBlock name="tracking" remove="true"/>
+        <referenceBlock name="tracking_notification" remove="true"/>
+        <referenceBlock name="admin_usage_notification" remove="true"/>
         <referenceContainer name="before.body.end">
             <block class="Pubsetup\Demo\Block\AdminNotice" name="pubsetup.demo.notice" template="Pubsetup_Demo::notice.phtml"/>
         </referenceContainer>

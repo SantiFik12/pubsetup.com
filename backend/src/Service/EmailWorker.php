@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-
 final readonly class EmailWorker
 {
-    public function __construct(private Database $db, private HttpClientInterface $http,
-        private string $postmarkToken, private string $messageStream,
-        private string $mailFrom, private string $notificationTo)
+    public function __construct(private Database $db, private OrderMailer $mailer)
     {
     }
 
     public function processOne(): bool
     {
-        if ('' === $this->postmarkToken) {
-            return false;
+        if (null !== $error = $this->configurationError()) {
+            throw new \LogicException($error);
         }
         $pdo = $this->db->connection();
         $pdo->beginTransaction();
@@ -34,22 +30,12 @@ final readonly class EmailWorker
             $error = null;
             try {
                 if (!$suppressed) {
-                    $subject = ('order-notification' === $job['template_name'] ? 'New service order ' : 'Your service order ').$order['order_code'];
-                    $text = "Order: {$order['order_code']}\nName: {$order['customer_name']}\nService: {$order['service_name']}\nExtension: ".($order['extension_name'] ?? '—')."\nTotal: $".$order['amount']."\nWebsite: ".($order['website'] ?? '—')."\nNotes: ".($order['notes'] ?? '—')."\n\nWe will contact you shortly. No payment is required at this step.\ncontact@pubsetup.com";
-                    $result = $this->http->request('POST', 'https://api.postmarkapp.com/email', ['timeout' => 20,
-                        'headers' => ['X-Postmark-Server-Token' => $this->postmarkToken, 'Accept' => 'application/json'],
-                        'json' => ['From' => 'pubsetup.com <'.$this->mailFrom.'>', 'To' => $job['recipient_email'], 'ReplyTo' => $this->notificationTo,
-                            'Subject' => $subject, 'TextBody' => $text, 'HtmlBody' => '<pre>'.htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'</pre>',
-                            'MessageStream' => $this->messageStream, 'Headers' => [['Name' => 'Message-ID', 'Value' => '<'.$job['id'].'@pubsetup.com>']]],
-                    ])->toArray();
-                    if (($result['ErrorCode'] ?? 0) !== 0) {
-                        throw new \RuntimeException('Postmark rejected message');
-                    }
+                    $this->mailer->send($order, $job);
                     $status = 'sent';
                 }
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
                 $status = 'failed';
-                $error = 'Postmark delivery failed; automatic retry scheduled';
+                $error = $this->mailer->failureMessage($e);
             }
             $this->db->execute('INSERT INTO email_send_log(message_id,template_name,recipient_email,status,error_message) VALUES (:id,:template,:email,:status,:error)',
                 ['id' => $job['id'], 'template' => $job['template_name'], 'email' => $job['recipient_email'], 'status' => $status, 'error' => $error]);
@@ -64,5 +50,10 @@ final readonly class EmailWorker
             $pdo->rollBack();
             throw $e;
         }
+    }
+
+    public function configurationError(): ?string
+    {
+        return $this->mailer->configurationError();
     }
 }

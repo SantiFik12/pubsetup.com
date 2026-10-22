@@ -43,7 +43,7 @@ Use [PRODUCTION_HETZNER.md](PRODUCTION_HETZNER.md), adapted to this project from
 
 ```bash
 bash scripts/init-production.sh
-# Set SITE_URL, release tag, HTTP_PORT and Postmark settings in .env.production.
+# Set SITE_URL, release tag, HTTP_PORT and SMTP or Postmark settings in .env.production.
 bash scripts/deploy.sh
 python3 scripts/smoke.py http://127.0.0.1:8080 --require-content
 ```

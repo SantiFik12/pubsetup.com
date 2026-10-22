@@ -81,6 +81,10 @@ if ($verifiedUser->getRole()->getRoleName() !== AdminPolicy::ROLE
     || !$om->get(\Magento\Framework\Encryption\EncryptorInterface::class)->validateHash($password, $verifiedUser->getPassword())) {
     throw new RuntimeException('Demo account role/password verification failed. Check DEMO_VIEWER_PASSWORD and the dedicated account.');
 }
+// This credential is intentionally public. Publish only after the exact viewer role
+// and password hash have been checked; never read the owner's admin credentials here.
+$om->get(\Magento\Framework\App\Config\Storage\WriterInterface::class)
+    ->save(AdminPolicy::PUBLIC_PASSWORD_PATH, $password);
 
 $store = $om->get(StoreManagerInterface::class)->getDefaultStoreView();
 if (!$store) {

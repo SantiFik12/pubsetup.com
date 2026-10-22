@@ -8,6 +8,7 @@ final class AdminPolicy
 {
     public const USERNAME = 'demo_viewer';
     public const ROLE = 'Pubsetup Demo Viewer';
+    public const PUBLIC_PASSWORD_PATH = 'pubsetup_demo/access/public_password';
     private const GRID_NAMESPACES = [
         'product_listing', 'sales_order_grid',
         'customer_listing', 'customer_group_listing', 'customer_online_grid',

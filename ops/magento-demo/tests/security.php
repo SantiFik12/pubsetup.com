@@ -9,7 +9,14 @@ namespace Magento\Framework\App\Action {
     interface HttpGetActionInterface extends \Magento\Framework\App\ActionInterface {}
 }
 namespace Magento\Backend\Block {
-    class Template { protected function _toHtml() {} }
+    class Template {
+        public function __construct($context, array $data = []) {}
+        protected function _toHtml() {}
+    }
+}
+namespace Magento\Backend\Block\Template { class Context {} }
+namespace Magento\Framework\App\Config {
+    interface ScopeConfigInterface { public function getValue($path); }
 }
 namespace Magento\Framework\App\Request {
     class Http {
@@ -69,13 +76,17 @@ namespace Magento\Authorization\Model {
 }
 namespace Magento\User\Model {
     class UserFactory {
-        public function create(): \TestUser { return new \TestUser('demo_viewer', 'Pubsetup Demo Viewer'); }
+        public string $username = 'demo_viewer';
+        public string $role = 'Pubsetup Demo Viewer';
+        public int $id = 1;
+        public function create(): \TestUser { return new \TestUser($this->username, $this->role, $this->id); }
     }
 }
 namespace {
     function __(string $message): string { return $message; }
     final class TestUser {
-        public function __construct(public string $username, public string $role) {}
+        public function __construct(public string $username, public string $role, public int $id = 1) {}
+        public function getId(): int { return $this->id; }
         public function getUserName(): string { return $this->username; }
         public function getRole(): object { return new class($this->role) {
             public function __construct(private string $role) {}
@@ -106,10 +117,24 @@ namespace {
     // Magento generates subclasses for intercepted controllers and blocks.
     class TestAdminInterceptor extends \Pubsetup\Demo\Controller\Admin\Index {}
     class TestNoticeInterceptor extends \Pubsetup\Demo\Block\AdminNotice {}
+    class TestLoginCredentialsInterceptor extends \Pubsetup\Demo\Block\LoginCredentials {}
     check(is_subclass_of(TestAdminInterceptor::class, \Pubsetup\Demo\Controller\Admin\Index::class), 'Controller supports generated interception');
     check(is_subclass_of(TestNoticeInterceptor::class, \Pubsetup\Demo\Block\AdminNotice::class), 'Block supports generated interception');
+    check(is_subclass_of(TestLoginCredentialsInterceptor::class, \Pubsetup\Demo\Block\LoginCredentials::class), 'Login block supports generated interception');
 
     $policy = new \Pubsetup\Demo\Model\AdminPolicy();
+    $loginUsers = new \Magento\User\Model\UserFactory();
+    $loginConfig = new class implements \Magento\Framework\App\Config\ScopeConfigInterface {
+        public function getValue($path) { return $path === \Pubsetup\Demo\Model\AdminPolicy::PUBLIC_PASSWORD_PATH ? 'public-demo-password' : null; }
+    };
+    $login = new \Pubsetup\Demo\Block\LoginCredentials(new \Magento\Backend\Block\Template\Context(), $loginConfig, $loginUsers, $policy);
+    check($login->getDemoUsername() === 'demo_viewer' && $login->getDemoPassword() === 'public-demo-password', 'Login page can show the dedicated public viewer credential');
+    $loginUsers->role = 'Administrators';
+    check($login->getDemoPassword() === '', 'A privileged role never receives a published credential');
+    $loginUsers->role = $policy::ROLE; $loginUsers->username = 'owner';
+    check($login->getDemoPassword() === '', 'Another username never receives a published credential');
+    $loginUsers->username = $policy::USERNAME; $loginUsers->id = 0;
+    check($login->getDemoPassword() === '', 'Missing viewer account does not show a credential');
     $session = new \Magento\Backend\Model\Auth\Session(new TestUser($policy::USERNAME, $policy::ROLE));
     $viewer = new \Pubsetup\Demo\Model\ViewerSession($session, $policy);
     $request = new \Magento\Framework\App\Request\Http();

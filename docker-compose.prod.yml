@@ -20,6 +20,12 @@ x-backend: &backend
     POSTMARK_MESSAGE_STREAM: ${POSTMARK_MESSAGE_STREAM:-outbound}
     MAIL_FROM: ${MAIL_FROM:-contact@pubsetup.com}
     MAIL_NOTIFICATION_TO: ${MAIL_NOTIFICATION_TO:-contact@pubsetup.com}
+    MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
+    SMTP_HOST: ${SMTP_HOST:-smtppro.zoho.eu}
+    SMTP_PORT: ${SMTP_PORT:-465}
+    SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-ssl}
+    SMTP_USERNAME: ${SMTP_USERNAME:-}
+    SMTP_PASSWORD: ${SMTP_PASSWORD:-}
   depends_on:
     postgres:
       condition: service_healthy
@@ -74,7 +80,6 @@ services:
       SITE_URL: ${SITE_URL:?Set SITE_URL}
       API_INTERNAL_URL: http://gateway:8082
       DEMO_ADMIN_ENABLED: ${DEMO_ADMIN_ENABLED:-1}
-      DEMO_ADMIN_PASSWORD: ${DEMO_ADMIN_PASSWORD:-}
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s

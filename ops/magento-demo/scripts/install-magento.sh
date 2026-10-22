@@ -60,6 +60,7 @@ php bin/magento config:set web/secure/offloader_header X-Forwarded-Proto
 php bin/magento config:set web/cookie/cookie_domain "$DOMAIN"
 php bin/magento config:set design/search_engine_robots/default_robots NOINDEX,NOFOLLOW
 php bin/magento config:set system/smtp/disable 1
+php bin/magento config:set admin/usage/enabled 0
 php bin/magento config:set system/full_page_cache/caching_application 2
 php bin/magento config:set system/full_page_cache/varnish/backend_host nginx
 php bin/magento config:set system/full_page_cache/varnish/backend_port 80

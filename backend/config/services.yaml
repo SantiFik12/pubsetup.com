@@ -10,8 +10,25 @@ services:
     App\Service\OrderService:
         arguments:
             $notificationTo: '%env(MAIL_NOTIFICATION_TO)%'
-    App\Service\EmailWorker:
+    App\Service\SmtpTransportFactory:
         arguments:
+            $smtpHost: '%env(SMTP_HOST)%'
+            $smtpPort: '%env(int:SMTP_PORT)%'
+            $smtpUsername: '%env(SMTP_USERNAME)%'
+            $smtpPassword: '%env(SMTP_PASSWORD)%'
+            $smtpEncryption: '%env(SMTP_ENCRYPTION)%'
+    app.smtp_transport:
+        class: Symfony\Component\Mailer\Transport\TransportInterface
+        factory: ['@App\Service\SmtpTransportFactory', 'create']
+    app.smtp_mailer:
+        class: Symfony\Component\Mailer\Mailer
+        autowire: false
+        arguments:
+            $transport: '@app.smtp_transport'
+    App\Service\OrderMailer:
+        arguments:
+            $smtpMailer: '@app.smtp_mailer'
+            $mailTransport: '%env(MAIL_TRANSPORT)%'
             $postmarkToken: '%env(POSTMARK_SERVER_TOKEN)%'
             $messageStream: '%env(POSTMARK_MESSAGE_STREAM)%'
             $mailFrom: '%env(MAIL_FROM)%'

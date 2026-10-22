@@ -64,6 +64,11 @@ php bin/magento config:set system/full_page_cache/caching_application 2
 php bin/magento config:set system/full_page_cache/varnish/backend_host nginx
 php bin/magento config:set system/full_page_cache/varnish/backend_port 80
 php bin/magento maintenance:enable
+mkdir -p app/code/Pubsetup/Demo
+cp -R /demo-module/. app/code/Pubsetup/Demo/
+php bin/magento module:enable Pubsetup_Demo
+php bin/magento setup:upgrade
+php /tools/configure-demo.php
 php bin/magento deploy:mode:set production --skip-compilation
 php bin/magento setup:di:compile
 php bin/magento setup:static-content:deploy -f en_US --jobs=1

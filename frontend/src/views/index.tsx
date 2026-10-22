@@ -4,6 +4,7 @@ import { Link } from "@/components/Link";
 import { useExtensions, useService } from "@/data/catalog";
 import { ArrowRight,BadgeCheck,Check,Gauge,Puzzle,Rocket,ShieldCheck,Sparkles,Star,Wrench } from "lucide-react";
 import { featuredExtensions } from "@/lib/featured";
+import { AdminDemo, type AdminDemoAccess } from "@/components/AdminDemo";
 const magentoDemoPreview = "/assets/magento-demo-preview.png";
 
 
@@ -26,7 +27,7 @@ const stack = [
   "RabbitMQ — reliable async message queue",
 ];
 
-export default function HomePage() {
+export default function HomePage({ demoAdmin }: { demoAdmin?: AdminDemoAccess } = {}) {
   const extensions = useExtensions();
   const setup = useService("magento-2-setup-from-scratch");
   const featured = featuredExtensions(extensions);
@@ -80,7 +81,7 @@ export default function HomePage() {
               </span>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground">See an optimized Magento 2 store, live.</h2>
               <p className="mt-3 text-muted-foreground">
-                We deploy a fresh Magento 2 install with Hyvä-ready Luma theme on a tuned stack — Varnish, Redis, OpenSearch, PHP-FPM. Open the live demo and run your own Lighthouse.
+                We deploy a fresh Magento 2 install with Luma theme on a tuned stack — Varnish, Redis, OpenSearch, PHP-FPM. Open the live demo and run your own Lighthouse.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a
@@ -130,6 +131,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <AdminDemo access={demoAdmin} />
 
       {/* FEATURED EXTENSIONS */}
       {featured.length > 0 && (

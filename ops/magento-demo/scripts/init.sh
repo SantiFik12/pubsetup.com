@@ -24,5 +24,6 @@ MAGENTO_ADMIN_PASSWORD=${admin_password}
 MAGENTO_ADMIN_EMAIL=contact@pubsetup.com
 MAGENTO_ADMIN_FIRSTNAME=Demo
 MAGENTO_ADMIN_LASTNAME=Admin
+DEMO_VIEWER_PASSWORD=$(openssl rand -hex 12)Aa1
 EOF
 printf '%s\n' 'Created .env with generated passwords. Review it with nano .env before installation.'

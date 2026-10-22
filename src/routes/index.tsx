@@ -87,7 +87,7 @@ function HomePage() {
               </span>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground">See an optimized Magento 2 store, live.</h2>
               <p className="mt-3 text-muted-foreground">
-                We deploy a fresh Magento 2 install with Hyvä-ready Luma theme on a tuned stack — Varnish, Redis, OpenSearch, PHP-FPM. Open the live demo and run your own Lighthouse.
+                We deploy a fresh Magento 2 install with Luma theme on a tuned stack — Varnish, Redis, OpenSearch, PHP-FPM. Open the live demo and run your own Lighthouse.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <a

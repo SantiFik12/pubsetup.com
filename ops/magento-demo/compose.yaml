@@ -34,6 +34,7 @@ services:
       - ./app:/var/www/html
       - composer_home:/var/www/.composer
       - ./scripts:/tools:ro
+      - ./module/Pubsetup/Demo:/demo-module:ro
   cron:
     <<: *php
     command: ["sh", "-c", "while true; do php bin/magento cron:run; sleep 60; done"]

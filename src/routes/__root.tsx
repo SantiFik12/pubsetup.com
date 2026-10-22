@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Link } from "@tanstack/react-router";
-import { CookieConsent } from "@/components/CookieConsent";
 
 import appCss from "../styles.css?url";
 
@@ -83,6 +82,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="+57NM94/ggY+Gia5wYJa9A" async />
       </head>
       <body>
         {children}
@@ -105,7 +105,6 @@ function RootComponent() {
         </main>
         <Footer />
       </div>
-      <CookieConsent />
     </QueryClientProvider>
   );
 }

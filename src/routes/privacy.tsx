@@ -27,7 +27,7 @@ const sections = [
         <li><strong className="text-foreground">Order data</strong>: name, email, website URL, notes and access details you provide at checkout.</li>
         <li><strong className="text-foreground">Communication data</strong>: messages you send us by email or contact form.</li>
         <li><strong className="text-foreground">Technical data</strong>: IP address, browser type, device, pages visited, referrer.</li>
-        <li><strong className="text-foreground">Analytics data</strong>: aggregated, privacy-friendly usage statistics collected via Jolt analytics.</li>
+        <li><strong className="text-foreground">Analytics data</strong>: usage statistics collected via Ahrefs Analytics.</li>
       </ul>
     ),
   },
@@ -48,7 +48,7 @@ const sections = [
       <p>
         We process your data on the basis of (a) performance of a contract when you order a
         Service, (b) our legitimate interest in operating and improving the Site, and (c) your
-        consent where required (e.g. optional analytics).
+        consent where required.
       </p>
     ),
   },
@@ -60,7 +60,7 @@ const sections = [
         <ul className="list-disc space-y-2 pl-5">
           <li>Hosting and database (Lovable Cloud / Supabase infrastructure).</li>
           <li>Email delivery providers for order confirmations and support.</li>
-          <li>Privacy-friendly analytics (Jolt) — aggregated, no cross-site tracking.</li>
+          <li>Ahrefs Analytics — website usage statistics.</li>
           <li>Authorities when required by law.</li>
         </ul>
       </>
@@ -100,8 +100,8 @@ const sections = [
     title: "8. Cookies",
     body: (
       <p>
-        The Site uses strictly necessary cookies to remember your preferences (such as the
-        comparison list) and a privacy-friendly analytics cookie. We do not use third-party
+        The Site uses cookies and local storage for essential functionality, such as remembering
+        your comparison list. Ahrefs Analytics does not use cookies. We do not use third-party
         advertising cookies.
       </p>
     ),

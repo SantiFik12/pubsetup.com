@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Quote\Api\CartManagementInterface">
+        <plugin name="pubsetup_demo_no_checkout" type="Pubsetup\Demo\Plugin\BlockOrders" sortOrder="1"/>
+    </type>
+    <type name="Magento\Quote\Model\QuoteManagement">
+        <plugin name="pubsetup_demo_no_submit" type="Pubsetup\Demo\Plugin\BlockOrders" sortOrder="1"/>
+    </type>
+    <type name="Magento\Sales\Api\OrderManagementInterface">
+        <plugin name="pubsetup_demo_no_order" type="Pubsetup\Demo\Plugin\BlockOrders" sortOrder="1"/>
+    </type>
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="pubsetup_demo_no_new_order" type="Pubsetup\Demo\Plugin\BlockOrders" sortOrder="1"/>
+    </type>
+    <type name="Magento\Framework\Mail\TransportInterface">
+        <plugin name="pubsetup_demo_no_mail" type="Pubsetup\Demo\Plugin\BlockMail" sortOrder="1"/>
+    </type>
+    <type name="Magento\Integration\Api\AdminTokenServiceInterface">
+        <plugin name="pubsetup_demo_no_api_token" type="Pubsetup\Demo\Plugin\BlockAdminToken" sortOrder="1"/>
+    </type>
+    <type name="Magento\Integration\Api\UserTokenIssuerInterface">
+        <plugin name="pubsetup_demo_no_issued_token" type="Pubsetup\Demo\Plugin\BlockAdminToken" sortOrder="1"/>
+    </type>
+    <type name="Magento\Integration\Model\Oauth\Token">
+        <plugin name="pubsetup_demo_no_oauth_token" type="Pubsetup\Demo\Plugin\BlockAdminToken" sortOrder="1"/>
+    </type>
+</config>

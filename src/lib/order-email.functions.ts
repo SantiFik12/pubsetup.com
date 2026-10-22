@@ -4,7 +4,7 @@ import { render } from '@react-email/components'
 
 const SITE_NAME = 'pubsetup.com'
 const FROM_DOMAIN = 'pubsetup.com'
-const FROM_LOCAL = 'noreply'
+const FROM_LOCAL = 'contact'
 const NOTIFICATION_RECIPIENT = 'contact@pubsetup.com'
 
 interface OrderEmailInput {

@@ -9,6 +9,7 @@ set -o noclobber
     printf 'POSTGRES_PASSWORD=%s\n' "$(openssl rand -hex 32)"
     printf 'APP_DB_PASSWORD=%s\n' "$(openssl rand -hex 32)"
     printf 'APP_SECRET=%s\n' "$(openssl rand -hex 32)"
-    printf '%s\n' 'POSTMARK_SERVER_TOKEN=' 'POSTMARK_MESSAGE_STREAM=outbound' 'MAIL_FROM=noreply@pubsetup.com' 'MAIL_NOTIFICATION_TO=contact@pubsetup.com'
+    printf '%s\n' 'POSTMARK_SERVER_TOKEN=' 'POSTMARK_MESSAGE_STREAM=outbound' 'MAIL_FROM=contact@pubsetup.com' 'MAIL_NOTIFICATION_TO=contact@pubsetup.com'
+    printf '%s\n' 'DEMO_ADMIN_ENABLED=1' 'DEMO_ADMIN_PASSWORD='
 } > .env.production
 printf '%s\n' 'Created .env.production (0600). Set URL, release tag, port and Postmark token before deployment.'

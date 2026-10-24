@@ -22,8 +22,8 @@ x-backend: &backend
     MAIL_NOTIFICATION_TO: ${MAIL_NOTIFICATION_TO:-contact@pubsetup.com}
     MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
     SMTP_HOST: ${SMTP_HOST:-smtppro.zoho.eu}
-    SMTP_PORT: ${SMTP_PORT:-465}
-    SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-ssl}
+    SMTP_PORT: ${SMTP_PORT:-587}
+    SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-tls}
     SMTP_USERNAME: ${SMTP_USERNAME:-}
     SMTP_PASSWORD: ${SMTP_PASSWORD:-}
   depends_on:

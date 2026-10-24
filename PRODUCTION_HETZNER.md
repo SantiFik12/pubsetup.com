@@ -101,15 +101,15 @@ Backup сохраняет БД в `backups/*.dump` с правами, огран
 ```dotenv
 MAIL_TRANSPORT=smtp
 SMTP_HOST=smtppro.zoho.eu
-SMTP_PORT=465
-SMTP_ENCRYPTION=ssl
+SMTP_PORT=587
+SMTP_ENCRYPTION=tls
 SMTP_USERNAME=kontakt@artwelve.com
 SMTP_PASSWORD='ZOHO_APP_PASSWORD'
 MAIL_FROM=contact@pubsetup.com
 MAIL_NOTIFICATION_TO=contact@pubsetup.com
 ```
 
-В этой конфигурации `contact@pubsetup.com` — разрешённый алиас ящика `kontakt@artwelve.com`. Пароль приложения создаётся для основного ящика. Значение хранится только на сервере; спецсимволы не нужно URL-кодировать. Используйте одинарные кавычки в env-файле, чтобы Compose не подставлял значения вместо `$` в пароле. SMTP-параметры нужно брать из настроек конкретного аккаунта Zoho; текущие EU-настройки показаны владельцем. Для STARTTLS используются `SMTP_ENCRYPTION=tls` и порт 587. Проверка сертификата и обязательный TLS включены.
+В этой конфигурации `contact@pubsetup.com` — разрешённый алиас ящика `kontakt@artwelve.com`. Пароль приложения создаётся для основного ящика. Значение хранится только на сервере; спецсимволы не нужно URL-кодировать. Используйте одинарные кавычки в env-файле, чтобы Compose не подставлял значения вместо `$` в пароле. SMTP-host нужно брать из настроек конкретного аккаунта Zoho; текущий EU-host показан владельцем. Для Hetzner используйте порт 587 с STARTTLS (`SMTP_ENCRYPTION=tls`): порты 25 и 465 заблокированы по умолчанию, а 587 открыт ([Hetzner FAQ](https://docs.hetzner.com/cloud/servers/faq/#why-can-i-not-send-any-mails-from-my-server)). Если 465 отдельно разблокирован, транспорт также поддерживает `SMTP_PORT=465` и `SMTP_ENCRYPTION=ssl`. Проверка сертификата и обязательный TLS включены.
 
 После первого обновления SMTP-кода выполнить `bash scripts/deploy.sh`: необходимо пересобрать backend с Symfony Mailer. Очередь `email_outbox` сохраняется; worker отправляет доступные неотправленные задания автоматически. Новую заявку создавать для повторной отправки не требуется. Если меняются только SMTP-параметры после сборки, достаточно `bash scripts/prod.sh up -d --no-deps --force-recreate backend worker`.
 

@@ -26,8 +26,8 @@ services:
       DATABASE_URL: postgresql://pubsetup_app:pubsetup@postgres:5432/pubsetup
       MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
       SMTP_HOST: ${SMTP_HOST:-smtppro.zoho.eu}
-      SMTP_PORT: ${SMTP_PORT:-465}
-      SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-ssl}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-tls}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM:-contact@pubsetup.com}
@@ -70,8 +70,8 @@ services:
       DATABASE_URL: postgresql://pubsetup_app:pubsetup@postgres:5432/pubsetup
       MAIL_TRANSPORT: ${MAIL_TRANSPORT:-smtp}
       SMTP_HOST: ${SMTP_HOST:-smtppro.zoho.eu}
-      SMTP_PORT: ${SMTP_PORT:-465}
-      SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-ssl}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_ENCRYPTION: ${SMTP_ENCRYPTION:-tls}
       SMTP_USERNAME: ${SMTP_USERNAME:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM:-contact@pubsetup.com}

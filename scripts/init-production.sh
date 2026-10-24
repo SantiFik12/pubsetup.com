@@ -11,6 +11,6 @@ set -o noclobber
     printf 'APP_SECRET=%s\n' "$(openssl rand -hex 32)"
     printf '%s\n' 'POSTMARK_SERVER_TOKEN=' 'POSTMARK_MESSAGE_STREAM=outbound' 'MAIL_FROM=contact@pubsetup.com' 'MAIL_NOTIFICATION_TO=contact@pubsetup.com'
     printf '%s\n' 'DEMO_ADMIN_ENABLED=1'
-    printf '%s\n' 'MAIL_TRANSPORT=smtp' 'SMTP_HOST=smtppro.zoho.eu' 'SMTP_PORT=465' 'SMTP_ENCRYPTION=ssl' 'SMTP_USERNAME=kontakt@artwelve.com' 'SMTP_PASSWORD='
+    printf '%s\n' 'MAIL_TRANSPORT=smtp' 'SMTP_HOST=smtppro.zoho.eu' 'SMTP_PORT=587' 'SMTP_ENCRYPTION=tls' 'SMTP_USERNAME=kontakt@artwelve.com' 'SMTP_PASSWORD='
 } > .env.production
 printf '%s\n' 'Created .env.production (0600). Set URL, release tag, port and Postmark token before deployment.'

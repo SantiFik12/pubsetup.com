@@ -3,6 +3,7 @@ import type { Catalog } from "@/data/mappers";
 import { absoluteUrl, landingExtensions, latestDate, validDate } from "./seo.ts";
 import { featuredCategory } from "./featured.ts";
 import { tagSlug } from "./slug.ts";
+import { categoryCollection, curatedCategories } from "./catalog-collections.ts";
 
 export function catalogSitemap(catalog: Catalog): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];
@@ -21,9 +22,10 @@ export function catalogSitemap(catalog: Catalog): MetadataRoute.Sitemap {
   for (const item of catalog.extensions) add(`/extension/${item.slug}`, validDate(item.updatedAt || item.createdAt));
   for (const item of catalog.services) add(`/services/${item.slug}`, validDate(item.updatedAt));
   for (const item of catalog.blogPosts) add(`/blog/${item.slug}`, validDate(item.updatedAt || item.date));
-  for (const category of catalog.categories) {
-    const extensions = catalog.extensions.filter(item => item.categoryId === category.id);
-    if (extensions.length) add(`/category/${category.slug}`, latestDate([category.updatedAt, ...extensions.map(item => item.updatedAt || item.createdAt)]));
+  for (const category of [...curatedCategories, ...catalog.categories.filter(item => !curatedCategories.some(curated => curated.slug === item.slug))]) {
+    const collection = categoryCollection(catalog, category.slug);
+    const extensions = collection?.extensions ?? [];
+    if (extensions.length) add(`/category/${category.slug}`, latestDate([collection?.category.updatedAt, ...extensions.map(item => item.updatedAt || item.createdAt)]));
   }
   for (const partner of catalog.partners) {
     const extensions = catalog.extensions.filter(item => item.partnerId === partner.id);

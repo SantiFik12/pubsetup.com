@@ -1,26 +1,11 @@
 "use client";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
-import { useCatalog,useCategory,useExtensions } from "@/data/catalog";
-import { useParams } from "next/navigation";
+import type { Category, Extension } from "@/data/types";
 
 
 
-export default function CategoryPage() {
-  const { slug } = useParams<{ slug: string; landing: string }>();
-  const { isLoading } = useCatalog();
-  const cat = useCategory(slug);
-  const all = useExtensions();
-  if (isLoading) return <div className="container-page py-20 text-center text-muted-foreground">Loading…</div>;
-  if (!cat) {
-    return (
-      <div className="container-page py-20 text-center">
-        <h1 className="text-2xl font-bold">Category not found</h1>
-        <Link to="/extensions" className="mt-4 inline-block text-primary">Back to catalog</Link>
-      </div>
-    );
-  }
-  const list = all.filter((e) => e.categoryId === cat.id);
+export default function CategoryPage({ category: cat, extensions: list }: { category: Category; extensions: Extension[] }) {
   return (
     <>
       <section className="border-b border-border bg-surface">
@@ -32,9 +17,9 @@ export default function CategoryPage() {
       </section>
       <section className="container-page py-10">
         <p className="mb-6 text-sm text-muted-foreground">{list.length} extensions in this category</p>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {list.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
-        </div>
+        </div> : <p className="text-muted-foreground">No extensions are listed in this collection yet. <Link to="/extensions" className="text-primary hover:underline">Browse all extensions</Link>.</p>}
       </section>
     </>
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Catalog } from "@/data/mappers";
 import type { Extension, SeoLanding } from "@/data/types";
+import { categoryExtensions } from "./catalog-collections.ts";
 
 export const siteUrl = (process.env.SITE_URL ?? "https://pubsetup.com").replace(/\/+$/, "");
 export const defaultImage = "/social-image";
@@ -50,8 +51,9 @@ export function collectionSchema(name: string, path: string, items: { name: stri
 
 export function landingExtensions(catalog: Catalog, landing: SeoLanding): Extension[] {
   const filter = landing.filter;
+  const categoryIds = filter.categorySlug ? new Set(categoryExtensions(catalog, filter.categorySlug).map(item => item.id)) : null;
   return catalog.extensions.filter(extension =>
-    (!filter.categorySlug || catalog.categories.some(category => category.slug === filter.categorySlug && category.id === extension.categoryId)) &&
+    (!categoryIds || categoryIds.has(extension.id)) &&
     (!filter.partnerSlug || catalog.partners.some(partner => partner.slug === filter.partnerSlug && partner.id === extension.partnerId)) &&
     (!filter.tag || extension.tags.includes(filter.tag)) &&
     (!filter.hyvaCompatible || extension.hyvaCompatible) &&

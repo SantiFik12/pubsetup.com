@@ -1,7 +1,7 @@
 {% extends 'admin/base.html.twig' %}
 {% block title %}Вход{% endblock %}
 {% block shell %}
-<main class="login-page"><div class="login-brand"><img class="brand-logo" src="/assets/logo.png" alt="Pubsetup"><span class="brand-badge">ADMIN</span></div><section class="login-card"><span class="eyebrow">УПРАВЛЕНИЕ КАТАЛОГОМ</span><h1>Вход в панель</h1><p class="muted">Вендоры, модули и статистика переходов.</p>
+<main class="login-page"><div class="login-brand"><img class="brand-logo" src="/assets/logo.png" alt="Pubsetup"><span class="brand-badge">ADMIN</span></div><section class="login-card"><span class="eyebrow">УПРАВЛЕНИЕ КАТАЛОГОМ</span><h1>Вход в панель</h1><p class="muted">Вендоры, модули, заказы и статистика переходов.</p>
 {% if error %}<div role="alert" class="notice error">{{ error }}</div>{% endif %}
 <form method="post" action="{{ path('admin_login') }}" class="form-stack"><input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}"><label>Email<input type="email" name="email" value="{{ email }}" autocomplete="username" maxlength="254" required autofocus></label><label>Пароль<input type="password" name="password" autocomplete="current-password" required></label><button class="button primary full" type="submit">Войти</button></form></section><a class="muted" href="/">Вернуться на сайт</a></main>
 {% endblock %}

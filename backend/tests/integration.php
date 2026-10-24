@@ -7,6 +7,10 @@ use App\Service\Database;
 use App\Service\EmailWorker;
 use App\Service\OrderService;
 use App\Service\OrderValidator;
+use App\Service\OrderMailer;
+use App\Service\SmtpTransportFactory;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport\NullTransport;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -45,14 +49,14 @@ $http = new MockHttpClient(static function ($method, $url, $options) use (&$call
 
     return new MockResponse('{"ErrorCode":0,"MessageID":"test"}');
 });
-$worker = new EmailWorker($db, $http, 'fake-test-token', 'outbound', 'noreply@example.com', 'team@example.com');
+$worker = new EmailWorker($db, new OrderMailer(new Mailer(new NullTransport()), new SmtpTransportFactory('unused', 465, '', '', 'ssl'), $http, 'postmark', 'fake-test-token', 'outbound', 'noreply@example.com', 'team@example.com'));
 $worker->processOne();
 $worker->processOne();
 $check(1 === $calls, 'Suppressed email was sent');
 $check([] !== $db->fetchAll("SELECT status FROM email_send_log WHERE status = 'sent'"), 'Sent email not logged');
 $check([] !== $db->fetchAll("SELECT status FROM email_send_log WHERE status = 'suppressed'"), 'Suppression not logged');
 $orders->create($input, 'another-test-ip');
-$failedWorker = new EmailWorker($db, new MockHttpClient(new MockResponse('{"ErrorCode":10}', ['http_code' => 500])), 'fake', 'outbound', 'noreply@example.com', 'team@example.com');
+$failedWorker = new EmailWorker($db, new OrderMailer(new Mailer(new NullTransport()), new SmtpTransportFactory('unused', 465, '', '', 'ssl'), new MockHttpClient(new MockResponse('{"ErrorCode":10}', ['http_code' => 500])), 'postmark', 'fake', 'outbound', 'noreply@example.com', 'team@example.com'));
 $failedWorker->processOne();
 $check([] !== $db->fetchAll('SELECT id FROM email_outbox WHERE attempts = 1 AND sent_at IS NULL AND available_at > now()'), 'Failed mail was not scheduled for retry');
 try {

@@ -1,0 +1,28 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}{{ order.order_code }}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ЗАЯВКА НА УСЛУГУ</div><h1>{{ order.order_code }}</h1><p class="muted">Создан {{ order.created_at|date('d.m.Y H:i','Europe/Warsaw') }} · {{ statuses[order.status]|default(order.status) }}</p></div><a class="button" href="{{ path('admin_orders') }}">← Все заказы</a></div>
+<div class="order-detail-grid">
+  <section class="panel order-section"><h2>Клиент</h2><dl class="order-facts">
+    <dt>Имя</dt><dd>{{ order.customer_name }}</dd>
+    <dt>Email</dt><dd>{{ order.email }}</dd>
+    <dt>Сайт</dt><dd>{% if order.website_url %}<a class="source-link" href="{{ order.website_url }}" target="_blank" rel="noopener noreferrer">{{ order.website }}</a>{% else %}{{ order.website|default('Не указан', true) }}{% endif %}</dd>
+  </dl></section>
+  <section class="panel order-section"><h2>Услуга</h2><dl class="order-facts">
+    <dt>Услуга</dt><dd>{{ order.service_name }}</dd>
+    <dt>Модуль</dt><dd>{{ order.extension_name|default('Не выбран', true) }}</dd>
+    <dt>Сумма</dt><dd>${{ order.amount|number_format(2,'.','') }}</dd>
+    <dt>Статус</dt><dd>{{ statuses[order.status]|default(order.status) }}</dd>
+  </dl></section>
+</div>
+<section class="panel order-section"><h2>Требования и примечания клиента</h2><p class="order-notes">{{ order.notes|default('Не указаны', true) }}</p></section>
+<section class="panel"><div class="panel-toolbar"><div><h2>Отправка писем</h2><p class="muted small">Принятие письма почтовым сервером не гарантирует попадание во входящие.</p></div></div>
+{% if email_jobs %}<div class="table-scroll"><table><thead><tr><th>Письмо / получатель</th><th>Состояние</th><th>Попытки</th><th>Обработано / следующий запуск</th><th>Последняя ошибка</th></tr></thead><tbody>
+{% for job in email_jobs %}<tr><td>{{ job.template_name == 'order-notification' ? 'Уведомление администратору' : 'Подтверждение клиенту' }}<div class="muted small">{{ job.recipient_email }}</div></td>
+<td><span class="status {{ job.state_class }}">{{ job.state_label }}</span></td><td>{{ job.attempts }} / 8</td>
+<td>{% if job.sent_at %}{{ job.sent_at|date('d.m.Y H:i','Europe/Warsaw') }}{% elseif job.attempts < 8 %}{{ job.available_at|date('d.m.Y H:i','Europe/Warsaw') }}{% else %}—{% endif %}</td><td class="order-error">{{ job.last_error|default('—', true) }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="empty-state"><p class="muted">Для этого заказа нет записей в очереди писем.</p></div>{% endif %}</section>
+{% if email_logs %}<section class="panel order-history"><div class="panel-toolbar"><h2>Последние попытки отправки</h2></div><div class="table-scroll"><table><thead><tr><th>Время</th><th>Получатель</th><th>Результат</th><th>Ошибка</th></tr></thead><tbody>
+{% for entry in email_logs %}<tr><td>{{ entry.created_at|date('d.m.Y H:i:s','Europe/Warsaw') }}</td><td>{{ entry.recipient_email }}</td><td>{{ entry.status }}</td><td class="order-error">{{ entry.error_message|default('—', true) }}</td></tr>{% endfor %}
+</tbody></table></div></section>{% endif %}
+{% endblock %}

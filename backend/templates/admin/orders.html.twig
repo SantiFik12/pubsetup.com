@@ -1,0 +1,33 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Заказы{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ЗАЯВКИ НА УСЛУГИ</div><h1>Заказы</h1><p class="muted">{{ total }} заказов · просмотр заявок и состояния отправки писем.</p></div></div>
+<section class="panel">
+  <div class="panel-toolbar"><h2>Список заказов</h2>
+    <form class="search-form order-search" method="get" action="{{ path('admin_orders') }}">
+      <label class="sr-only" for="order-search">Номер, клиент, email, услуга или модуль</label>
+      <input id="order-search" type="search" name="q" value="{{ query }}" placeholder="Номер, клиент, email…" maxlength="150">
+      <label class="sr-only" for="order-status">Статус заказа</label>
+      <select id="order-status" name="status"><option value="">Все статусы</option>{% for value,label in statuses %}<option value="{{ value }}" {{ status == value ? 'selected' : '' }}>{{ label }}</option>{% endfor %}</select>
+      <button class="button" type="submit">Найти</button>
+      {% if query or status %}<a class="button" href="{{ path('admin_orders') }}">Сбросить</a>{% endif %}
+    </form>
+  </div>
+  {% if orders %}
+  <div class="table-scroll"><table><thead><tr><th>Заказ / дата</th><th>Клиент</th><th>Услуга / модуль</th><th>Сумма</th><th>Статус</th><th></th></tr></thead><tbody>
+  {% for order in orders %}<tr>
+    <td><a class="module-title" href="{{ path('admin_order_show',{id:order.id}) }}">{{ order.order_code }}</a><div class="muted small">{{ order.created_at|date('d.m.Y H:i','Europe/Warsaw') }}</div></td>
+    <td><strong>{{ order.customer_name }}</strong><div class="muted small">{{ order.email }}</div></td>
+    <td>{{ order.service_name }}{% if order.extension_name %}<div class="muted small">{{ order.extension_name }}</div>{% endif %}</td>
+    <td>${{ order.amount|number_format(2,'.','') }}</td><td><span class="status draft">{{ statuses[order.status]|default(order.status) }}</span></td>
+    <td><a class="button small-button" href="{{ path('admin_order_show',{id:order.id}) }}">Открыть</a></td>
+  </tr>{% endfor %}</tbody></table></div>
+  {% else %}<div class="empty-state"><h3>Заказы не найдены</h3><p class="muted">{% if query or status %}Измените поиск или сбросьте фильтры.{% else %}Новые заявки с сайта появятся здесь автоматически.{% endif %}</p></div>{% endif %}
+</section>
+{% if pages > 1 %}<nav class="order-pagination" aria-label="Страницы заказов">
+  {% if page > 1 %}<a class="button" href="{{ path('admin_orders',{q:query,status:status,page:page-1}) }}">← Назад</a>{% endif %}
+  <span class="muted">Страница {{ page }} из {{ pages }}</span>
+  {% if page < pages %}<a class="button" href="{{ path('admin_orders',{q:query,status:status,page:page+1}) }}">Далее →</a>{% endif %}
+</nav>{% endif %}
+<p class="footnote">Время отображается в часовом поясе Europe/Warsaw.</p>
+{% endblock %}

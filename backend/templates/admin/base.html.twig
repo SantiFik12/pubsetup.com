@@ -7,7 +7,9 @@
   <aside class="sidebar">
     <a class="brand" href="{{ path('admin_dashboard') }}" aria-label="Pubsetup — панель администратора"><img class="brand-logo" src="/assets/logo.png" alt="Pubsetup"><span class="brand-badge">ADMIN</span></a>
     <div class="workspace-label">УПРАВЛЕНИЕ КАТАЛОГОМ</div>
-    <a class="nav-link" href="{{ path('admin_dashboard') }}">Все модули</a>
+    {% set orders_active = app.request.attributes.get('_route') starts with 'admin_order' %}
+    <a class="nav-link {{ orders_active ? '' : 'active' }}" href="{{ path('admin_dashboard') }}">Все модули</a>
+    <a class="nav-link {{ orders_active ? 'active' : '' }}" href="{{ path('admin_orders') }}" {% if orders_active %}aria-current="page"{% endif %}>Заказы</a>
     <div class="sidebar-heading"><span>Вендоры</span><a href="{{ path('admin_vendor_new') }}" aria-label="Добавить вендора">Добавить</a></div>
     {% for item in vendors|default([]) %}<a class="vendor-link {{ selected is defined and selected and selected.id == item.id ? 'active' : '' }}" href="{{ path('admin_dashboard', {vendor:item.id}) }}"><span>{{ item.name }}</span><span class="count">{{ item.modules }}</span></a>{% endfor %}
     <div class="sidebar-footer"><a href="/extensions">Открыть каталог</a></div>

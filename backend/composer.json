@@ -42,6 +42,7 @@
             "@php bin/console lint:container",
             "@php tests/run.php",
             "@php tests/email.php",
+            "@php tests/orders.php",
             "@php tests/admin.php"
         ],
         "qa:phpstan": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=512M",

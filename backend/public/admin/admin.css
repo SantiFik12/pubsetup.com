@@ -12,3 +12,6 @@
 @media(max-width:720px){.module-edit-sections>.source-panel{grid-template-columns:minmax(0,1fr);gap:20px}.source-panel>form,.source-panel>form>.button{width:100%}}
 
 .brand{gap:8px}.brand-logo{display:block;width:138px;max-width:100%;height:auto;object-fit:contain}.brand .brand-logo{min-width:0;flex:0 1 138px;max-width:calc(100% - 52px)}.brand-badge{flex-shrink:0}.login-brand .brand-logo{width:166px}
+.nav-link{background:transparent;color:#455269}.nav-link:hover{background:#f1f5fa}.nav-link.active{background:var(--blue-soft);color:var(--blue)}
+.order-search{flex-wrap:wrap}.order-pagination{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:24px}.order-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.order-section{padding:24px;margin-bottom:20px}.order-facts{display:grid;grid-template-columns:90px minmax(0,1fr);gap:14px;margin:20px 0 0}.order-facts dt{color:var(--muted)}.order-facts dd{margin:0;overflow-wrap:anywhere}.order-notes{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:16px}.order-error{max-width:360px;overflow-wrap:anywhere;font-size:12px}.order-history{margin-top:20px}.status.failed{background:#fff0ed;color:#b63020}
+@media(max-width:720px){.order-detail-grid{grid-template-columns:minmax(0,1fr);gap:0}.order-search input{width:100%}}

@@ -180,7 +180,7 @@ final readonly class ModuleSourceImporter
             }
         }
         $features = [];
-        foreach ($xpath->query('//*['.$class('amsite-features-block').']//li | //*[@itemprop="featureList"]') as $node) {
+        foreach ($xpath->query('//*['.$class('amsite-features-block').']//li | //*[@itemprop="featureList"] | //*['.$class('mw-card-description').']//*['.$class('mw-card-option').']') as $node) {
             if (($text = $clean($node->textContent, 400)) !== '') {
                 $features[] = $text;
             }
@@ -191,18 +191,24 @@ final readonly class ModuleSourceImporter
                 $result['hyva_compatible'] = true;
             }
         }
-        foreach ($xpath->query('//a[@href]') as $node) {
+        $guideScore = 0;
+        foreach ($xpath->query('//a[@href and not(ancestor::nav) and not(ancestor::header) and not(ancestor::footer)]') as $node) {
             if (!$node instanceof \DOMElement) {
                 continue;
             }
             $href = self::resolveUrl($url, $node->getAttribute('href'));
             $label = $clean($node->textContent.' '.$node->getAttribute('aria-label'), 300);
+            $guidePath = parse_url($href, PHP_URL_PATH) ?? '';
+            $exactLabel = (bool) preg_match('/^(?:user[ -]?guide|readme|documentation|manual|installation guide)(?:\s*↗)?$/iu', $label);
+            $documentPath = (bool) preg_match('~/(?:user-guides?|docs?|documentation|manuals?)/.+~i', $guidePath);
+            $score = ($exactLabel ? 2 : 0) + ($documentPath ? 1 : 0);
             // Ignore a generic documentation directory from the site's footer.
-            if (preg_match('/user[ -]?guide|readme|documentation|manual|installation guide/iu', $label.' '.$node->getAttribute('href'))
-                && !preg_match('~/(?:user-guides?|docs?|documentation)/?$~i', parse_url($href, PHP_URL_PATH) ?? '')) {
+            if ($score > $guideScore
+                && !str_starts_with(trim($node->getAttribute('href')), '#')
+                && !preg_match('~/(?:user-guides?|docs?|documentation|manuals?)/?$~i', $guidePath)) {
                 try {
                     $result['user_guide_url'] = AdminCatalog::url($href, true);
-                    break;
+                    $guideScore = $score;
                 } catch (\InvalidArgumentException) {
                 }
             }
@@ -229,6 +235,21 @@ final readonly class ModuleSourceImporter
         }
         $fallbackPictures = $pictures;
         $pictures = [];
+        // Mageworx uses HTML sliders with lazy-loaded full-size images, not Magento gallery JSON.
+        foreach (['mw-slider-gallery', 'mw-slider'] as $slider) {
+            foreach ($xpath->query('//*[@id="'.$slider.'"]//img') as $node) {
+                if (!$node instanceof \DOMElement) {
+                    continue;
+                }
+                $picture = $node->getAttribute('data-src') ?: $node->getAttribute('src');
+                if ('' !== $picture && !str_starts_with($picture, 'data:')) {
+                    $pictures[] = self::resolveUrl($url, $picture);
+                }
+            }
+            if ([] !== $pictures) {
+                break;
+            }
+        }
         // Hyvä galleries expose JSON data inside a script; never evaluate JavaScript.
         if (preg_match('/["\']initialImages["\']\s*:\s*(\[.*?\])\s*,/s', $html, $match)) {
             $gallery = json_decode($match[1], true);

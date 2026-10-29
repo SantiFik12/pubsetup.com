@@ -235,6 +235,23 @@ final readonly class ModuleSourceImporter
         }
         $fallbackPictures = $pictures;
         $pictures = [];
+        // Plumrocket keeps full-size screenshots in the PhotoSwipe opener as a JSON array.
+        // Decode only that array; never execute the surrounding JavaScript or import video HTML.
+        foreach ($xpath->query('//script[not(@src)]') as $node) {
+            if (!preg_match('/function\s+openPhotoSwipe\s*\([^)]*\)\s*\{.*?\b(?:var|let|const)\s+items\s*=\s*(\[.*?\])\s*;/s', $node->textContent, $match)) {
+                continue;
+            }
+            $gallery = json_decode($match[1], true);
+            foreach (is_array($gallery) ? $gallery : [] as $entry) {
+                if (!is_array($entry) || !empty($entry['isVideo']) || isset($entry['html']) || ($entry['type'] ?? 'image') !== 'image') {
+                    continue;
+                }
+                $picture = $entry['src'] ?? '';
+                if (is_string($picture) && '' !== $picture && !str_starts_with($picture, 'data:')) {
+                    $pictures[] = self::resolveUrl($url, $picture);
+                }
+            }
+        }
         // Mageworx uses HTML sliders with lazy-loaded full-size images, not Magento gallery JSON.
         foreach (['mw-slider-gallery', 'mw-slider'] as $slider) {
             foreach ($xpath->query('//*[@id="'.$slider.'"]//img') as $node) {

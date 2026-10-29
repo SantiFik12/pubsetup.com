@@ -44,4 +44,27 @@ $check(['https://www.mageworx.com/preview.png'] === $fallback['_images'], 'Thumb
 $generic = ModuleSourceImporter::extract('<a href="/user-guides/">User Guides</a><footer><a href="/docs/other/">User Guide</a></footer>', $source);
 $check(!isset($generic['user_guide_url']), 'Generic documentation or footer leaked into product guide');
 
-echo "Module importer: 6 checks passed.\n";
+$plumrocket = <<<'HTML'
+<html><head><meta property="og:image" content="/module-icon.png"></head><body>
+<div id="product-gallery-origin"><a href="javascript: " onclick="openPhotoSwipe(0)"><img src="/thumbnail.png"></a></div>
+<script>
+var items = [{"src":"/unrelated.png"}];
+function openPhotoSwipe(index) {
+    function stopVideo() { return; }
+    var items = [{"src":"https:\/\/plumrocket.com\/media\/screenshot-1.png","w":1260,"h":820},{"src":"/media/screenshot-2.png","w":1260,"h":820},{"src":"/media/screenshot-2.png"},{"src":"/video.mp4","isVideo":true},{"html":"<iframe src='video'></iframe>","isVideo":true},{"src":"/video.mp4","type":"video"},{"src":"data:image/gif;base64,placeholder"}];
+    new PhotoSwipe(element, ui, items, options);
+}
+</script>
+</body></html>
+HTML;
+$plumrocketSource = 'https://plumrocket.com/magento-social-login-pro';
+$screenshots = ModuleSourceImporter::extract($plumrocket, $plumrocketSource);
+$check(['https://plumrocket.com/media/screenshot-1.png', 'https://plumrocket.com/media/screenshot-2.png'] === $screenshots['_images'], 'PhotoSwipe screenshots missing, unordered, or mixed with thumbnails/videos/unrelated arrays');
+$check('https://plumrocket.com/media/screenshot-1.png' === $screenshots['_image'], 'PhotoSwipe first screenshot must replace the icon');
+$invalidGallery = str_replace('"src":"https:', 'src:"https:', $plumrocket);
+$invalid = ModuleSourceImporter::extract($invalidGallery, $plumrocketSource);
+$check(['https://plumrocket.com/module-icon.png'] === $invalid['_images'], 'Invalid JavaScript must not be evaluated; metadata fallback required');
+$unrelated = ModuleSourceImporter::extract('<meta property="og:image" content="/icon.png"><script>var items = [{"src":"/other.png"}];</script>', $plumrocketSource);
+$check(['https://plumrocket.com/icon.png'] === $unrelated['_images'], 'Generic JavaScript items array must not be treated as a product gallery');
+
+echo "Module importer: 10 checks passed.\n";

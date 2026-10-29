@@ -3,6 +3,7 @@
 .import-panel{max-width:760px}.import-panel .button{align-self:flex-start}details.edit-panel>summary{cursor:pointer;font-weight:600}details.edit-panel[open]>summary{margin-bottom:24px}
 
 .module-edit-sections{display:grid;gap:20px}
+.button.danger{color:#b42318;border-color:#f1b8b3;background:#fff5f4}.button.danger:hover{background:#ffe6e3}
 .module-edit-sections>.source-panel{margin:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px}
 .source-panel-copy{display:grid;gap:10px;min-width:0}
 .source-panel-copy h2{line-height:1.4}

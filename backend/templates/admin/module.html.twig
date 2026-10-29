@@ -21,5 +21,6 @@
 </aside>
 </form>
 </details>
+{% if module_id %}<section class="panel edit-panel source-panel"><div class="source-panel-copy"><h2>Удаление модуля</h2><p class="muted small">Удаляет карточку и статистику переходов. Модули с заказами можно снять с публикации.</p></div><a class="button danger" href="{{ path('admin_module_delete',{id:module_id}) }}">Удалить модуль</a></section>{% endif %}
 </div>
 {% endblock %}

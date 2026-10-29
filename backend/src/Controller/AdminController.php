@@ -186,6 +186,36 @@ final class AdminController extends AbstractController
         return $this->redirectToRoute('admin_module_edit', ['id' => $id]);
     }
 
+    #[Route('/admin_panel/modules/{id}/delete', name: 'admin_module_delete', defaults: ['kind' => 'module'], methods: ['GET', 'POST'])]
+    #[Route('/admin_panel/vendors/{id}/delete', name: 'admin_vendor_delete', defaults: ['kind' => 'vendor'], methods: ['GET', 'POST'])]
+    public function deleteForm(Request $request, string $id, string $kind): Response
+    {
+        $record = $this->catalog->deletionInfo($kind, $id);
+        if (!$record) {
+            throw $this->createNotFoundException();
+        }
+        $error = null;
+        if ($request->isMethod('POST')) {
+            $this->checkCsrf($request, 'delete_'.$kind.'_'.$id);
+            try {
+                if ('delete' !== $request->request->getString('confirm')) {
+                    throw new \InvalidArgumentException('Подтвердите удаление записи.');
+                }
+                if (!$this->catalog->deleteRecord($kind, $id)) {
+                    throw $this->createNotFoundException();
+                }
+                $this->addFlash('success', 'vendor' === $kind ? 'Вендор удалён.' : 'Модуль удалён.');
+
+                return $this->redirectToRoute('admin_dashboard');
+            } catch (\InvalidArgumentException $e) {
+                $error = $e->getMessage();
+                $record = $this->catalog->deletionInfo($kind, $id) ?? $record;
+            }
+        }
+
+        return $this->render('admin/delete.html.twig', ['record' => $record, 'kind' => $kind, 'error' => $error], new Response(status: $error ? 422 : 200));
+    }
+
     private function checkCsrf(Request $request, string $id): void
     {
         if (!$this->isCsrfTokenValid($id, $request->request->getString('_token'))) {

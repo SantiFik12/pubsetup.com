@@ -42,6 +42,48 @@ final readonly class AdminCatalog
         return $this->db->fetchAll('SELECT id,name,slug FROM categories ORDER BY name');
     }
 
+    public function deletionInfo(string $kind, string $id): ?array
+    {
+        [$table, $related, $foreignKey] = match ($kind) {
+            'vendor' => ['partners', 'extensions', 'partner_id'],
+            'module' => ['extensions', 'orders', 'extension_id'],
+            default => throw new \InvalidArgumentException('Неизвестный тип записи.'),
+        };
+
+        return $this->db->fetchAll("SELECT r.id,r.name,(SELECT count(*) FROM $related d WHERE d.$foreignKey=r.id) AS dependencies FROM $table r WHERE r.id::text=:id", ['id' => $id])[0] ?? null;
+    }
+
+    public function deleteRecord(string $kind, string $id): bool
+    {
+        $table = match ($kind) {
+            'vendor' => 'partners',
+            'module' => 'extensions',
+            default => throw new \InvalidArgumentException('Неизвестный тип записи.'),
+        };
+        $pdo = $this->db->connection();
+        $pdo->beginTransaction();
+        try {
+            // Serialize deletion with foreign-key checks from new modules/orders.
+            $row = $this->db->fetchAll("SELECT id FROM $table WHERE id::text=:id FOR UPDATE", ['id' => $id]);
+            if ([] === $row) {
+                $pdo->commit();
+
+                return false;
+            }
+            $info = $this->deletionInfo($kind, $id);
+            if ((int) $info['dependencies'] > 0) {
+                throw new \InvalidArgumentException('vendor' === $kind ? 'Сначала удалите модули вендора или перенесите их к другому вендору.' : 'Модуль связан с заказами. Снимите его с публикации, чтобы сохранить историю заказов.');
+            }
+            $this->db->execute("DELETE FROM $table WHERE id::text=:id", ['id' => $id]);
+            $pdo->commit();
+
+            return true;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
     public function totals(): array
     {
         return $this->db->fetchAll('SELECT (SELECT count(*) FROM partners) AS vendors,(SELECT count(*) FROM extensions) AS modules,(SELECT COALESCE(sum(module_clicks),0) FROM module_metrics) AS module_clicks,(SELECT COALESCE(sum(affiliate_clicks),0) FROM module_metrics) AS affiliate_clicks')[0];

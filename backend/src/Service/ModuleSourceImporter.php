@@ -151,10 +151,12 @@ final readonly class ModuleSourceImporter
                 $result['reviews'] = (int) $count;
             }
         }
-        if (!isset($result['price_from']) && 'USD' === $meta('product:price:currency') && is_numeric($meta('product:price:amount'))) {
-            $price = (float) $meta('product:price:amount');
-            if ($price >= 0 && $price < 100000000) {
-                $result['price_from'] = number_format($price, 2, '.', '');
+        foreach (['product:price', 'og:price'] as $priceKey) {
+            if (!isset($result['price_from']) && 'USD' === strtoupper($meta($priceKey.':currency')) && is_numeric($meta($priceKey.':amount'))) {
+                $price = (float) $meta($priceKey.':amount');
+                if ($price >= 0 && $price < 100000000) {
+                    $result['price_from'] = number_format($price, 2, '.', '');
+                }
             }
         }
         $class = static fn (string $name): string => 'contains(concat(" ",normalize-space(@class)," ")," '.$name.' ")';
@@ -180,7 +182,7 @@ final readonly class ModuleSourceImporter
             }
         }
         $features = [];
-        foreach ($xpath->query('//*['.$class('amsite-features-block').']//li | //*[@itemprop="featureList"] | //*['.$class('mw-card-description').']//*['.$class('mw-card-option').']') as $node) {
+        foreach ($xpath->query('//*['.$class('amsite-features-block').']//li | //*[@itemprop="featureList"] | //*['.$class('mw-card-description').']//*['.$class('mw-card-option').'] | //*['.$class('product-view').']//*['.$class('features-slider').']//li') as $node) {
             if (($text = $clean($node->textContent, 400)) !== '') {
                 $features[] = $text;
             }
@@ -199,7 +201,7 @@ final readonly class ModuleSourceImporter
             $href = self::resolveUrl($url, $node->getAttribute('href'));
             $label = $clean($node->textContent.' '.$node->getAttribute('aria-label'), 300);
             $guidePath = parse_url($href, PHP_URL_PATH) ?? '';
-            $exactLabel = (bool) preg_match('/^(?:user[ -]?guide|readme|documentation|manual|installation guide)(?:\s*↗)?$/iu', $label);
+            $exactLabel = (bool) preg_match('/^(?:user[ -]?guide|readme|documentation|(?:extension )?manual|installation guide)(?:\s*↗)?$/iu', $label);
             $documentPath = (bool) preg_match('~/(?:user-guides?|docs?|documentation|manuals?)/.+~i', $guidePath);
             $score = ($exactLabel ? 2 : 0) + ($documentPath ? 1 : 0);
             // Ignore a generic documentation directory from the site's footer.
@@ -235,6 +237,16 @@ final readonly class ModuleSourceImporter
         }
         $fallbackPictures = $pictures;
         $pictures = [];
+        // Firebear renders its screenshot carousel directly in the product-images block.
+        foreach ($xpath->query('//*['.$class('product-img-box').' and '.$class('product-images').']//img') as $node) {
+            if (!$node instanceof \DOMElement) {
+                continue;
+            }
+            $picture = $node->getAttribute('data-src') ?: $node->getAttribute('src');
+            if ('' !== $picture && !str_starts_with($picture, 'data:')) {
+                $pictures[] = self::resolveUrl($url, $picture);
+            }
+        }
         // Plumrocket keeps full-size screenshots in the PhotoSwipe opener as a JSON array.
         // Decode only that array; never execute the surrounding JavaScript or import video HTML.
         foreach ($xpath->query('//script[not(@src)]') as $node) {

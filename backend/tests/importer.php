@@ -67,4 +67,20 @@ $check(['https://plumrocket.com/module-icon.png'] === $invalid['_images'], 'Inva
 $unrelated = ModuleSourceImporter::extract('<meta property="og:image" content="/icon.png"><script>var items = [{"src":"/other.png"}];</script>', $plumrocketSource);
 $check(['https://plumrocket.com/icon.png'] === $unrelated['_images'], 'Generic JavaScript items array must not be treated as a product gallery');
 
-echo "Module importer: 10 checks passed.\n";
+$firebear = <<<'HTML'
+<meta property="og:price:amount" content="599.00"><meta property="og:price:currency" content="USD">
+<meta property="og:image" content="/icon.png"><h1>Improved Import &amp; Export</h1>
+<div class="product-view"><div class="features-slider"><ul><li>Scheduled import and export</li><li>Map product attributes</li></ul></div><img src="/partner-badge.png"></div>
+<div class="support-links"><a href="/blog/improved-import-magento-2-extension-manual.html"><i></i> Extension manual</a></div>
+<div class="product-img-box product-images"><div class="owl-carousel"><img src="/screen-1.png"><img data-src="/screen-2.png"></div></div>
+<div class="features-slider"><li>Unrelated site feature</li></div>
+HTML;
+$firebearSource = 'https://firebearstudio.com/the-improved-import.html';
+$firebearFields = ModuleSourceImporter::extract($firebear, $firebearSource);
+$check('599.00' === $firebearFields['price_from'], 'Firebear Open Graph USD price missing');
+$check('https://firebearstudio.com/blog/improved-import-magento-2-extension-manual.html' === $firebearFields['user_guide_url'], 'Firebear extension manual missing');
+$check(['https://firebearstudio.com/screen-1.png', 'https://firebearstudio.com/screen-2.png'] === $firebearFields['_images'], 'Firebear product carousel missing or contains unrelated images');
+$check(['Scheduled import and export', 'Map product attributes'] === $firebearFields['features'], 'Firebear product features missing or unrelated features leaked');
+$check(!isset(ModuleSourceImporter::extract(str_replace('USD', 'EUR', $firebear), $firebearSource)['price_from']), 'Non-USD Open Graph price must not be imported as USD');
+
+echo "Module importer: 15 checks passed.\n";

@@ -119,4 +119,15 @@ $check('Fallback' === $invalidJson['name'], 'Invalid JSON syntax must not be eva
 $noHyva = ModuleSourceImporter::extract('<header>Hyva-ready extensions</header><section><div id="buy-now-mobile-target"><h1>Product</h1></div><div><img alt="tick icon"><div>Custom fields</div></div></section>', $mageplazaSource);
 $check(!isset($noHyva['hyva_compatible']), 'Global Hyva marketing leaked into product compatibility');
 
-echo "Module importer: 22 checks passed.\n";
+$oldMageplaza = <<<'HTML'
+<meta property="og:image" content="/icon.svg">
+<div id="heroSlider"><img src="/icon.svg"><img src="data:image/svg+xml,placeholder" data-src="/Feature1.webp"><img data-src="/Feature2.webp"></div>
+<div id="heroSliderNav"><img data-src="/thumb.webp"></div>
+<div id="mp-screenshots"><a data-fancybox="gallery" href="/S1.webp"><img data-src="/thumb1.webp"></a><a data-fancybox="gallery" href="/S2.gif">Animation</a><a data-fancybox="gallery" href="/S3.webp">Screenshot</a></div>
+<a data-fancybox="gallery" href="/unrelated.webp">Unrelated</a>
+HTML;
+$oldImages = ModuleSourceImporter::extract($oldMageplaza, $mageplazaSource);
+$check(['https://www.mageplaza.com/Feature1.webp', 'https://www.mageplaza.com/Feature2.webp', 'https://www.mageplaza.com/S1.webp', 'https://www.mageplaza.com/S3.webp'] === $oldImages['_images'], 'Older Mageplaza hero or separate screenshots missing, or unsupported media leaked');
+$check('https://www.mageplaza.com/Feature1.webp' === $oldImages['_image'], 'Unsupported SVG icon must not replace a usable raster cover');
+
+echo "Module importer: 24 checks passed.\n";

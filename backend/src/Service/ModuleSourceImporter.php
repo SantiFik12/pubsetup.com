@@ -263,8 +263,19 @@ final readonly class ModuleSourceImporter
         }
         $fallbackPictures = $pictures;
         $pictures = [];
+        // Older Mageplaza pages use unlinked hero images and a separate screenshots block.
+        // SVG icons and GIF animations are not supported by our raster image storage.
+        foreach ($xpath->query('//*[@id="heroSlider"]//img[not(ancestor::a[@data-fancybox="gallery"])]') as $node) {
+            if (!$node instanceof \DOMElement) {
+                continue;
+            }
+            $picture = $node->getAttribute('data-src') ?: $node->getAttribute('src');
+            if (preg_match('~\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {
+                $pictures[] = self::resolveUrl($url, $picture);
+            }
+        }
         // Mageplaza's main slider links to the originals; thumbnail and feature media repeat them.
-        foreach ($xpath->query('//*[@id="heroSlider"]//a[@data-fancybox="gallery" and @href]') as $node) {
+        foreach ($xpath->query('//*[@id="heroSlider" or @id="mp-screenshots"]//a[@data-fancybox="gallery" and @href]') as $node) {
             if ($node instanceof \DOMElement && !in_array($node->getAttribute('data-type'), ['iframe', 'video'], true)) {
                 $picture = $node->getAttribute('href');
                 if (preg_match('~\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {

@@ -103,7 +103,7 @@ final class AdminController extends AbstractController
                     AdminCatalog::url($affiliate);
                     $fields = $source->fetch($url);
                     $this->catalog->importModule($url, $affiliate, $vendor, $fields);
-                    $this->addFlash('success', 'Модуль загружен по ссылке.');
+                    $this->addFlash('success', sprintf('Модуль «%s» загружен по ссылке.', $fields['name']));
                     foreach ($fields['_warnings'] ?? [] as $warning) {
                         $this->addFlash('warning', $warning);
                     }

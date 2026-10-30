@@ -130,4 +130,8 @@ $oldImages = ModuleSourceImporter::extract($oldMageplaza, $mageplazaSource);
 $check(['https://www.mageplaza.com/Feature1.webp', 'https://www.mageplaza.com/Feature2.webp', 'https://www.mageplaza.com/S1.webp', 'https://www.mageplaza.com/S3.webp'] === $oldImages['_images'], 'Older Mageplaza hero or separate screenshots missing, or unsupported media leaked');
 $check('https://www.mageplaza.com/Feature1.webp' === $oldImages['_image'], 'Unsupported SVG icon must not replace a usable raster cover');
 
-echo "Module importer: 24 checks passed.\n";
+$promotionalMageplaza = str_replace('<div id="heroSlider">', '<div id="heroSlider"><img alt="flash sale" src="/media/flash-slae/badge_installation_osc.png"><img alt="Free installation badge" src="/free-install.png">', $oldMageplaza);
+$promotionalImages = ModuleSourceImporter::extract($promotionalMageplaza, $mageplazaSource);
+$check($oldImages['_images'] === $promotionalImages['_images'] && $oldImages['_image'] === $promotionalImages['_image'], 'Promotional installation overlays must not enter the cover or gallery');
+
+echo "Module importer: 25 checks passed.\n";

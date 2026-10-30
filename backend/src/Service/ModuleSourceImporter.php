@@ -270,6 +270,10 @@ final readonly class ModuleSourceImporter
                 continue;
             }
             $picture = $node->getAttribute('data-src') ?: $node->getAttribute('src');
+            // Promotional overlays are repeated inside slides but are not product images.
+            if (preg_match('/flash sale|free installation|badge[_-]installation/iu', $node->getAttribute('alt').' '.$picture)) {
+                continue;
+            }
             if (preg_match('~\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {
                 $pictures[] = self::resolveUrl($url, $picture);
             }

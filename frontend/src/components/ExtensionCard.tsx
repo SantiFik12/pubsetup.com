@@ -1,15 +1,13 @@
 "use client";
 
 import { Link } from "@/components/Link";
+import Image from "next/image";
+import { formatExtensionPrice } from "@/lib/extension-price";
 import { useCategory, usePartner, useServices } from "@/data/catalog";
 import type { Extension } from "@/data/types";
 import { tagSlug } from "@/lib/slug";
 import { useCompare } from "@/state/compare";
 import { BookOpen, Check, ExternalLink, Plus, Star, X, Zap } from "lucide-react";
-
-function formatPrice(extension: Extension) {
-  return extension.priceType === "free" ? "Free" : `from $${extension.priceFrom}`;
-}
 
 export function ExtensionCard({ ext }: { ext: Extension }) {
   const partner = usePartner(ext.partnerId);
@@ -23,8 +21,8 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
   return (
     <article data-testid="extension-card" className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-card">
       {cover && (
-        <a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
-          <img src={cover} alt={ext.name} title={ext.name} loading="lazy" width={960} height={540} className="h-full w-full object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
+        <a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="relative block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
+          <Image src={cover} alt={ext.name} title={ext.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px" unoptimized={cover.startsWith("http:")} className="object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
         </a>
       )}
       <div className="flex flex-1 flex-col p-5">
@@ -50,7 +48,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
           <div className="flex items-center gap-1.5">
             {ext.reviews > 0 ? <><Star className="h-4 w-4 fill-warning text-warning"/><span className="font-medium">{ext.rating}</span><span className="text-muted-foreground">({ext.reviews})</span></> : <span className="text-xs text-muted-foreground">No reviews yet</span>}
           </div>
-          <span className="font-semibold text-foreground">{formatPrice(ext)}</span>
+          <span className="font-semibold text-foreground">{formatExtensionPrice(ext)}</span>
         </div>
         <div className="grid grid-cols-1 gap-2 min-[370px]:grid-cols-2">
           <a href={`/go/affiliate/${encodeURIComponent(ext.slug)}`} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex min-h-9 items-center justify-center gap-1 rounded-xl bg-primary px-2 py-2 text-xs font-semibold text-primary-foreground transition hover:bg-primary-hover">View Partner Offer <ExternalLink className="h-3 w-3"/></a>

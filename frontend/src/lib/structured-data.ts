@@ -1,4 +1,5 @@
 import type { BlogPost, Category, Extension, Partner, Service } from "@/data/types";
+import { isFreeExtension } from "./extension-price.ts";
 import { absoluteUrl, metaDescription, validDate } from "./seo.ts";
 
 export function extensionSchema(extension: Extension, partner?: Partner, category?: Category) {
@@ -10,9 +11,9 @@ export function extensionSchema(extension: Extension, partner?: Partner, categor
     image: [...new Set([extension.coverImage, ...extension.gallery].filter(Boolean))].map(absoluteUrl),
     ...(partner ? { brand: { "@type": "Brand", name: partner.name } } : {}),
     ...(category ? { category: category.name } : {}),
-    // Prices belong to the vendor. A missing/unknown price must not become a free offer.
-    ...(vendorUrl && (extension.priceFrom > 0 || extension.priceType === "free") ? { offers: {
-      "@type": "Offer", price: extension.priceType === "free" ? 0 : extension.priceFrom, priceCurrency: "USD", url: vendorUrl,
+    // Match the catalog: zero-priced modules and explicitly free licenses are free offers.
+    ...(vendorUrl && (extension.priceFrom > 0 || isFreeExtension(extension)) ? { offers: {
+      "@type": "Offer", price: isFreeExtension(extension) ? 0 : extension.priceFrom, priceCurrency: "USD", url: vendorUrl,
       ...(partner ? { seller: { "@type": "Organization", name: partner.name, ...(partner.website ? { url: partner.website } : {}) } } : {}),
     } } : {}),
   };

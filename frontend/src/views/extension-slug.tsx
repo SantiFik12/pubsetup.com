@@ -3,6 +3,7 @@
 import { Link } from "@/components/Link";
 import { ProductGallery } from "@/components/ProductGallery";
 import { useCategory, useExtension, usePartner, useServices } from "@/data/catalog";
+import { isFreeExtension } from "@/lib/extension-price";
 import { tagSlug } from "@/lib/slug";
 import { BookOpen, Check, ExternalLink, Star, Zap } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -44,7 +45,7 @@ export default function ExtensionPage() {
             <div className="flex flex-wrap gap-1.5">{ext.tags.map(tag => <Link key={tag} to="/tag/$slug" params={{slug:tagSlug(tag)}} className="rounded-full border border-border/50 bg-card px-2 py-1 text-xs font-medium text-muted-foreground shadow-soft hover:bg-accent hover:text-accent-foreground">{tag}</Link>)}</div>
             <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
               <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Partner price</div>
-              <div className="mt-1 flex items-baseline gap-1">{ext.priceType === "free" ? <span className="text-3xl font-bold">Free</span> : <><span className="text-sm text-muted-foreground">from</span><span className="text-3xl font-bold">${ext.priceFrom}</span></>}</div>
+              <div className="mt-1 flex items-baseline gap-1">{isFreeExtension(ext) ? <span className="text-3xl font-bold">FREE</span> : <><span className="text-sm text-muted-foreground">from</span><span className="text-3xl font-bold">${ext.priceFrom}</span></>}</div>
               <div className="mt-5 grid gap-2 sm:grid-cols-2">
                 <a href={`/go/affiliate/${encodeURIComponent(ext.slug)}`} target="_blank" rel="noopener noreferrer sponsored" className="ring-focus inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover">Buy on Partner Website <ExternalLink className="h-4 w-4 shrink-0"/></a>
                 {ext.userGuideUrl && <a href={ext.userGuideUrl} target="_blank" rel="noopener noreferrer" className="ring-focus inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold transition hover:bg-surface"><BookOpen className="h-4 w-4"/> User Guide / README</a>}

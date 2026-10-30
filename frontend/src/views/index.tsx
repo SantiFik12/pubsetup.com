@@ -1,5 +1,6 @@
 "use client";
 import { ExtensionCard } from "@/components/ExtensionCard";
+import Image from "next/image";
 import { Link } from "@/components/Link";
 import { useExtensions, useService } from "@/data/catalog";
 import { ArrowRight,BadgeCheck,Check,Gauge,Puzzle,Rocket,ShieldCheck,Sparkles,Star,Wrench } from "lucide-react";
@@ -114,7 +115,9 @@ export default function HomePage({ showAdminDemo = true }: { showAdminDemo?: boo
                 <span className="ml-3 text-xs text-muted-foreground">magento.pubsetup.com</span>
               </div>
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-card">
-                <img
+                <Image
+                  fill
+                  sizes="(min-width: 1024px) 600px, (min-width: 768px) 50vw, 100vw"
                   src={magentoDemoPreview}
                   alt="Live Magento 2 demo store on magento.pubsetup.com"
                   title="Live Magento 2 demo store on magento.pubsetup.com"

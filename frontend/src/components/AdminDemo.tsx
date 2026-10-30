@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowUpRight, Eye, ShieldCheck } from "lucide-react";
 
 export function AdminDemo({ enabled = true }: { enabled?: boolean }) {
@@ -25,11 +26,11 @@ export function AdminDemo({ enabled = true }: { enabled?: boolean }) {
               <span className="ml-3 text-xs text-muted-foreground">Magento Admin · Read-only demo</span>
             </div>
             <div className="relative aspect-[1440/782] w-full overflow-hidden bg-card">
-              <img
+              <Image
                 src="/assets/magento-admin-demo-preview.webp"
                 alt="Magento admin dashboard with Customers, Marketing, Content, Reports, Stores and System sections"
-                width={1440}
-                height={782}
+                fill
+                sizes="(min-width: 1024px) 600px, (min-width: 768px) 50vw, 100vw"
                 loading="lazy"
                 decoding="async"
                 className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.02]"

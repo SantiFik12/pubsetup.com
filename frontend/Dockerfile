@@ -20,4 +20,5 @@ COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/public ./public
 USER node
+RUN mkdir -p /app/.next/cache/images
 CMD ["node", "server.js"]

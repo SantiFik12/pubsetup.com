@@ -30,7 +30,7 @@ test('products identify the vendor as seller and do not copy third-party ratings
   assert.equal(schema.offers.seller.name, 'Vendor');
   assert.equal(schema.offers.url, extension.originalUrl);
   assert.ok(!('aggregateRating' in schema));
-  assert.ok(!('offers' in extensionSchema({ ...extension, priceFrom: 0 })));
+  assert.equal(extensionSchema({ ...extension, priceFrom: 0 }).offers.price, 0);
   assert.equal(extensionSchema({ ...extension, priceFrom: 0, priceType: 'free' }).offers.price, 0);
 });
 

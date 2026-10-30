@@ -1,4 +1,5 @@
 "use client";
+import { formatExtensionPrice } from "@/lib/extension-price";
 import { Link } from "@/components/Link";
 import { useCatalog } from "@/data/catalog";
 import { useCompare } from "@/state/compare";
@@ -28,7 +29,7 @@ export default function ComparePage() {
 
   const rows: { label: string; render: (e: typeof exts[number]) => React.ReactNode; highlight?: boolean }[] = [
     { label: "Partner", render: (e) => findPartner(e.partnerId)?.name ?? "—" },
-    { label: "Price", render: (e) => e.priceType === "free" ? "Free" : `from $${e.priceFrom}`, highlight: true },
+    { label: "Price", render: (e) => formatExtensionPrice(e), highlight: true },
     { label: "License", render: (e) => e.priceType },
     { label: "Rating", render: (e) => <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-warning text-warning" />{e.rating} ({e.reviews})</span>, highlight: true },
     { label: "Magento versions", render: (e) => e.magentoVersions.join(", ") },

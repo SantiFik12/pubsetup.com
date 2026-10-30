@@ -8,6 +8,7 @@
     "start": "next start --hostname 0.0.0.0",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:images": "node tests/image-optimization-http.mjs",
     "test:seo": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --test-isolation=none tests/seo.test.mjs",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test --test-isolation=none tests/*.test.mjs"
   },

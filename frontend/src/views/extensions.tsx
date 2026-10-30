@@ -1,4 +1,5 @@
 "use client";
+import { isFreeExtension } from "@/lib/extension-price";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
 import { useAllTags,useCatalog } from "@/data/catalog";
@@ -32,9 +33,9 @@ export default function ExtensionsPage() {
     if (search.tag) list = list.filter((e) => e.tags.includes(search.tag));
     if (search.hyva) list = list.filter((e) => e.hyvaCompatible);
     if (search.pwa) list = list.filter((e) => e.pwaReady);
-    if (search.price === "free") list = list.filter((e) => e.priceType === "free");
-    if (search.price === "lt300") list = list.filter((e) => e.priceFrom < 300 && e.priceType !== "free");
-    if (search.price === "gte300") list = list.filter((e) => e.priceFrom >= 300);
+    if (search.price === "free") list = list.filter(isFreeExtension);
+    if (search.price === "lt300") list = list.filter((e) => e.priceFrom < 300 && !isFreeExtension(e));
+    if (search.price === "gte300") list = list.filter((e) => e.priceFrom >= 300 && !isFreeExtension(e));
 
     switch (search.sort) {
       case "newest": list.sort((a, b) => b.createdAt.localeCompare(a.createdAt)); break;

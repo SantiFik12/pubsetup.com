@@ -76,6 +76,8 @@ services:
       target: production
     restart: unless-stopped
     init: true
+    volumes:
+      - frontend_image_cache:/app/.next/cache/images
     environment:
       SITE_URL: ${SITE_URL:?Set SITE_URL}
       API_INTERNAL_URL: http://gateway:8082
@@ -106,5 +108,6 @@ services:
       retries: 6
     logging: *logging
 volumes:
+  frontend_image_cache:
   module_uploads:
   postgres_data:

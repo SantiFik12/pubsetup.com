@@ -40,6 +40,29 @@ final readonly class ModuleSourceImporter
         return $content;
     }
 
+    private static function structuredData(string $json): ?array
+    {
+        $value = json_decode($json, true, 64);
+        if (JSON_ERROR_CTRL_CHAR === json_last_error()) {
+            // Some vendors put literal newlines in review strings. Escape control characters
+            // inside JSON strings only; retain normal whitespace and reject other syntax errors.
+            $fixed = '';
+            $inString = false;
+            $escaped = false;
+            for ($i = 0, $length = strlen($json); $i < $length; ++$i) {
+                $char = $json[$i];
+                if ('"' === $char && !$escaped) {
+                    $inString = !$inString;
+                }
+                $fixed .= $inString && ord($char) < 32 ? sprintf('\\u%04x', ord($char)) : $char;
+                $escaped = '\\' === $char && !$escaped;
+            }
+            $value = json_decode($fixed, true, 64);
+        }
+
+        return is_array($value) ? $value : null;
+    }
+
     public static function extract(string $html, string $url = ''): array
     {
         $document = new \DOMDocument();
@@ -71,11 +94,7 @@ final readonly class ModuleSourceImporter
         };
         $product = [];
         foreach ($xpath->query('//script[@type="application/ld+json"]') as $node) {
-            try {
-                $value = json_decode($node->textContent, true, 64, JSON_THROW_ON_ERROR);
-            } catch (\JsonException) {
-                continue;
-            }
+            $value = self::structuredData($node->textContent);
             if (is_array($value) && ($found = $findProduct($value))) {
                 $product = $found;
                 break;
@@ -119,7 +138,7 @@ final readonly class ModuleSourceImporter
             }
         };
         foreach ($xpath->query('//script[@type="application/ld+json"]') as $node) {
-            $value = json_decode($node->textContent, true);
+            $value = self::structuredData($node->textContent);
             if (is_array($value)) {
                 $collectCategories($value);
             }
@@ -187,6 +206,13 @@ final readonly class ModuleSourceImporter
                 $features[] = $text;
             }
         }
+        // Mageplaza's product summary uses icon/text rows rather than a feature list.
+        foreach ($xpath->query('//*[@id="buy-now-mobile-target"]/parent::*//div[img[@alt="tick icon"]]/div') as $node) {
+            $text = $clean($node->textContent, 400);
+            if ('' !== $text && !preg_match('/chat now/iu', $text)) {
+                $features[] = $text;
+            }
+        }
         if ([] !== $features) {
             $result['features'] = array_slice(array_values(array_unique($features)), 0, 20);
             if (preg_match('/hyv[äa].*(?:ready|compatible)|(?:ready|compatible).*hyv[äa]/iu', implode(' ', $features))) {
@@ -237,6 +263,15 @@ final readonly class ModuleSourceImporter
         }
         $fallbackPictures = $pictures;
         $pictures = [];
+        // Mageplaza's main slider links to the originals; thumbnail and feature media repeat them.
+        foreach ($xpath->query('//*[@id="heroSlider"]//a[@data-fancybox="gallery" and @href]') as $node) {
+            if ($node instanceof \DOMElement && !in_array($node->getAttribute('data-type'), ['iframe', 'video'], true)) {
+                $picture = $node->getAttribute('href');
+                if (preg_match('~\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {
+                    $pictures[] = self::resolveUrl($url, $picture);
+                }
+            }
+        }
         // Firebear renders its screenshot carousel directly in the product-images block.
         foreach ($xpath->query('//*['.$class('product-img-box').' and '.$class('product-images').']//img') as $node) {
             if (!$node instanceof \DOMElement) {
@@ -313,7 +348,7 @@ final readonly class ModuleSourceImporter
             $pictures = $fallbackPictures;
         }
         if ([] !== $pictures) {
-            $result['_images'] = array_slice(array_values(array_unique($pictures)), 0, 25);
+            $result['_images'] = array_slice(array_values(array_unique($pictures)), 0, 32);
             $result['_image'] = $result['_images'][0];
         }
 

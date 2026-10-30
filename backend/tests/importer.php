@@ -83,4 +83,40 @@ $check(['https://firebearstudio.com/screen-1.png', 'https://firebearstudio.com/s
 $check(['Scheduled import and export', 'Map product attributes'] === $firebearFields['features'], 'Firebear product features missing or unrelated features leaked');
 $check(!isset(ModuleSourceImporter::extract(str_replace('USD', 'EUR', $firebear), $firebearSource)['price_from']), 'Non-USD Open Graph price must not be imported as USD');
 
-echo "Module importer: 15 checks passed.\n";
+$mageplaza = <<<'HTML'
+<meta property="og:image" content="/icon.png"><meta name="description" content="Fallback description">
+<script type="application/ld+json">{
+"@type":"Product","name":"One Step Checkout","description":"Product description",
+"aggregateRating":{"ratingValue":"5.0","bestRating":5,"reviewCount":"227"},
+"offers":{"price":"199","priceCurrency":"USD"},
+"review":[{"reviewBody":"Line one
+Line two with \"quotes\" and \\path"}]
+}</script>
+<section><div id="buy-now-mobile-target"><h1>Checkout</h1></div>
+<div><img alt="tick icon"><div>Compatible with Hyva theme</div></div>
+<div><img alt="tick icon"><div>Customize checkout on one page</div></div>
+<div><img alt="tick icon"><div>Need API/GraphQL? Chat now</div></div></section>
+<a href="https://docs.mageplaza.com/magento/one-step-checkout/standard">User Guide</a>
+<div id="heroSlider">GALLERY</div>
+<div id="heroSliderNav"><img src="/thumbnail.webp"></div>
+<a data-fancybox="gallery" href="/unrelated.webp">Unrelated gallery</a>
+HTML;
+$gallery = '';
+for ($index = 1; $index <= 28; ++$index) {
+    $gallery .= '<a data-fancybox="gallery" href="//cdn2.mageplaza.com/shot-'.$index.'.webp"><img data-src="/thumb.webp"></a>';
+}
+$gallery .= '<a data-fancybox="gallery" href="//cdn2.mageplaza.com/shot-1.webp">Duplicate</a><a data-fancybox="gallery" data-type="iframe" href="/video.webp">Video</a><a data-fancybox="gallery" href="javascript:alert(1)">Invalid</a>';
+$mageplaza = str_replace('GALLERY', $gallery, $mageplaza);
+$mageplazaSource = 'https://www.mageplaza.com/magento-2-one-step-checkout-extension/';
+$mageplazaFields = ModuleSourceImporter::extract($mageplaza, $mageplazaSource);
+$check('199.00' === $mageplazaFields['price_from'] && 5.0 === $mageplazaFields['rating'] && 227 === $mageplazaFields['reviews'], 'JSON-LD with raw review newlines lost product data');
+$check(28 === count($mageplazaFields['_images']) && 'https://cdn2.mageplaza.com/shot-28.webp' === $mageplazaFields['_images'][27], 'Mageplaza gallery truncated or contains unrelated/duplicate/video images');
+$check('https://cdn2.mageplaza.com/shot-1.webp' === $mageplazaFields['_image'], 'Mageplaza cover must use the first screenshot');
+$check(['Compatible with Hyva theme', 'Customize checkout on one page'] === $mageplazaFields['features'] && $mageplazaFields['hyva_compatible'], 'Product features or explicit Hyva compatibility missing');
+$check('https://docs.mageplaza.com/magento/one-step-checkout/standard' === $mageplazaFields['user_guide_url'], 'Mageplaza standard guide missing');
+$invalidJson = ModuleSourceImporter::extract('<h1>Fallback</h1><script type="application/ld+json">{"@type":"Product","name":runJavaScript()}</script>', $mageplazaSource);
+$check('Fallback' === $invalidJson['name'], 'Invalid JSON syntax must not be evaluated or repaired');
+$noHyva = ModuleSourceImporter::extract('<header>Hyva-ready extensions</header><section><div id="buy-now-mobile-target"><h1>Product</h1></div><div><img alt="tick icon"><div>Custom fields</div></div></section>', $mageplazaSource);
+$check(!isset($noHyva['hyva_compatible']), 'Global Hyva marketing leaked into product compatibility');
+
+echo "Module importer: 22 checks passed.\n";

@@ -142,17 +142,47 @@ final readonly class AdminCatalog
     {
         $name = $this->text($input, 'name', 200, true);
         $slug = $this->slug($this->text($input, 'slug', 150), $name);
-        $values = ['name' => $name, 'slug' => $slug, 'description' => $this->text($input, 'description', 10000), 'website' => self::url($this->text($input, 'website', 2048)), 'logo_letter' => mb_substr($name, 0, 2)];
+        $template = AffiliateLinks::validate($this->text($input, 'affiliate_template', 2048));
+        $applyAll = isset($input['apply_affiliate_all']);
+        if ($applyAll && '' === $template) {
+            throw new \InvalidArgumentException('Для применения ко всем модулям заполните affiliate-ссылку вендора.');
+        }
+        // Validate expanded links before changing either the vendor or overrides.
+        foreach ($this->db->fetchAll('SELECT original_url,affiliate_url FROM extensions WHERE partner_id::text=:id', ['id' => $id ?? '']) as $module) {
+            if ('' !== $template && ($applyAll || '' === $module['affiliate_url'])) {
+                AffiliateLinks::resolve('', $template, $module['original_url']);
+            }
+        }
+        $values = ['name' => $name, 'slug' => $slug, 'description' => $this->text($input, 'description', 10000), 'website' => self::url($this->text($input, 'website', 2048)), 'logo_letter' => mb_substr($name, 0, 2), 'affiliate_template' => $template];
         if ([] !== $this->db->fetchAll('SELECT id FROM partners WHERE slug=:slug AND id::text <> :id', ['slug' => $slug, 'id' => $id ?? ''])) {
             throw new \InvalidArgumentException('Вендор с таким slug уже существует.');
         }
-        if ($id) {
-            $this->db->execute('UPDATE partners SET name=:name,slug=:slug,description=:description,website=:website,logo_letter=:logo_letter WHERE id=:id', $values + ['id' => $id]);
+        $connection = $this->db->connection();
+        // Automatic vendor creation also runs inside importModule's transaction.
+        $ownTransaction = !$connection->inTransaction();
+        if ($ownTransaction) {
+            $connection->beginTransaction();
+        }
+        try {
+            if ($id) {
+                $this->db->execute('UPDATE partners SET name=:name,slug=:slug,description=:description,website=:website,logo_letter=:logo_letter,affiliate_template=:affiliate_template WHERE id=:id', $values + ['id' => $id]);
+            } else {
+                $id = $this->db->fetchAll('INSERT INTO partners(name,slug,description,website,logo_letter,affiliate_template) VALUES (:name,:slug,:description,:website,:logo_letter,:affiliate_template) RETURNING id', $values)[0]['id'];
+            }
+            if ($applyAll) {
+                $this->db->execute("UPDATE extensions SET affiliate_url='' WHERE partner_id=:id", ['id' => $id]);
+            }
+            if ($ownTransaction) {
+                $connection->commit();
+            }
 
             return $id;
+        } catch (\Throwable $error) {
+            if ($ownTransaction) {
+                $connection->rollBack();
+            }
+            throw $error;
         }
-
-        return $this->db->fetchAll('INSERT INTO partners(name,slug,description,website,logo_letter) VALUES (:name,:slug,:description,:website,:logo_letter) RETURNING id', $values)[0]['id'];
     }
 
     public function saveModule(array $input, ?string $id): string

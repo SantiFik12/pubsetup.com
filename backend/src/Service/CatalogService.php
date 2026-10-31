@@ -26,6 +26,18 @@ final readonly class CatalogService
             $rows = $this->db->fetchAll('SELECT row_to_json(r) AS data FROM ('.$query.') r');
             $result[$key] = array_map(static fn (array $row): array => json_decode($row['data'], true, 512, JSON_THROW_ON_ERROR), $rows);
         }
+        $templates = array_column($result['partners'], 'affiliate_template', 'id');
+        foreach ($result['extensions'] as &$module) {
+            $template = $templates[$module['partner_id']] ?? '';
+            if ('' === $module['affiliate_url'] && '' !== $template) {
+                try {
+                    $module['affiliate_url'] = AffiliateLinks::resolve('', $template, $module['original_url']);
+                } catch (\InvalidArgumentException) {
+                    // Invalid legacy/source URLs must not break the public catalog.
+                }
+            }
+        }
+        unset($module);
 
         return $result;
     }

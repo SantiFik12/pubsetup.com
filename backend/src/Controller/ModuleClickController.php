@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\AdminCatalog;
+use App\Service\AffiliateLinks;
 use App\Service\Database;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,13 +17,14 @@ final class ModuleClickController
     #[Route('/go/{kind}/{slug}', methods: ['GET'], requirements: ['kind' => 'module|affiliate'])]
     public function click(Request $request, string $kind, string $slug, Database $db): RedirectResponse
     {
-        $module = $db->fetchAll('SELECT id,slug,original_url,affiliate_url FROM extensions WHERE slug=:slug AND published=true', ['slug' => $slug])[0] ?? null;
+        $module = $db->fetchAll('SELECT e.id,e.slug,e.original_url,e.affiliate_url,p.affiliate_template FROM extensions e JOIN partners p ON p.id=e.partner_id WHERE e.slug=:slug AND e.published=true', ['slug' => $slug])[0] ?? null;
         if (!$module) {
             throw new NotFoundHttpException();
         }
-        $target = 'module' === $kind ? '/extension/'.rawurlencode($module['slug']) : ($module['affiliate_url'] ?: $module['original_url']);
+        $target = '/extension/'.rawurlencode($module['slug']);
         if ('affiliate' === $kind) {
             try {
+                $target = AffiliateLinks::resolve($module['affiliate_url'], $module['affiliate_template'], $module['original_url']);
                 AdminCatalog::url($target, true);
             } catch (\InvalidArgumentException) {
                 throw new NotFoundHttpException();

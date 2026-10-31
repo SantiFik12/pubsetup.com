@@ -76,7 +76,7 @@ final class AdminController extends AbstractController
             $vendor = array_replace($vendor, $request->request->all());
             try {
                 $saved = $this->catalog->saveVendor($request->request->all(), $id);
-                $this->addFlash('success', 'Вендор сохранён. Теперь можно добавить его модули.');
+                $this->addFlash('success', 'Вендор сохранён. Affiliate-настройка применяется к его модулям без индивидуальной ссылки.');
 
                 return $this->redirectToRoute('admin_dashboard', ['vendor' => $saved]);
             } catch (\InvalidArgumentException $e) {

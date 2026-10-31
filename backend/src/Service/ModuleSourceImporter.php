@@ -375,6 +375,9 @@ final readonly class ModuleSourceImporter
             $result['_image'] = $result['_images'][0];
         }
 
+        if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['magezon.com', 'www.magezon.com'], true)) {
+            $result = self::magezonData($xpath, $result);
+        }
         if ($isWyomind) {
             $result = self::wyomindData($xpath, $url, $result);
             if (!isset($result['price_from']) && isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
@@ -383,6 +386,52 @@ final readonly class ModuleSourceImporter
         }
 
         return array_replace($result, ModuleSeo::generate($result));
+    }
+
+    private static function magezonData(\DOMXPath $xpath, array $result): array
+    {
+        $class = static fn (string $name): string => 'contains(concat(" ",normalize-space(@class)," ")," '.$name.' ")';
+        $main = $xpath->query('//*['.$class('product-info-main').']')->item(0);
+        if (!$main) {
+            return $result;
+        }
+        // Use the main product only: integrations, upsells and marketing copy
+        // elsewhere on the page carry different prices and review summaries.
+        $currency = strtoupper(trim($xpath->query('.//*[@itemprop="priceCurrency"]/@content', $main)->item(0)->textContent ?? ''));
+        if ('' === $currency) {
+            $currency = strtoupper(trim($xpath->query('//meta[@property="product:price:currency" or @property="og:price:currency" or @itemprop="priceCurrency"]/@content')->item(0)->textContent ?? ''));
+        }
+        $priceNode = $xpath->query('.//*['.$class('price-box').']//*[@data-price-type="finalPrice"]', $main)->item(0);
+        $price = null;
+        $visible = '';
+        if ($priceNode instanceof \DOMElement) {
+            $price = $priceNode->getAttribute('data-price-amount') ?: null;
+            $visible = trim($priceNode->textContent);
+        } else {
+            $visible = trim($xpath->query('.//*['.$class('price-box').']//*['.$class('price').' and not(ancestor::*['.$class('old-price').'])]', $main)->item(0)->textContent ?? '');
+        }
+        if (null === $price && preg_match('/^\$\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)$/', $visible, $match)) {
+            $price = str_replace(',', '', $match[1]);
+        }
+        if (!isset($result['price_from']) && ('USD' === $currency || ('' === $currency && preg_match('/^\$\s*\d/', $visible))) && is_numeric($price) && (float) $price >= 0 && (float) $price < 100000000) {
+            $result['price_from'] = number_format((float) $price, 2, '.', '');
+        }
+        $summary = $xpath->query('.//*['.$class('product-reviews-summary').']', $main)->item(0);
+        if ($summary) {
+            $percent = $xpath->query('.//*['.$class('rating-result').']/@title', $summary)->item(0)->textContent ?? '';
+            if (!isset($result['rating']) && preg_match('/^\s*(\d+(?:\.\d+)?)%\s*$/', $percent, $match) && (float) $match[1] <= 100) {
+                $result['rating'] = round((float) $match[1] / 20, 2);
+            }
+            $count = $xpath->query('.//*['.$class('reviews-actions').']//a['.$class('view').']', $summary)->item(0)->textContent ?? '';
+            if (!isset($result['reviews']) && preg_match('/^\s*([\d,]+)\s+(?:customer\s+)?reviews?\b/i', str_replace("\u{00A0}", ' ', $count), $match)) {
+                $reviews = str_replace(',', '', $match[1]);
+                if (ctype_digit($reviews) && (float) $reviews < 2147483647) {
+                    $result['reviews'] = (int) $reviews;
+                }
+            }
+        }
+
+        return $result;
     }
 
     private static function wyomindData(\DOMXPath $xpath, string $url, array $result): array

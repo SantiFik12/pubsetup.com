@@ -227,4 +227,38 @@ foreach ([
 }
 $check($wyomindSource === $usdFields['_source_url'], 'USD request must preserve original source identity');
 
+$magezonSource = 'https://www.magezon.com/magento-2-form-builder.html';
+$magezon = <<<'HTML'
+<html><head><meta name="description" content="Build product forms"></head><body>
+<div class="product-info-main"><h1>Magento 2 Form Builder Extension</h1>
+<div class="product-reviews-summary"><div class="rating-summary"><div class="rating-result" title="96%"><span style="width:96%">96% of 100</span></div></div><div class="reviews-actions"><a class="action view" href="#reviews"><span>64</span>&nbsp;<span>Customer Reviews</span></a><a href="#review-form">Add Your Review</a></div></div>
+<div class="price-box price-final_price" data-product-id="42"><span class="old-price"><span data-price-type="oldPrice" data-price-amount="199"><span class="price">$199.00</span></span></span><span data-price-type="finalPrice" data-price-amount="169"><span class="price">$169.00</span></span></div>
+<div class="product-options-wrapper"><label>Installation Support + $50.00</label><label>Priority Support + $99.00</label></div>
+</div>
+<div class="product-reviews-summary"><div class="rating-result" title="95%"></div><div class="reviews-actions"><a class="action view">44 Customer Reviews</a></div></div>
+<div class="price-box"><span data-price-type="finalPrice" data-price-amount="49"><span class="price">$49.00</span></span></div>
+</body></html>
+HTML;
+$magezonFields = ModuleSourceImporter::extract($magezon, $magezonSource);
+$check('169.00' === $magezonFields['price_from'], 'Magezon must use final product price, excluding old prices, options and integrations');
+$check(4.8 === $magezonFields['rating'] && 64 === $magezonFields['reviews'], 'Magezon main review summary missing or replaced by a secondary marketing summary');
+$magezonWithCurrency = str_replace('<h1>', '<meta itemprop="priceCurrency" content="USD"><h1>', $magezon);
+$hiddenPrice = ModuleSourceImporter::extract(str_replace('$169.00', '', $magezonWithCurrency), $magezonSource);
+$check('169.00' === $hiddenPrice['price_from'], 'Magezon numeric USD final price missing when the visible price is rendered by JavaScript');
+$nonUsdMagezon = ModuleSourceImporter::extract(str_replace('content="USD"', 'content="EUR"', $magezonWithCurrency), $magezonSource);
+$check(!isset($nonUsdMagezon['price_from']), 'Magezon explicit non-USD currency must not be imported as USD');
+$visibleOnlyMagezon = ModuleSourceImporter::extract(str_replace('data-price-type="finalPrice" data-price-amount="169"', '', str_replace('<span class="old-price"><span data-price-type="oldPrice" data-price-amount="199"><span class="price">$199.00</span></span></span>', '', $magezon)), $magezonSource);
+$check('169.00' === $visibleOnlyMagezon['price_from'], 'Magezon visible USD price fallback missing');
+$withoutMain = ModuleSourceImporter::extract(str_replace('product-info-main', 'other-block', $magezon), $magezonSource);
+$check(!isset($withoutMain['rating']) && !isset($withoutMain['reviews']) && !isset($withoutMain['price_from']), 'Magezon adapter must not read unrelated page content');
+foreach (['https://other.example/product', 'https://magezon.com.example/product'] as $otherSource) {
+    $otherFields = ModuleSourceImporter::extract($magezon, $otherSource);
+    $check(!isset($otherFields['rating']) && !isset($otherFields['reviews']) && !isset($otherFields['price_from']), 'Magezon rules leaked into another vendor');
+}
+$invalidMagezon = ModuleSourceImporter::extract(str_replace(['title="96%"', '64</span>', 'data-price-amount="169"'], ['title="196%"', '-64</span>', 'data-price-amount="-169"'], $magezon), $magezonSource);
+$check(!isset($invalidMagezon['rating']) && !isset($invalidMagezon['reviews']) && !isset($invalidMagezon['price_from']), 'Magezon invalid numeric data accepted');
+$structuredMagezon = str_replace('<h1>', '<script type="application/ld+json">{"@type":"Product","offers":{"price":179,"priceCurrency":"USD"},"aggregateRating":{"ratingValue":4.7,"reviewCount":65}}</script><h1>', $magezon);
+$structuredFields = ModuleSourceImporter::extract($structuredMagezon, $magezonSource);
+$check('179.00' === $structuredFields['price_from'] && 4.7 === $structuredFields['rating'] && 65 === $structuredFields['reviews'], 'Magezon HTML fallback must preserve valid structured product data');
+
 echo 'Module importer: '.$checks." checks passed.\n";

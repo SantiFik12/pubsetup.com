@@ -65,13 +65,18 @@ final readonly class ModuleSourceImporter
 
     public static function extract(string $html, string $url = ''): array
     {
+        $isWyomind = in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['wyomind.com', 'www.wyomind.com'], true);
         $document = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
         try {
-            // Malformed vendor reviews can nest beyond libxml's default depth and
-            // silently discard the product JSON-LD at the end of the page.
+            // Wyomind's malformed reviews exceed libxml's default depth and hide
+            // its JSON-LD. Keep the existing parser limits for every other vendor.
             // Downloads remain bounded to 3 MiB and external entities stay disabled.
-            $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_PARSEHUGE);
+            $flags = LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING;
+            if ($isWyomind) {
+                $flags |= LIBXML_PARSEHUGE;
+            }
+            $document->loadHTML('<?xml encoding="UTF-8">'.$html, $flags);
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors($previous);
@@ -370,7 +375,7 @@ final readonly class ModuleSourceImporter
             $result['_image'] = $result['_images'][0];
         }
 
-        if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['wyomind.com', 'www.wyomind.com'], true)) {
+        if ($isWyomind) {
             $result = self::wyomindData($xpath, $url, $result);
             if (isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
                 $result['_warnings'][] = 'Цена источника указана в '.$offer['priceCurrency'].'. Укажите цену в USD вручную; автоматическая конвертация не выполняется.';

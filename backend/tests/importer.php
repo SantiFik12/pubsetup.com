@@ -6,7 +6,9 @@ require dirname(__DIR__).'/vendor/autoload.php';
 
 use App\Service\ModuleSourceImporter;
 
-$check = static function (bool $condition, string $message): void {
+$checks = 0;
+$check = static function (bool $condition, string $message) use (&$checks): void {
+    ++$checks;
     if (!$condition) {
         throw new RuntimeException($message);
     }
@@ -170,4 +172,38 @@ $check(!isset($withoutPanels['user_guide_url']) && !isset($withoutPanels['magent
 $withoutPictures = ModuleSourceImporter::extract(str_replace('id="overview"', 'id="other-overview"', $wyomind), $wyomindSource);
 $check(['https://www.wyomind.com/icon.png'] === $withoutPictures['_images'], 'Wyomind product icon fallback missing');
 
-echo "Module importer: 35 checks passed.\n";
+// Common Magento/Hyva and metadata fallbacks must continue to work alongside
+// vendor-specific HTML. These IDs also occur on unrelated storefronts.
+$common = <<<'HTML'
+<meta property="og:image" content="/fallback.png"><meta name="description" content="Generic fallback description">
+<h1>Fallback title</h1>
+<script type="application/ld+json">{"@graph":[{"@type":"Product","name":"Privacy Module","brand":{"name":"Original Vendor"},"description":"Original product description","offers":{"price":159,"priceCurrency":"USD"},"aggregateRating":{"ratingValue":90,"bestRating":100,"reviewCount":12}}]}</script>
+<div class="product attribute overview">Original product introduction</div>
+<div class="amsite-features-block"><li>Hyvä-ready storefront</li><li>Customer privacy</li></div>
+<a href="/user-guides/privacy/">User Guide</a>
+<div>Magento 2.4.8-p5; 2.4.7-p10</div>
+<div id="userguide">Other content</div><div id="compatibility"><li>2.4.1</li></div>
+<div id="overview"><div class="feature-1col"><p><strong>Foreign feature</strong><br>Do not override the original</p><a data-lightbox="overview" href="/pub/media/extensions/other/overview/foreign.png">Foreign screenshot</a></div></div>
+GALLERY
+HTML;
+$galleryFormats = [
+    'Magento' => '<script type="text/x-magento-init">{"[data-gallery-role=gallery-placeholder]":{"mage/gallery/gallery":{"data":[{"full":"/original.png"},{"full":"/second.png"}]}}}</script>',
+    'Hyva' => '<script>const gallery = {"initialImages":[{"full":"/original.png","type":"image"},{"full":"/second.png","type":"image"}],"active":0};</script>',
+];
+foreach (['www.amasty.com', 'www.mageworx.com', 'plumrocket.com', 'firebearstudio.com', 'www.mageplaza.com', 'unknown-vendor.example', 'wyomind.com.example', 'shop.wyomind.com'] as $host) {
+    foreach ($galleryFormats as $format => $galleryHtml) {
+        $origin = 'https://'.$host;
+        $fields = ModuleSourceImporter::extract(str_replace('GALLERY', $galleryHtml, $common), $origin.'/products/privacy.html');
+        $check('Privacy Module' === $fields['name'] && 'Original Vendor' === $fields['_vendor'] && 'Original product introduction' === $fields['short_description'], $host.': common product data changed');
+        $check('159.00' === $fields['price_from'] && 4.5 === $fields['rating'] && 12 === $fields['reviews'] && !isset($fields['_warnings']), $host.': price, rating or warnings affected by another vendor');
+        $check([$origin.'/original.png', $origin.'/second.png'] === $fields['_images'], $host.': '.$format.' gallery overridden by unrelated HTML');
+        $check($origin.'/user-guides/privacy/' === $fields['user_guide_url'] && ['2.4.8-p5', '2.4.7-p10'] === $fields['magento_versions'], $host.': guide or versions overridden by Wyomind rules');
+        $check(['Hyvä-ready storefront', 'Customer privacy'] === $fields['features'] && $fields['hyva_compatible'], $host.': features or Hyva compatibility changed');
+    }
+}
+$genericFields = ModuleSourceImporter::extract('<h1>Generic module</h1><meta name="description" content="Generic description"><meta property="og:image" content="/cover.png">', 'https://unknown-vendor.example/module');
+$check('Generic module' === $genericFields['name'] && 'Generic description' === $genericFields['description'] && ['https://unknown-vendor.example/cover.png'] === $genericFields['_images'], 'Unknown vendor must retain generic HTML/Open Graph fallback');
+// Import order must not leak the previous vendor's fields or gallery.
+$check($wyomindFields === ModuleSourceImporter::extract($wyomind, $wyomindSource), 'Interleaved vendor imports changed Wyomind results');
+
+echo 'Module importer: '.$checks." checks passed.\n";

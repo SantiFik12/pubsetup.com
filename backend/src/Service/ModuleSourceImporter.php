@@ -68,7 +68,10 @@ final readonly class ModuleSourceImporter
         $document = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
         try {
-            $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+            // Malformed vendor reviews can nest beyond libxml's default depth and
+            // silently discard the product JSON-LD at the end of the page.
+            // Downloads remain bounded to 3 MiB and external entities stay disabled.
+            $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING | LIBXML_PARSEHUGE);
         } finally {
             libxml_clear_errors();
             libxml_use_internal_errors($previous);
@@ -367,7 +370,80 @@ final readonly class ModuleSourceImporter
             $result['_image'] = $result['_images'][0];
         }
 
+        if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['wyomind.com', 'www.wyomind.com'], true)) {
+            $result = self::wyomindData($xpath, $url, $result);
+            if (isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
+                $result['_warnings'][] = 'Цена источника указана в '.$offer['priceCurrency'].'. Укажите цену в USD вручную; автоматическая конвертация не выполняется.';
+            }
+        }
+
         return array_replace($result, ModuleSeo::generate($result));
+    }
+
+    private static function wyomindData(\DOMXPath $xpath, string $url, array $result): array
+    {
+        $clean = static fn (string $html): string => trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(preg_replace('~<br\s*/?>~i', ' ', $html)), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        // The overview ends with promotions for other extensions. Exclude the
+        // entire content block linking to another product, including its images.
+        $pictures = [];
+        $features = [];
+        foreach ($xpath->query('//*[@id="overview"]/div[contains(concat(" ",normalize-space(@class)," ")," feature-1col ")]') as $block) {
+            foreach ($xpath->query('.//a[@href]', $block) as $link) {
+                if (!$link instanceof \DOMElement) {
+                    continue;
+                }
+                $path = parse_url(self::resolveUrl($url, $link->getAttribute('href')), PHP_URL_PATH) ?? '';
+                if (str_starts_with($path, '/magento2/') && str_ends_with($path, '.html') && $path !== parse_url($url, PHP_URL_PATH)) {
+                    continue 2;
+                }
+            }
+            foreach ($xpath->query('.//p[strong and .//br]', $block) as $node) {
+                $text = preg_replace('/\s+:/u', ':', $clean(str_replace('</strong>', ': ', $node->ownerDocument->saveHTML($node))));
+                if ('' !== $text) {
+                    $features[] = mb_substr($text, 0, 400);
+                }
+            }
+            foreach ($xpath->query('.//a[@data-lightbox and @href] | .//img[not(ancestor::a[@data-lightbox])]', $block) as $node) {
+                if (!$node instanceof \DOMElement) {
+                    continue;
+                }
+                $reference = 'a' === $node->nodeName ? $node->getAttribute('href') : ($node->getAttribute('data-src') ?: $node->getAttribute('src'));
+                $picture = self::resolveUrl($url, $reference);
+                if (preg_match('~^https?://.+/pub/media/extensions/.+/overview/.+\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {
+                    $pictures[] = $picture;
+                }
+            }
+        }
+        if ([] !== $pictures) {
+            $result['_images'] = array_slice(array_values(array_unique($pictures)), 0, 32);
+            $result['_image'] = $result['_images'][0];
+        }
+        if ([] !== $features) {
+            $result['features'] = array_slice(array_values(array_unique($features)), 0, 20);
+        }
+        // This vendor embeds the product manual; generic guide scanning finds
+        // unrelated Magento instructions inside it instead.
+        unset($result['user_guide_url'], $result['magento_versions']);
+        if ($xpath->query('//*[@id="userguide"]')->length > 0) {
+            $result['user_guide_url'] = strtok($url, '?#').'?section=documentation#userguide';
+        }
+        $versions = [];
+        foreach ($xpath->query('//*[@id="compatibility"]//li') as $node) {
+            $version = trim($node->textContent);
+            if (preg_match('/^2\.[34](?:\.\d+)?(?:-p\d+)?$/', $version)) {
+                $versions[] = $version;
+            }
+        }
+        if ([] !== $versions) {
+            $result['magento_versions'] = array_slice(array_values(array_unique($versions)), -20);
+        }
+        $categories = [];
+        foreach ($xpath->query('//*[@id="breadcrumb"]//a') as $node) {
+            $categories[] = $clean($node->textContent);
+        }
+        $result['_categories'] = array_values(array_unique([...array_reverse($categories), ...$result['_categories']]));
+
+        return $result;
     }
 
     public static function resolveUrl(string $base, string $reference): string
@@ -422,7 +498,7 @@ final readonly class ModuleSourceImporter
         if ([] !== $saved) {
             $data['gallery'] = $saved;
         }
-        $data['_warnings'] = [];
+        $data['_warnings'] ??= [];
         if (!isset($data['cover_image'])) {
             $data['_warnings'][] = 'Не удалось скачать главное изображение.';
         }

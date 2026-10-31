@@ -134,4 +134,40 @@ $promotionalMageplaza = str_replace('<div id="heroSlider">', '<div id="heroSlide
 $promotionalImages = ModuleSourceImporter::extract($promotionalMageplaza, $mageplazaSource);
 $check($oldImages['_images'] === $promotionalImages['_images'] && $oldImages['_image'] === $promotionalImages['_image'], 'Promotional installation overlays must not enter the cover or gallery');
 
-echo "Module importer: 25 checks passed.\n";
+$wyomindSource = 'https://www.wyomind.com/magento2/google-shopping-magento.html';
+$wyomind = <<<'HTML'
+<html><body><h1>Simple Google Shopping</h1>
+<nav id="breadcrumb"><a>Magento 2 extensions</a><a>Google Shopping and Data Feed Management</a></nav>
+<div id="userguide"><p>Old instructions mention Magento 2.4.1</p><a href="https://devdocs.magento.com/docs/cron.html">Magento cron guide</a><a data-lightbox="overview" href="/pub/media/extensions/other/userguide/guide.png">Guide screenshot</a></div>
+<div id="overview">
+<div class="feature-1col"><p><strong>Product types</strong><br>Export all product types</p><p><strong>Library<br></strong>Find attributes</p>
+<a data-lightbox="overview" href="/pub/media/extensions/sgs/overview/intro.gif">Animation</a>
+<a data-lightbox="overview" href="/pub/media/extensions/sgs/overview/first.png"><img src="/thumbnail.png"></a>
+<img src="/pub/media/extensions/sgs/overview/second.png">
+<a data-lightbox="overview" href="/pub/media/extensions/sgs/overview/first.png">Duplicate</a></div>
+<div class="feature-1col"><img src="/pub/media/templates/banner.jpg"></div>
+<div class="feature-1col"><p><strong>Other module</strong><br>Unrelated feature</p><a data-lightbox="overview" href="/pub/media/extensions/sgs/overview/advert.png">Advert</a><a href="/magento2/data-feed-manager-magento.html">See more details</a></div>
+</div>
+<div id="compatibility"><ul><li>2.3.7</li><li>2.4.8</li><li>2.4.9</li><li>2.4.9</li><li>2.0.1</li></ul></div>
+DEEP_REVIEWS
+<script type="application/ld+json">{"@type":"Product","name":"Simple Google Shopping","brand":"Wyomind","description":"Export your products to Google Shopping","image":"/icon.png","offers":{"price":145,"priceCurrency":"EUR"},"aggregateRating":{"ratingValue":4.9,"reviewCount":545}}</script>
+<script type="application/ld+json">{"@type":"Product","name":"Wyomind","aggregateRating":{"ratingValue":4.9,"reviewCount":2610}}</script>
+</body></html>
+HTML;
+// Broken review markup pushes the JSON-LD past libxml's default depth limit.
+$wyomind = str_replace('DEEP_REVIEWS', str_repeat('<div>', 300).str_repeat('</div>', 300), $wyomind);
+$wyomindFields = ModuleSourceImporter::extract($wyomind, $wyomindSource);
+$check('Wyomind' === $wyomindFields['_vendor'] && 4.9 === $wyomindFields['rating'] && 545 === $wyomindFields['reviews'], 'Wyomind product JSON-LD lost after deeply nested reviews or replaced by site-wide ratings');
+$check(['https://www.wyomind.com/pub/media/extensions/sgs/overview/first.png', 'https://www.wyomind.com/pub/media/extensions/sgs/overview/second.png'] === $wyomindFields['_images'], 'Wyomind gallery must include originals and unlinked screenshots, excluding GIFs, thumbnails, documentation and other product promotions');
+$check($wyomindFields['_images'][0] === $wyomindFields['_image'], 'Wyomind cover must use first supported product screenshot');
+$check(['Product types: Export all product types', 'Library: Find attributes'] === $wyomindFields['features'], 'Wyomind features missing or mixed with other modules');
+$check($wyomindSource.'?section=documentation#userguide' === $wyomindFields['user_guide_url'], 'Wyomind embedded manual replaced by a Magento guide');
+$check(['2.3.7', '2.4.8', '2.4.9'] === $wyomindFields['magento_versions'], 'Wyomind versions must come from compatibility badges, not documentation');
+$check('Google Shopping and Data Feed Management' === $wyomindFields['_categories'][0], 'Wyomind product category missing');
+$check(!isset($wyomindFields['price_from']) && str_contains($wyomindFields['_warnings'][0], 'EUR'), 'Wyomind EUR price must warn without being imported as USD');
+$withoutPanels = ModuleSourceImporter::extract(str_replace(['id="userguide"', 'id="compatibility"'], ['id="other-guide"', 'id="other-versions"'], $wyomind), $wyomindSource);
+$check(!isset($withoutPanels['user_guide_url']) && !isset($withoutPanels['magento_versions']), 'Wyomind must not fall back to unrelated guide/version mentions');
+$withoutPictures = ModuleSourceImporter::extract(str_replace('id="overview"', 'id="other-overview"', $wyomind), $wyomindSource);
+$check(['https://www.wyomind.com/icon.png'] === $withoutPictures['_images'], 'Wyomind product icon fallback missing');
+
+echo "Module importer: 35 checks passed.\n";

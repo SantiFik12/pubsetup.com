@@ -206,4 +206,25 @@ $check('Generic module' === $genericFields['name'] && 'Generic description' === 
 // Import order must not leak the previous vendor's fields or gallery.
 $check($wyomindFields === ModuleSourceImporter::extract($wyomind, $wyomindSource), 'Interleaved vendor imports changed Wyomind results');
 
+$usdHtml = '<div id="currency-switcher"><a>USD</a></div><div class="price-box"><span class="price">$164</span></div>';
+$usdFields = ModuleSourceImporter::extract(str_replace('<h1>', $usdHtml.'<h1>', $wyomind), $wyomindSource);
+$check('164.00' === $usdFields['price_from'] && !isset($usdFields['_warnings']), 'Selected Wyomind USD storefront price must override stale EUR JSON-LD without a currency warning');
+$unconfirmedUsd = ModuleSourceImporter::extract(str_replace('<h1>', str_replace('>USD<', '>EUR<', $usdHtml).'<h1>', $wyomind), $wyomindSource);
+$check(!isset($unconfirmedUsd['price_from']), 'Dollar symbol alone must not override the selected currency');
+$thousands = ModuleSourceImporter::extract(str_replace('<h1>', str_replace('$164', '$1,234.50', $usdHtml).'<h1>', $wyomind), $wyomindSource);
+$check('1234.50' === $thousands['price_from'], 'USD thousands and decimal separators parsed incorrectly');
+$invalidPrice = ModuleSourceImporter::extract(str_replace('<h1>', str_replace('$164', '€145', $usdHtml).'<h1>', $wyomind), $wyomindSource);
+$check(!isset($invalidPrice['price_from']), 'EUR visible price must not be imported as USD');
+foreach ([
+    $wyomindSource => $wyomindSource.'?c=usd',
+    $wyomindSource.'?c=eur&ref=partner#overview' => $wyomindSource.'?c=usd&ref=partner',
+    $wyomindSource.'?c=usd' => $wyomindSource.'?c=usd',
+    'https://wyomind.com/product.html?ref=partner' => 'https://wyomind.com/product.html?ref=partner&c=usd',
+    'https://www.mageplaza.com/product?c=eur#overview' => 'https://www.mageplaza.com/product?c=eur#overview',
+    'https://wyomind.com.example/product?c=eur' => 'https://wyomind.com.example/product?c=eur',
+] as $input => $expectedUrl) {
+    $check($expectedUrl === ModuleSourceImporter::requestUrl($input), 'Currency request URL changed another vendor or lost existing query parameters: '.$input);
+}
+$check($wyomindSource === $usdFields['_source_url'], 'USD request must preserve original source identity');
+
 echo 'Module importer: '.$checks." checks passed.\n";

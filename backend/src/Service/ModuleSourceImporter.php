@@ -377,7 +377,7 @@ final readonly class ModuleSourceImporter
 
         if ($isWyomind) {
             $result = self::wyomindData($xpath, $url, $result);
-            if (isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
+            if (!isset($result['price_from']) && isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
                 $result['_warnings'][] = 'Цена источника указана в '.$offer['priceCurrency'].'. Укажите цену в USD вручную; автоматическая конвертация не выполняется.';
             }
         }
@@ -388,6 +388,16 @@ final readonly class ModuleSourceImporter
     private static function wyomindData(\DOMXPath $xpath, string $url, array $result): array
     {
         $clean = static fn (string $html): string => trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(preg_replace('~<br\s*/?>~i', ' ', $html)), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        // Wyomind leaves EUR in JSON-LD even after switching to USD. Only trust
+        // the visible price when the currency selector confirms USD.
+        $currency = $clean($xpath->query('//*[@id="currency-switcher"]/a')->item(0)->textContent ?? '');
+        $price = $clean($xpath->query('//*[contains(concat(" ",normalize-space(@class)," ")," price-box ")]//*[contains(concat(" ",normalize-space(@class)," ")," price ")]')->item(0)->textContent ?? '');
+        if ('USD' === strtoupper($currency) && preg_match('/^\$\s*(\d+(?:,\d{3})*(?:\.\d{1,2})?)$/', $price, $match)) {
+            $amount = (float) str_replace(',', '', $match[1]);
+            if ($amount < 100000000) {
+                $result['price_from'] = number_format($amount, 2, '.', '');
+            }
+        }
         // The overview ends with promotions for other extensions. Exclude the
         // entire content block linking to another product, including its images.
         $pictures = [];
@@ -480,7 +490,7 @@ final readonly class ModuleSourceImporter
 
     public function fetch(string $url): array
     {
-        $data = self::extract($this->download($url, 3 * 1024 * 1024), $url);
+        $data = self::extract($this->download(self::requestUrl($url), 3 * 1024 * 1024), $url);
         if (empty($data['name']) || empty($data['description'])) {
             throw new \RuntimeException('На странице не найдены название и описание модуля. Проверьте ссылку на товар.');
         }
@@ -515,5 +525,18 @@ final readonly class ModuleSourceImporter
         }
 
         return $data;
+    }
+
+    public static function requestUrl(string $url): string
+    {
+        // Wyomind exposes its own USD prices via the currency switcher. Use
+        // those prices without changing the stored original or affiliate URL.
+        if (!in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['wyomind.com', 'www.wyomind.com'], true)) {
+            return $url;
+        }
+        parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $query);
+        $query['c'] = 'usd';
+
+        return strtok($url, '?#').'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 }

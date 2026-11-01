@@ -20,7 +20,7 @@ export function VendorLogo({ partner, className = "" }: { partner?: Partner; cla
 
   return (
     <div aria-hidden="true" className={cn("flex shrink-0 items-center justify-center overflow-hidden bg-brand-soft font-bold text-primary", className, "rounded-full")}>
-      {source ? <Image src={source} alt="" width={64} height={64} unoptimized referrerPolicy="no-referrer" className={cn("h-full w-full", wideSource === source ? "object-cover object-center" : "object-contain p-2")} onLoad={event => { if (event.currentTarget.naturalWidth > event.currentTarget.naturalHeight * 1.8) setWideSource(source); }} onError={() => setFailed(previous => [...previous, source])} /> : (partner?.logoLetter || partner?.name.slice(0, 2))}
+      {source ? <Image src={source} alt="" width={64} height={64} unoptimized referrerPolicy="no-referrer" className={cn("h-full w-full", wideSource === source ? "object-cover object-left" : "object-contain p-2")} onLoad={event => { if (event.currentTarget.naturalWidth > event.currentTarget.naturalHeight * 1.8) setWideSource(source); }} onError={() => setFailed(previous => [...previous, source])} /> : (partner?.logoLetter || partner?.name.slice(0, 2))}
     </div>
   );
 }

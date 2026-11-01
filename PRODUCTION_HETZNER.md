@@ -119,4 +119,4 @@ Postmark остаётся доступен при `MAIL_TRANSPORT=postmark`, с 
 
 ## Плановое обновление модулей
 
-После деплоя кода с миграцией `010_catalog_refresh.sql` выполните из каталога проекта `bash scripts/catalog-refresh.sh --dry-run`, затем один раз `sudo bash scripts/install-catalog-refresh-timer.sh`. Таймер запускает обход по воскресеньям в 22:00 Europe/Warsaw. Результаты доступны в админке в разделе «Обновления каталога». Полная инструкция и диагностика — [docs/catalog-refresh.md](docs/catalog-refresh.md).
+После деплоя кода с миграцией `010_catalog_refresh.sql` один раз выполните из каталога проекта `sudo bash scripts/install-catalog-refresh-timer.sh`. Ручной обход при установке не требуется. Таймер запускает обход по воскресеньям в 22:00 Europe/Warsaw. Результаты доступны в админке в разделе «Обновления каталога». Полная инструкция и диагностика — [docs/catalog-refresh.md](docs/catalog-refresh.md).

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
+use App\Command\CatalogRefreshCommand;
 use App\Service\AdminCatalog;
 use App\Service\CatalogRefresh;
 use App\Service\Database;
 use App\Service\ModuleImages;
 use App\Service\ModuleSource;
 use App\Service\ModuleSourceImporter;
+use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\HttpClient\MockHttpClient;
 
 $checks = 0;
@@ -95,10 +97,19 @@ $source = new class($fields) implements ModuleSource {
 $source->fields[$urls['A']]['price_from'] = '150.00';
 $source->failures[$urls['C']] = 403;
 $worker = new CatalogRefresh($db, $catalog, $source);
-$dry = $worker->run($vendor, true, 0);
+$events = [];
+$dry = $worker->run($vendor, true, 0, false, static function (array $event) use (&$events): void { $events[] = $event; });
+$check('start' === $events[0]['event'] && 3 === $events[0]['total'], 'Progress did not announce run size');
+$results = array_values(array_filter($events, static fn (array $event): bool => 'result' === $event['event']));
+$check(3 === count($results) && [1, 2, 3] === array_column($results, 'completed'), 'Progress missed or double-counted modules');
 $check(100.0 === (float) $catalog->module($ids['A'])['price_from'] && 0 === $source->downloads, 'Dry run mutated data or downloaded media');
 $check(1 === (int) $db->fetchAll("SELECT count(*) AS n FROM catalog_refresh_items WHERE run_id=:run AND status='would_update'", ['run' => $dry])[0]['n'], 'Dry run planned incorrect number of updates');
 $check('partial' === $db->fetchAll('SELECT status FROM catalog_refresh_runs WHERE id=:id', ['id' => $dry])[0]['status'], 'Partial failure incorrectly reported as success');
+$command = new CommandTester(new CatalogRefreshCommand($worker));
+$command->execute(['--vendor' => $vendor, '--dry-run' => true, '--delay' => '0']);
+$console = $command->getDisplay();
+$check(str_contains($console, '[1/3]') && str_contains($console, '[3/3]') && str_contains($console, 'чтение страницы'), 'CLI did not show live per-module progress');
+$check(str_contains($console, 'ГОТОВО. Частично успешно.') && str_contains($console, 'Проверено: 3/3') && str_contains($console, 'планируется обновить: 1') && str_contains($console, 'ошибок: 1'), 'CLI final summary missing or inaccurate');
 $first = $worker->run($vendor, false, 0);
 $firstItems = $db->fetchAll('SELECT module_id,status FROM catalog_refresh_items WHERE run_id=:run', ['run' => $first]);
 $statuses = array_column($firstItems, 'status', 'module_id');

@@ -24,10 +24,24 @@ final readonly class AdminCatalog
 
     public function modules(?string $vendor, string $query): array
     {
-        return $this->db->fetchAll("SELECT e.id,e.slug,e.name,e.original_url,e.affiliate_url,e.cover_image,e.price_from,e.published,e.updated_at,e.source_updated_at,p.name AS vendor,c.name AS category,COALESCE(m.module_clicks,0) AS module_clicks,COALESCE(m.affiliate_clicks,0) AS affiliate_clicks
+        return $this->modulePage($vendor, $query)['modules'];
+    }
+
+    public function modulePage(?string $vendor, string $query, int $page = 1): array
+    {
+        $query = mb_substr(trim($query), 0, 150);
+        $where = "(:vendor = '' OR e.partner_id::text = :vendor_id) AND (:q = '' OR e.name ILIKE :pattern OR e.slug ILIKE :slug_pattern)";
+        $pattern = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $query).'%';
+        $params = ['vendor' => $vendor ?? '', 'vendor_id' => $vendor ?? '', 'q' => $query, 'pattern' => $pattern, 'slug_pattern' => $pattern];
+        $total = (int) $this->db->fetchAll('SELECT count(*) AS total FROM extensions e WHERE '.$where, $params)[0]['total'];
+        $pageSize = 25;
+        $pages = max(1, (int) ceil($total / $pageSize));
+        $page = max(1, min($page, $pages));
+        $modules = $this->db->fetchAll('SELECT e.id,e.slug,e.name,e.original_url,e.affiliate_url,e.cover_image,e.price_from,e.published,e.updated_at,e.source_updated_at,p.name AS vendor,c.name AS category,COALESCE(m.module_clicks,0) AS module_clicks,COALESCE(m.affiliate_clicks,0) AS affiliate_clicks
             FROM extensions e JOIN partners p ON p.id=e.partner_id JOIN categories c ON c.id=e.category_id LEFT JOIN module_metrics m ON m.extension_id=e.id
-            WHERE (:vendor = '' OR e.partner_id::text = :vendor_id) AND (:q = '' OR e.name ILIKE :pattern OR e.slug ILIKE :slug_pattern) ORDER BY p.name,e.name",
-            ['vendor' => $vendor ?? '', 'vendor_id' => $vendor ?? '', 'q' => $query, 'pattern' => '%'.$query.'%', 'slug_pattern' => '%'.$query.'%']);
+            WHERE '.$where.' ORDER BY p.name,e.name,e.id LIMIT '.$pageSize.' OFFSET :offset', $params + ['offset' => ($page - 1) * $pageSize]);
+
+        return ['modules' => $modules, 'total' => $total, 'page' => $page, 'pages' => $pages, 'from' => $total ? ($page - 1) * $pageSize + 1 : 0, 'to' => min($page * $pageSize, $total)];
     }
 
     public function module(string $id): ?array

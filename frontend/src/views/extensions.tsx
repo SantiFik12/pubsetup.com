@@ -1,10 +1,11 @@
 "use client";
-import { isFreeExtension } from "@/lib/extension-price";
+import { extensionPage, filteredExtensions } from "@/lib/extension-list";
+import { ExtensionPagination } from "@/components/ExtensionPagination";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
 import { useAllTags,useCatalog } from "@/data/catalog";
 import { useCatalogSearch } from "@/lib/search";
-import { featuredCategory, featuredExtensions } from "@/lib/featured";
+import { featuredCategory } from "@/lib/featured";
 import { useCompare } from "@/state/compare";
 import * as Select from "@radix-ui/react-select";
 import { Check,ChevronDown,ChevronUp,Search,SlidersHorizontal,Star } from "lucide-react";
@@ -18,36 +19,14 @@ export default function ExtensionsPage() {
   const allTags = useAllTags();
 
   const update = (patch: Partial<typeof search>) => {
-    navigate({ search: (prev: typeof search) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: typeof search) => ({ ...prev, ...patch, page: "1" }) });
   };
 
-  const filtered = useMemo(() => {
-    let list = search.cat === featuredCategory ? featuredExtensions(extensions) : extensions.slice();
-    if (search.q) {
-      const q = search.q.trim().toLowerCase();
-      list = list.filter((e) => [e.name, e.shortDescription, e.description, partners.find((p) => p.id === e.partnerId)?.name, ...e.tags]
-        .filter(Boolean).join(" ").toLowerCase().includes(q));
-    }
-    if (search.cat && search.cat !== featuredCategory) list = list.filter((e) => e.categoryId === search.cat);
-    if (search.partner) list = list.filter((e) => e.partnerId === search.partner);
-    if (search.tag) list = list.filter((e) => e.tags.includes(search.tag));
-    if (search.hyva) list = list.filter((e) => e.hyvaCompatible);
-    if (search.pwa) list = list.filter((e) => e.pwaReady);
-    if (search.price === "free") list = list.filter(isFreeExtension);
-    if (search.price === "lt300") list = list.filter((e) => e.priceFrom < 300 && !isFreeExtension(e));
-    if (search.price === "gte300") list = list.filter((e) => e.priceFrom >= 300 && !isFreeExtension(e));
-
-    switch (search.sort) {
-      case "newest": list.sort((a, b) => b.createdAt.localeCompare(a.createdAt)); break;
-      case "cheapest": list.sort((a, b) => a.priceFrom - b.priceFrom); break;
-      case "best-rated": list.sort((a, b) => b.rating - a.rating); break;
-      default: list.sort((a, b) => (b.views ?? 0) - (a.views ?? 0));
-    }
-    return list;
-  }, [search, extensions, partners]);
+  const filtered = useMemo(() => filteredExtensions(extensions, partners, search), [search, extensions, partners]);
+  const pagination = extensionPage(filtered, search.page);
 
   const clearAll = () =>
-    navigate({ search: { q: "", cat: "", partner: "", tag: "", price: "all", hyva: false, pwa: false, sort: "popular" } });
+    navigate({ search: { q: "", cat: "", partner: "", tag: "", price: "all", hyva: false, pwa: false, sort: "popular", page: "1" } });
 
   const advancedCount = Number(search.price !== "all") + Number(search.hyva) + Number(search.pwa) + Number(Boolean(search.tag));
   const hasFilters = Boolean(search.q || search.cat || search.partner || advancedCount);
@@ -127,9 +106,9 @@ export default function ExtensionsPage() {
         )}
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+      <div id="extension-results" className="mt-4 flex scroll-mt-24 flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-4">
-          <p role="status" className="text-sm text-muted-foreground">{filtered.length} result{filtered.length !== 1 && "s"}</p>
+          <p role="status" className="text-sm text-muted-foreground">{pagination.from}–{pagination.to} of {pagination.total} result{pagination.total !== 1 && "s"}</p>
           <button
             onClick={() => setAdvancedOpen((open) => !open)}
             aria-expanded={advancedOpen}
@@ -149,6 +128,7 @@ export default function ExtensionsPage() {
           </div>
         )}
       </div>
+      <ExtensionPagination search={search} page={pagination.page} pages={pagination.pages} />
       {filtered.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-dashed border-border px-4 py-12 text-center">
           <Star aria-hidden="true" className="mx-auto h-8 w-8 text-muted-foreground" />
@@ -157,9 +137,10 @@ export default function ExtensionsPage() {
         </div>
       ) : (
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((e) => <ExtensionCard key={e.id} ext={e} />)}
+          {pagination.items.map((e) => <ExtensionCard key={e.id} ext={e} />)}
         </div>
       )}
+      <ExtensionPagination search={search} page={pagination.page} pages={pagination.pages} />
     </section>
   );
 }

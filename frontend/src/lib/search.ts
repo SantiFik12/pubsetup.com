@@ -1,5 +1,6 @@
 "use client";
 import { usePathname,useRouter,useSearchParams } from "next/navigation";
+import { catalogDefaults } from "./extension-list";
 function useSearch<T extends object>(defaults: T): [T, (options: {search: T | ((previous: T) => T)}) => void] {
  const params = useSearchParams();
  const router = useRouter();
@@ -12,5 +13,5 @@ function useSearch<T extends object>(defaults: T): [T, (options: {search: T | ((
    router.replace(`${pathname}${query.size ? `?${query}` : ""}`, {scroll: false});
  }];
 }
-export function useCatalogSearch() { return useSearch({q:"", cat:"", partner:"", tag:"", price:"all", hyva:false, pwa:false, sort:"popular"}); }
+export function useCatalogSearch() { return useSearch(catalogDefaults); }
 export function useCheckoutSearch() { return useSearch<{service:string; extension?:string}>({service:"",extension:""}); }

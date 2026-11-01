@@ -57,7 +57,9 @@ final class AdminController extends AbstractController
         $query = mb_substr($request->query->getString('q'), 0, 150);
         $selected = '' !== $vendor ? $this->catalog->vendor($vendor) : null;
 
-        return $this->render('admin/dashboard.html.twig', ['vendors' => $this->catalog->vendors(), 'modules' => $this->catalog->modules($vendor, $query), 'selected' => $selected, 'totals' => $this->catalog->totals(), 'query' => $query]);
+        $data = $this->catalog->modulePage($vendor, $query, $request->query->getInt('page', 1));
+
+        return $this->render('admin/dashboard.html.twig', $data + ['vendors' => $this->catalog->vendors(), 'selected' => $selected, 'vendor_filter' => $vendor, 'totals' => $this->catalog->totals(), 'query' => $query]);
     }
 
     #[Route('/admin_panel/vendors/new', name: 'admin_vendor_new', methods: ['GET', 'POST'])]

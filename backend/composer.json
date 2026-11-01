@@ -47,7 +47,8 @@
             "@php tests/affiliate.php",
             "@php tests/catalog-refresh.php",
             "@php tests/catalog-delete.php",
-            "@php tests/admin.php"
+            "@php tests/admin.php",
+            "@php tests/module-pagination.php"
         ],
         "qa:phpstan": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=512M",
         "qa:cs-fixer": "@php vendor/bin/php-cs-fixer fix --dry-run --diff --sequential",

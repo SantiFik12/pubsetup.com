@@ -165,6 +165,27 @@ final readonly class ModuleSourceImporter
         foreach ($xpath->query('//link[contains(concat(" ",normalize-space(translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))," ")," apple-touch-icon ") or contains(concat(" ",normalize-space(translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))," ")," icon ")]/@href') as $node) {
             try {
                 $result['_vendor_logo'] = AdminCatalog::url(self::resolveUrl($url, $node->textContent), true);
+                $result['_vendor_favicon'] = $result['_vendor_logo'];
+                break;
+            } catch (\InvalidArgumentException) {
+            }
+        }
+        // Restrict logo discovery to site branding, never customer/partner badges.
+        $logoClass = 'contains(concat(" ",normalize-space(@class)," ")," logo ")';
+        foreach ($xpath->query('//*['.$logoClass.']//img | //img['.$logoClass.'] | //*['.$logoClass.']//*[local-name()="svg"] | //*[local-name()="svg" and '.$logoClass.']') as $node) {
+            if (!$node instanceof \DOMElement) {
+                continue;
+            }
+            if ('svg' === $node->localName) {
+                $result['_vendor_logo_svg'] = $document->saveXML($node);
+                break;
+            }
+            $reference = $node->getAttribute('data-src') ?: $node->getAttribute('src');
+            if ('' === trim($reference)) {
+                continue;
+            }
+            try {
+                $result['_vendor_logo'] = AdminCatalog::url(self::resolveUrl($url, $reference), true);
                 break;
             } catch (\InvalidArgumentException) {
             }
@@ -551,6 +572,16 @@ final readonly class ModuleSourceImporter
         if (empty($data['name']) || empty($data['description'])) {
             throw new \RuntimeException('На странице не найдены название и описание модуля. Проверьте ссылку на товар.');
         }
+        try {
+            if (!empty($data['_vendor_logo_svg'])) {
+                $data['_vendor_logo'] = $this->images->storeLogo($data['_vendor_logo_svg']);
+            } elseif (!empty($data['_vendor_logo']) && ($data['_vendor_logo'] !== ($data['_vendor_favicon'] ?? ''))) {
+                $data['_vendor_logo'] = $this->images->storeLogo($this->download($data['_vendor_logo'], 512 * 1024));
+            }
+        } catch (\Throwable) {
+            $data['_vendor_logo'] = $data['_vendor_favicon'] ?? '';
+        }
+        unset($data['_vendor_logo_svg']);
         $pictures = $data['_images'] ?? [];
         unset($data['_image'], $data['_images']);
         $saved = [];

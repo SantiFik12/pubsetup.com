@@ -90,7 +90,22 @@ try {
     throw new RuntimeException('SVG upload accepted');
 } catch (InvalidArgumentException) {
 }
-echo "Admin unit checks passed: URLs, metadata, currency handling, upload types.\n";
+$logoDirectory = sys_get_temp_dir().'/pubsetup-svg-logo-'.bin2hex(random_bytes(6));
+$logoImages = new ModuleImages($logoDirectory);
+$safeLogo = $logoImages->storeLogo('<svg viewbox="0 0 200 40" onload="alert(1)"><defs><lineargradient id="paint"><stop offset="0" stop-color="#ff6600"/></lineargradient></defs><path d="M0 0h20v20z" fill="url(#paint)" onclick="alert(1)"/><script>alert(1)</script><foreignObject><div>unsafe</div></foreignObject><image href="https://evil.example/tracker"/></svg>');
+$safeLogoFile = $logoDirectory.'/'.basename($safeLogo);
+$safeSvg = file_get_contents($safeLogoFile);
+$check(str_contains($safeSvg, 'viewBox="0 0 200 40"') && str_contains($safeSvg, '<linearGradient') && str_contains($safeSvg, 'fill="url(#paint)"'), 'Sanitized SVG lost vector geometry or gradients');
+$check(!preg_match('/script|onload|onclick|foreignObject|evil.example/', $safeSvg), 'Active SVG content survived logo storage');
+$check($safeLogo === AdminCatalog::logoUrl($safeLogo), 'Stored local logo URL rejected');
+unlink($safeLogoFile);
+rmdir($logoDirectory);
+try {
+    $logoImages->storeLogo('<!DOCTYPE svg [<!ENTITY x "unsafe">]><svg>&x;</svg>');
+    throw new RuntimeException('SVG DTD accepted');
+} catch (InvalidArgumentException) {
+}
+echo "Admin unit checks passed: URLs, metadata, currency handling, upload types and vector logos.\n";
 
 if (!getenv('ADMIN_TEST_DATABASE_URL')) {
     exit(0);
@@ -134,6 +149,8 @@ $zeroViews = array_values(array_filter($public['extensions'], static fn (array $
 $check(0 === (int) $zeroViews['views'], 'Modules without metrics must have zero views');
 $admin->updateFromSource($id, ['_vendor_logo' => 'https://example.com/favicon.ico', 'description' => 'Imported icon']);
 $check('https://example.com/favicon.ico' === $admin->vendor($vendor)['logo_url'], 'Source icon did not populate empty vendor logo');
+$admin->updateFromSource($id, ['_vendor_logo' => '/media/modules/'.str_repeat('a', 40).'.svg', '_vendor_favicon' => 'https://example.com/favicon.ico', 'description' => 'Upgrade favicon to vector logo']);
+$check('/media/modules/'.str_repeat('a', 40).'.svg' === $admin->vendor($vendor)['logo_url'], 'Existing favicon was not upgraded to source logo');
 $admin->saveVendor(['name' => 'QA vendor logo', 'slug' => $admin->vendor($vendor)['slug'], 'logo_url' => 'https://example.com/custom-logo.png'], $vendor);
 $admin->updateFromSource($id, ['_vendor_logo' => 'https://example.com/other-icon.ico', 'description' => 'Preserve manual logo']);
 $check('https://example.com/custom-logo.png' === $admin->vendor($vendor)['logo_url'], 'Source refresh overwrote manual vendor logo');

@@ -103,6 +103,15 @@ final readonly class AdminCatalog
         return $value;
     }
 
+    public static function logoUrl(string $value): string
+    {
+        if (preg_match('~^/media/modules/[a-f0-9]{40}\.(?:svg|png|jpg|webp)$~D', $value)) {
+            return $value;
+        }
+
+        return self::url($value);
+    }
+
     private function slug(string $slug, string $name): string
     {
         if ('' === trim($slug)) {
@@ -153,7 +162,7 @@ final readonly class AdminCatalog
                 AffiliateLinks::resolve('', $template, $module['original_url']);
             }
         }
-        $values = ['name' => $name, 'slug' => $slug, 'description' => $this->text($input, 'description', 10000), 'website' => self::url($this->text($input, 'website', 2048)), 'logo_letter' => mb_substr($name, 0, 2), 'affiliate_template' => $template, 'logo_url' => self::url($this->text($input, 'logo_url', 2048))];
+        $values = ['name' => $name, 'slug' => $slug, 'description' => $this->text($input, 'description', 10000), 'website' => self::url($this->text($input, 'website', 2048)), 'logo_letter' => mb_substr($name, 0, 2), 'affiliate_template' => $template, 'logo_url' => self::logoUrl($this->text($input, 'logo_url', 2048))];
         if ([] !== $this->db->fetchAll('SELECT id FROM partners WHERE slug=:slug AND id::text <> :id', ['slug' => $slug, 'id' => $id ?? ''])) {
             throw new \InvalidArgumentException('Вендор с таким slug уже существует.');
         }
@@ -343,8 +352,8 @@ final readonly class AdminCatalog
         }
         $stored = $this->module($id) ?? [];
         if (!empty($fields['_vendor_logo']) && isset($stored['partner_id'])) {
-            $logo = self::url($fields['_vendor_logo'], true);
-            $this->db->execute("UPDATE partners SET logo_url=:logo WHERE id=:id AND logo_url=''", ['logo' => $logo, 'id' => $stored['partner_id']]);
+            $logo = self::logoUrl($fields['_vendor_logo']);
+            $this->db->execute("UPDATE partners SET logo_url=:logo WHERE id=:id AND (logo_url='' OR logo_url=:favicon)", ['logo' => $logo, 'id' => $stored['partner_id'], 'favicon' => $fields['_vendor_favicon'] ?? '']);
         }
         $fields = array_replace($fields, ModuleSeo::generate(array_replace($stored, $fields)));
         $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];

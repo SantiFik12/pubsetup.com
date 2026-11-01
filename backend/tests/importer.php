@@ -282,4 +282,11 @@ $invalidIcon = ModuleSourceImporter::extract('<link rel="icon" href="javascript:
 $check('https://cdn.example.com/icon.png' === $invalidIcon['_vendor_logo'], 'Invalid favicon must be skipped for supported icon fallback');
 $check(!isset(ModuleSourceImporter::extract('<link rel="stylesheet" href="/style.css">', $magedelightSource)['_vendor_logo']), 'A vendor icon must not be invented from unrelated links');
 
+$branding = '<link rel="icon" href="/favicon.ico"><header><a class="logo" href="/"><img src="/brand/logo.svg"></a></header><img alt="customer logo" src="/customer-logo.png">';
+$brandingFields = ModuleSourceImporter::extract($branding, $magedelightSource);
+$check('https://www.magedelight.com/brand/logo.svg' === $brandingFields['_vendor_logo'] && 'https://www.magedelight.com/favicon.ico' === $brandingFields['_vendor_favicon'], 'Header logo must take priority over favicon and unrelated customer logos');
+$vectorBranding = ModuleSourceImporter::extract('<link rel="icon" href="/favicon.ico"><div class="logo"><a href="/"><svg viewBox="0 0 200 40"><path d="M0 0h20v20z"/></svg></a></div>', $magedelightSource);
+$check(str_contains($vectorBranding['_vendor_logo_svg'], '<svg') && str_contains($vectorBranding['_vendor_logo_svg'], 'viewbox='), 'Inline site logo missing');
+$check(!isset(ModuleSourceImporter::extract('<img alt="customer logo" src="/customer-logo.png">', $magedelightSource)['_vendor_logo']), 'Customer badges must not become site branding');
+
 echo 'Module importer: '.$checks." checks passed.\n";

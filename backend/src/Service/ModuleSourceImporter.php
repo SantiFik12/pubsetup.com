@@ -7,13 +7,15 @@ namespace App\Service;
 use Symfony\Component\HttpClient\NoPrivateNetworkHttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-final readonly class ModuleSourceImporter
+final readonly class ModuleSourceImporter implements ModuleSource
 {
     private HttpClientInterface $safeHttp;
+    private \stdClass $logoCache;
 
     public function __construct(HttpClientInterface $http, private ModuleImages $images)
     {
         $this->safeHttp = new NoPrivateNetworkHttpClient($http);
+        $this->logoCache = new \stdClass();
     }
 
     private function download(string $url, int $limit): string
@@ -30,7 +32,7 @@ final readonly class ModuleSourceImporter
         ]);
         if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
             $response->cancel();
-            throw new \RuntimeException('Источник недоступен. Проверьте ссылку или заполните данные вручную.');
+            throw new \RuntimeException('Источник вернул HTTP '.$response->getStatusCode().'.', $response->getStatusCode());
         }
         $content = $response->getContent();
         if (strlen($content) > $limit) {
@@ -410,7 +412,7 @@ final readonly class ModuleSourceImporter
         if ($isWyomind) {
             $result = self::wyomindData($xpath, $url, $result);
             if (!isset($result['price_from']) && isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
-                $result['_warnings'][] = 'Цена источника указана в '.$offer['priceCurrency'].'. Укажите цену в USD вручную; автоматическая конвертация не выполняется.';
+                $result['_warnings'][] = 'Цена источника указана в '.$offer['priceCurrency'].'. Цена в USD недоступна; автоматическая конвертация не выполняется, прежнее значение сохраняется.';
             }
         }
 
@@ -568,18 +570,41 @@ final readonly class ModuleSourceImporter
 
     public function fetch(string $url): array
     {
+        return $this->materialize($this->inspect($url));
+    }
+
+    public function inspect(string $url): array
+    {
         $data = self::extract($this->download(self::requestUrl($url), 3 * 1024 * 1024), $url);
         if (empty($data['name']) || empty($data['description'])) {
             throw new \RuntimeException('На странице не найдены название и описание модуля. Проверьте ссылку на товар.');
         }
+        if (empty($data['user_guide_url'])) {
+            $data['_warnings'][] = 'Ссылка на README / User Guide на странице не найдена.';
+        }
+
+        return $data;
+    }
+
+    public function materialize(array $data, array $media = []): array
+    {
+        $data['_warnings'] ??= [];
+        $usedMedia = [];
         try {
-            if (!empty($data['_vendor_logo_svg'])) {
-                $data['_vendor_logo'] = $this->images->storeLogo($data['_vendor_logo_svg']);
-            } elseif (!empty($data['_vendor_logo']) && ($data['_vendor_logo'] !== ($data['_vendor_favicon'] ?? ''))) {
-                $data['_vendor_logo'] = $this->images->storeLogo($this->download($data['_vendor_logo'], 512 * 1024));
+            $inline = $data['_vendor_logo_svg'] ?? '';
+            $logo = $data['_vendor_logo'] ?? '';
+            if ('' !== $inline || ('' !== $logo && $logo !== ($data['_vendor_favicon'] ?? ''))) {
+                $key = 'logo:'.hash('sha256', $inline ?: $logo);
+                $cached = $media[$key] ?? $this->logoCache->{$key} ?? '';
+                if (!$this->images->exists($cached)) {
+                    $cached = $this->images->storeLogo($inline ?: $this->download($logo, 512 * 1024));
+                }
+                $data['_vendor_logo'] = $media[$key] = $this->logoCache->{$key} = $cached;
+                $usedMedia[$key] = $cached;
             }
         } catch (\Throwable) {
             $data['_vendor_logo'] = $data['_vendor_favicon'] ?? '';
+            $data['_warnings'][] = 'Логотип источника недоступен.';
         }
         unset($data['_vendor_logo_svg']);
         $pictures = $data['_images'] ?? [];
@@ -591,26 +616,27 @@ final readonly class ModuleSourceImporter
                 break;
             }
             try {
-                $saved[] = $this->images->store($this->download($picture, 8 * 1024 * 1024));
+                $key = 'image:'.$picture;
+                if (!$this->images->exists($media[$key] ?? '')) {
+                    $media[$key] = $this->images->store($this->download($picture, 8 * 1024 * 1024));
+                }
+                $saved[] = $media[$key];
+                $usedMedia[$key] = $media[$key];
             } catch (\Throwable) { /* Keep existing media if the source image is unavailable. */
             }
         }
-        if ([] !== $saved) {
+        $complete = count($saved) === count($pictures);
+        if ([] !== $saved && $complete) {
             $data['cover_image'] = array_shift($saved);
-        }
-        if ([] !== $saved) {
             $data['gallery'] = $saved;
         }
-        $data['_warnings'] ??= [];
-        if (!isset($data['cover_image'])) {
-            $data['_warnings'][] = 'Не удалось скачать главное изображение.';
-        }
-        if (count($pictures) > count($saved) + (isset($data['cover_image']) ? 1 : 0)) {
+        if (!$complete) {
             $data['_warnings'][] = 'Часть изображений источника недоступна.';
         }
-        if (empty($data['user_guide_url'])) {
-            $data['_warnings'][] = 'Ссылка на README / User Guide на странице не найдена.';
+        if ([] === $pictures) {
+            $data['_warnings'][] = 'На странице нет изображений модуля.';
         }
+        $data['_media'] = $usedMedia;
 
         return $data;
     }

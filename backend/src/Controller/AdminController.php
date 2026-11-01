@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\AdminCatalog;
-use App\Service\ModuleImages;
 use App\Service\ModuleSourceImporter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,7 +16,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class AdminController extends AbstractController
 {
-    public function __construct(private readonly AdminCatalog $catalog, private readonly ModuleImages $images)
+    public function __construct(private readonly AdminCatalog $catalog)
     {
     }
 
@@ -118,48 +116,29 @@ final class AdminController extends AbstractController
 
             return $this->render('admin/import.html.twig', ['selected' => '' !== $vendor ? $this->catalog->vendor($vendor) : null, 'vendor_id' => $vendor, 'original_url' => $url, 'affiliate_url' => $affiliate, 'error' => $error], new Response(status: $error ? 422 : 200));
         }
-        $stored = $id ? $this->catalog->module($id) : null;
-        if ($id && !$stored) {
+        $module = $this->catalog->module($id);
+        if (!$module) {
             throw $this->createNotFoundException();
-        }
-        $module = array_replace(['name' => '', 'slug' => '', 'partner_id' => $request->query->getString('vendor'), 'category_id' => '', 'original_url' => '', 'affiliate_url' => '', 'user_guide_url' => '', 'short_description' => '', 'description' => '', 'price_from' => '0', 'price_type' => 'one-time', 'install_price' => '60', 'cover_image' => '', 'gallery' => [], 'tags' => [], 'features' => [], 'magento_versions' => [], 'published' => true, 'hyva_compatible' => false], $stored ?? []);
-        foreach (['gallery', 'features'] as $key) {
-            $module[$key] = implode("\n", $module[$key]);
-        }
-        foreach (['tags', 'magento_versions'] as $key) {
-            $module[$key] = implode(', ', $module[$key]);
         }
         $error = null;
         if ($request->isMethod('POST')) {
             $this->checkCsrf($request, 'module_'.$id);
             $data = $request->request->all();
-            $module = array_replace($module, $data, ['published' => isset($data['published']), 'hyva_compatible' => isset($data['hyva_compatible'])]);
             try {
-                $cover = $request->files->get('cover_upload');
-                if ($cover instanceof UploadedFile) {
-                    $data['cover_image'] = $this->images->upload($cover);
-                    $module['cover_image'] = $data['cover_image'];
-                }
-                $gallery = $request->files->all('gallery_uploads');
-                if (count($gallery) > 8) {
-                    throw new \InvalidArgumentException('За один раз можно загрузить до 8 скриншотов.');
-                }
-                foreach ($gallery as $file) {
-                    if ($file instanceof UploadedFile) {
-                        $data['gallery'] = trim(($data['gallery'] ?? '')."\n".$this->images->upload($file));
-                    }
-                }
-                $module['gallery'] = $data['gallery'] ?? '';
-                $saved = $this->catalog->saveModule($data, $id);
-                $this->addFlash('success', 'Модуль сохранён. Изменения доступны в каталоге.');
+                $this->catalog->saveModuleSettings($id, $data);
+                $this->addFlash('success', 'Настройки модуля сохранены.');
 
-                return $this->redirectToRoute('admin_module_edit', ['id' => $saved]);
+                return $this->redirectToRoute('admin_module_edit', ['id' => $id]);
             } catch (\InvalidArgumentException $e) {
                 $error = $e->getMessage();
+                foreach (['original_url', 'affiliate_url', 'partner_id'] as $key) {
+                    $module[$key] = $request->request->getString($key);
+                }
+                $module['published'] = isset($data['published']);
             }
         }
 
-        return $this->render('admin/module.html.twig', ['module' => $module, 'module_id' => $id, 'vendors' => $this->catalog->vendors(), 'categories' => $this->catalog->categories(), 'error' => $error], new Response(status: $error ? 422 : 200));
+        return $this->render('admin/module.html.twig', ['module' => $module, 'module_id' => $id, 'vendors' => $this->catalog->vendors(), 'error' => $error], new Response(status: $error ? 422 : 200));
     }
 
     #[Route('/admin_panel/modules/{id}/upload', name: 'admin_module_upload', methods: ['POST'])]
@@ -171,7 +150,7 @@ final class AdminController extends AbstractController
             throw $this->createNotFoundException();
         }
         try {
-            $fields = $source->fetch($module['original_url']);
+            $fields = $source->materialize($source->inspect($module['original_url']), $this->catalog->sourceMedia($id));
             $this->catalog->updateFromSource($id, $fields);
             foreach ($fields['_warnings'] ?? [] as $warning) {
                 $this->addFlash('warning', $warning);
@@ -180,7 +159,7 @@ final class AdminController extends AbstractController
 
             return $this->redirectToRoute('admin_dashboard');
         } catch (\Throwable) {
-            $this->addFlash('error', 'Источник не удалось прочитать. Сайт может блокировать автоматическую загрузку. Данные модуля сохранены; отредактируйте их вручную.');
+            $this->addFlash('error', 'Источник не удалось прочитать. Сайт может блокировать автоматическую загрузку. Данные модуля сохранены; повторите Upload позже.');
         }
 
         return $this->redirectToRoute('admin_module_edit', ['id' => $id]);

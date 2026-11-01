@@ -4,6 +4,8 @@ services:
         autoconfigure: true
     App\:
         resource: '../src/'
+    App\Service\ModuleSource:
+        alias: App\Service\ModuleSourceImporter
     App\Service\Database:
         arguments:
             $databaseUrl: '%env(DATABASE_URL)%'

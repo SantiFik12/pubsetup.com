@@ -1,0 +1,13 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Результаты обновления{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ path('admin_refreshes') }}">Все запуски</a>
+<div class="page-heading"><div><h1>Результаты обновления</h1><p class="muted">{{ run.started_at|date('d.m.Y H:i', 'Europe/Warsaw') }} · Europe/Warsaw{% if run.dry_run %} · пробный запуск{% endif %}</p></div><a class="button" href="{{ path('admin_refresh_detail',{id:run.id}) }}">Обновить статистику</a></div>
+{% if run.error %}<div class="notice error">{{ run.error }}</div>{% endif %}
+{% set statuses = {pending:'В очереди',processing:'Проверяется',updated:'Обновлён',unchanged:'Без изменений',would_update:'Будет обновлён',failed:'Ошибка',skipped:'Пропущен'} %}
+<section class="panel"><div class="panel-toolbar"><h2>Модули · {{ items|length }}</h2></div><div class="table-scroll"><table><thead><tr><th>Модуль / вендор</th><th>Результат</th><th>Изменения и предупреждения</th></tr></thead><tbody>
+{% for item in items %}<tr><td>{% if item.module_id %}<a class="module-title" href="{{ path('admin_module_edit',{id:item.module_id}) }}">{{ item.module_name }}</a>{% else %}{{ item.module_name }}{% endif %}<div class="muted small">{{ item.vendor_name }}</div><a class="source-link" href="{{ item.source_url }}" target="_blank" rel="noopener noreferrer">Источник</a></td>
+<td>{{ statuses[item.status] }}<div class="muted tiny">Попыток: {{ item.attempts }}</div>{% if item.finished_at %}<div class="muted tiny">{{ item.finished_at|date('d.m.Y H:i:s', 'Europe/Warsaw') }}</div>{% endif %}</td>
+<td>{% if item.error %}<p>{{ item.error }}</p>{% endif %}{% for warning in item.warnings %}<p class="muted small">{{ warning }}</p>{% endfor %}{% if item.changes %}<details><summary>Изменённые поля: {{ item.changes|keys|join(', ') }}</summary>{% for field, change in item.changes %}<div class="small"><strong>{{ field }}</strong><div class="muted">Было: {{ change.old is iterable ? change.old|json_encode : change.old }}</div><div>Стало: {{ change.new is iterable ? change.new|json_encode : change.new }}</div></div>{% endfor %}</details>{% elseif not item.error and not item.warnings %}<span class="muted small">—</span>{% endif %}</td></tr>{% endfor %}
+</tbody></table></div></section>
+{% endblock %}

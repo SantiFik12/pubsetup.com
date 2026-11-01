@@ -5,14 +5,14 @@ require dirname(__DIR__).'/vendor/autoload.php';
 use App\Service\CatalogService;
 use App\Service\Database;
 use App\Service\EmailWorker;
+use App\Service\OrderMailer;
 use App\Service\OrderService;
 use App\Service\OrderValidator;
-use App\Service\OrderMailer;
 use App\Service\SmtpTransportFactory;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport\NullTransport;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\Transport\NullTransport;
 
 $db = new Database(getenv('DATABASE_URL'));
 $check = static function (bool $condition, string $message): void { if (!$condition) { throw new RuntimeException($message); } };

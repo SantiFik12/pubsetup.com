@@ -1,0 +1,13 @@
+{% extends 'admin/base.html.twig' %}
+{% block title %}Обновления каталога{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">ОБНОВЛЕНИЯ ИЗ ИСТОЧНИКОВ</div><h1>Обновления каталога</h1><p class="muted">Воскресенье, 22:00 · Europe/Warsaw. Следующий срок: {{ next_run|date('d.m.Y H:i', 'Europe/Warsaw') }}.</p></div><a class="button" href="{{ path('admin_refreshes') }}">Обновить статистику</a></div>
+{% if overdue %}<div class="notice warning">За последний плановый срок полный обход не запускался. Проверьте активацию таймера на сервере и журнал его работы.</div>{% endif %}
+<p class="footnote">Расписание действует после установки серверного таймера. «Обновлено» — модули с реальными изменениями; проверенные без изменений считаются отдельно. Пробные и выборочные запуски отмечены в списке.</p>
+{% set statuses = {running:'Выполняется',success:'Успешно',partial:'Частично успешно',failed:'Ошибка'} %}
+<section class="panel"><div class="panel-toolbar"><h2>Последние 50 запусков</h2></div>
+{% if runs %}<div class="table-scroll"><table><thead><tr><th>Запуск</th><th>Статус</th><th>Проверено / всего</th><th>Обновлено</th><th>Без изменений</th><th>Ошибки / пропуски</th><th>Предупреждения</th></tr></thead><tbody>
+{% for run in runs %}<tr><td><a class="module-title" href="{{ path('admin_refresh_detail',{id:run.id}) }}">{{ run.started_at|date('d.m.Y H:i', 'Europe/Warsaw') }}</a>{% if run.dry_run %}<div class="muted small">Пробный запуск</div>{% endif %}{% if run.vendor_id %}<div class="muted small">Один вендор</div>{% endif %}<div class="muted tiny">{% if run.finished_at %}{{ (run.finished_at|date('U') - run.started_at|date('U')) }} сек.{% else %}В работе{% endif %}</div></td>
+<td>{{ run.stalled ? 'Прерван / нет прогресса' : statuses[run.status] }}{% if run.error %}<div class="muted small">{{ run.error }}</div>{% endif %}</td><td>{{ run.total - run.pending - run.skipped }} / {{ run.total }}</td><td>{{ run.dry_run ? run.would_update ~ ' планируется' : run.updated }}</td><td>{{ run.unchanged }}</td><td>{{ run.failed }} / {{ run.skipped }}</td><td>{{ run.warned }}</td></tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="empty-state"><h3>Запусков пока нет</h3><p class="muted">После первого обхода здесь появится его результат.</p></div>{% endif %}</section>
+{% endblock %}

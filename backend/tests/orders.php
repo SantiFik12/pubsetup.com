@@ -40,7 +40,7 @@ $list = $orders->search($created['order_code']);
 $check(1 === $list['total'], 'Created service order not found by order code');
 $id = $list['orders'][0]['id'];
 $detail = $orders->details($id);
-$check($detail['order']['email'] === 'admin-order-qa@example.test' && str_contains($detail['order']['notes'], 'escaped notes'), 'Customer data or notes missing');
+$check('admin-order-qa@example.test' === $detail['order']['email'] && str_contains($detail['order']['notes'], 'escaped notes'), 'Customer data or notes missing');
 $check(2 === count($detail['email_jobs']) && [] === $detail['email_logs'], 'Both newly queued emails must be visible');
 $check('https://example.test/store' === $detail['order']['website_url'], 'Valid customer website lost');
 $check(1 === $orders->search('admin-order-qa@example.test', 'pending')['total'], 'Email/status search failed');
@@ -56,7 +56,7 @@ $db->execute("INSERT INTO email_send_log(message_id,template_name,recipient_emai
 $detail = $orders->details($id);
 $check('failed' === $detail['email_jobs'][0]['state_class'] && 1 === count($detail['email_logs']), 'Delivery failures or attempt history not visible');
 for ($i = 0; $i < 27; ++$i) {
-    $db->execute("INSERT INTO orders(service_id,customer_name,email,amount) VALUES (:service,:name,:email,60)",
+    $db->execute('INSERT INTO orders(service_id,customer_name,email,amount) VALUES (:service,:name,:email,60)',
         ['service' => $service, 'name' => 'Pagination QA '.str_pad((string) $i, 2, '0', STR_PAD_LEFT), 'email' => 'pagination-'.$i.'@example.test']);
 }
 $first = $orders->search('Pagination QA', '', 1);

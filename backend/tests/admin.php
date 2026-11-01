@@ -129,14 +129,16 @@ $check($importedModule['features'] === $parsed['features'] && $importedModule['u
 $vendor = $admin->saveVendor(['name' => 'QA Vendor', 'slug' => 'qa-vendor', 'website' => 'https://example.com'], null);
 $category = $admin->categories()[0]['id'];
 $input = ['name' => 'QA Module', 'slug' => 'qa-module', 'partner_id' => $vendor, 'category_id' => $category, 'original_url' => 'https://example.com/module', 'affiliate_url' => 'https://example.com/module?ref=ours', 'user_guide_url' => 'https://example.com/readme', 'price_from' => '159', 'price_type' => 'one-time', 'install_price' => '60', 'description' => 'Original text', 'short_description' => 'Short text', 'gallery' => '', 'cover_image' => '', 'features' => "One\nTwo", 'tags' => 'one, two', 'magento_versions' => '2.4.8', 'published' => '1'];
-$id = $admin->saveModule($input, null);
+$id = $admin->importModule($input['original_url'], $input['affiliate_url'], $vendor, array_replace($input, ['gallery' => [], 'features' => ['One', 'Two'], 'tags' => ['one', 'two'], 'magento_versions' => ['2.4.8']]));
 $admin->updateFromSource($id, ['name' => 'Updated source title', 'description' => 'New description', 'affiliate_url' => 'https://attacker.example', 'slug' => 'changed-slug']);
 $module = $admin->module($id);
 $check($module['affiliate_url'] === $input['affiliate_url'] && 'qa-module' === $module['slug'] && 'Updated source title' === $module['name'], 'Refresh replaced affiliate URL or slug');
 $check('' !== $module['seo_title'] && '' !== $module['seo_description'], 'Imported module SEO was not saved');
 $check(mb_strlen($module['seo_title']) <= 65 && mb_strlen($module['seo_description']) <= 160, 'Stored SEO exceeds limits');
 $check($module['features'] === ['One', 'Two'] && $module['tags'] === ['one', 'two'], 'Arrays lost their types');
-$admin->saveModule(array_diff_key($input, ['published' => true]), $id);
+$admin->saveModuleSettings($id, array_replace(array_diff_key($input, ['published' => true]), ['name' => 'Forbidden manual title', 'description' => 'Forbidden manual content', 'price_from' => '1', 'seo_title' => 'Forbidden manual SEO']));
+$afterSettings = $admin->module($id);
+$check($afterSettings['name'] === $module['name'] && $afterSettings['description'] === $module['description'] && $afterSettings['price_from'] === $module['price_from'] && $afterSettings['seo_title'] === $module['seo_title'], 'Settings endpoint accepted manual imported-content changes');
 $check(false === $admin->module($id)['published'], 'Module draft was not saved');
 $public = new App\Service\CatalogService($db)->all();
 $check(!in_array('qa-module', array_column($public['extensions'], 'slug'), true), 'Draft leaked into public catalog');

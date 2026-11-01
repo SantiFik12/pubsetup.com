@@ -116,3 +116,7 @@ MAIL_NOTIFICATION_TO=contact@pubsetup.com
 Если настройки отсутствуют, worker завершится с явным сообщением в логе, не расходуя попытки заданий. Статусы и безопасные сообщения об ошибках доступны в `email_outbox` и `email_send_log`; SMTP-пароли и AUTH-транскрипты не записываются. Статус `sent` означает принятие письма транспортом, а не гарантированное появление во входящих. Проверить логи: `bash scripts/prod.sh logs --tail=80 worker`. Если задание уже исчерпало 8 попыток, автоматическая отправка не возобновится без отдельного сброса попыток этого задания.
 
 Postmark остаётся доступен при `MAIL_TRANSPORT=postmark`, с `POSTMARK_SERVER_TOKEN` и `POSTMARK_MESSAGE_STREAM`. SMTP-пароль в этом режиме не нужен. Локальная проверка отправки без сетевых соединений: `php backend/tests/email.php`.
+
+## Плановое обновление модулей
+
+После деплоя кода с миграцией `010_catalog_refresh.sql` выполните из каталога проекта `bash scripts/catalog-refresh.sh --dry-run`, затем один раз `sudo bash scripts/install-catalog-refresh-timer.sh`. Таймер запускает обход по воскресеньям в 22:00 Europe/Warsaw. Результаты доступны в админке в разделе «Обновления каталога». Полная инструкция и диагностика — [docs/catalog-refresh.md](docs/catalog-refresh.md).

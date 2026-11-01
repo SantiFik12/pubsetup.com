@@ -45,6 +45,7 @@
             "@php tests/orders.php",
             "@php tests/importer.php",
             "@php tests/affiliate.php",
+            "@php tests/catalog-refresh.php",
             "@php tests/catalog-delete.php",
             "@php tests/admin.php"
         ],

@@ -55,3 +55,7 @@ The previous TanStack/Supabase implementation remains under root `src/`, `supaba
 ## Admin panel
 
 Open `/admin_panel`. Create an administrator with `docker compose exec backend php bin/console admin:user:create admin@example.com` (production: `bash scripts/prod.sh exec backend php bin/console admin:user:create admin@example.com`). The command prompts for a password. Vendor/module management, image uploads, source refresh and click counters are described in [docs/admin-panel.md](docs/admin-panel.md). Uploaded images are stored in the persistent `module_uploads` volume.
+
+## Scheduled catalog refresh
+
+A resumable vendor refresh runs through `app:catalog:refresh`; the admin journal is at `/admin_panel/refreshes`. After deploying migration `010_catalog_refresh.sql`, run `bash scripts/catalog-refresh.sh --dry-run` and install the Sunday 22:00 Europe/Warsaw timer once with `sudo bash scripts/install-catalog-refresh-timer.sh`. See [docs/catalog-refresh.md](docs/catalog-refresh.md) for setup, media caching, retries and diagnostics.

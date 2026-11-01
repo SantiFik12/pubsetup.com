@@ -194,7 +194,20 @@ final readonly class AdminCatalog
         }
     }
 
-    public function saveModule(array $input, ?string $id): string
+    public function saveModuleSettings(string $id, array $input): void
+    {
+        $original = self::url($this->text($input, 'original_url', 2048), true);
+        $affiliate = self::url($this->text($input, 'affiliate_url', 2048));
+        $vendor = $this->text($input, 'partner_id', 36, true);
+        if (!$this->module($id) || !$this->vendor($vendor)) {
+            throw new \InvalidArgumentException('Модуль или вендор не найден.');
+        }
+        $this->db->execute('UPDATE extensions SET original_url=:original,affiliate_url=:affiliate,partner_id=:vendor,published=CAST(:published AS boolean) WHERE id=:id', [
+            'id' => $id, 'original' => $original, 'affiliate' => $affiliate, 'vendor' => $vendor, 'published' => isset($input['published']) ? 'true' : 'false',
+        ]);
+    }
+
+    private function createImportedModule(array $input): string
     {
         $name = $this->text($input, 'name', 250, true);
         $slug = $this->slug($this->text($input, 'slug', 150), $name);
@@ -203,7 +216,7 @@ final readonly class AdminCatalog
         if (!$this->vendor($partner) || [] === $this->db->fetchAll('SELECT id FROM categories WHERE id::text=:id', ['id' => $category])) {
             throw new \InvalidArgumentException('Выберите вендора и категорию.');
         }
-        if ([] !== $this->db->fetchAll('SELECT id FROM extensions WHERE slug=:slug AND id::text<>:id', ['slug' => $slug, 'id' => $id ?? ''])) {
+        if ([] !== $this->db->fetchAll('SELECT id FROM extensions WHERE slug=:slug', ['slug' => $slug])) {
             throw new \InvalidArgumentException('Модуль с таким slug уже существует.');
         }
         $lines = static fn (string $value): array => array_values(array_unique(array_filter(array_map(trim(...), preg_split('/[\r\n]+/', $value)))));
@@ -231,15 +244,8 @@ final readonly class AdminCatalog
             'magento_versions' => array_values(array_filter(array_map(trim(...), explode(',', $this->text($input, 'magento_versions', 500))))),
             'hyva_compatible' => isset($input['hyva_compatible']), 'published' => isset($input['published']),
         ];
-        $previous = $id ? ($this->module($id) ?? []) : [];
-        $generated = ModuleSeo::generate(array_replace($previous, $input, $payload));
-        foreach (['seo_title' => ModuleSeo::TITLE_LIMIT, 'seo_description' => ModuleSeo::DESCRIPTION_LIMIT] as $key => $limit) {
-            $value = $this->text($input, $key, $limit * 4);
-            if (mb_strlen($value) > $limit) {
-                throw new \InvalidArgumentException('Проверьте длину поля '.$key.'.');
-            }
-            $payload[$key] = '' !== $value ? $value : $generated[$key];
-        }
+        $generated = ModuleSeo::generate(array_replace($input, $payload));
+        $payload = array_replace($payload, $generated);
         foreach (['seo_source_title' => 4000, 'seo_source_description' => 16000] as $key => $limit) {
             if (array_key_exists($key, $input)) {
                 $payload[$key] = $this->text($input, $key, $limit);
@@ -249,12 +255,6 @@ final readonly class AdminCatalog
         $columns = array_keys($payload);
         $quoted = array_map(static fn (string $key): string => '"'.$key.'"', $columns);
         $json = json_encode($payload, JSON_THROW_ON_ERROR);
-        if ($id) {
-            $assignments = implode(',', array_map(static fn (string $key): string => '"'.$key.'"=r."'.$key.'"', $columns));
-            $this->db->execute('UPDATE extensions e SET '.$assignments.' FROM json_populate_record(NULL::extensions,CAST(:data AS json)) r WHERE e.id=:id', ['data' => $json, 'id' => $id]);
-
-            return $id;
-        }
 
         return $this->db->fetchAll('INSERT INTO extensions ('.implode(',', $quoted).') SELECT '.implode(',', $quoted).' FROM json_populate_record(NULL::extensions,CAST(:data AS json)) RETURNING id', ['data' => $json])[0]['id'];
     }
@@ -317,7 +317,7 @@ final readonly class AdminCatalog
             if (empty($fields['hyva_compatible'])) {
                 unset($input['hyva_compatible']);
             }
-            $id = $this->saveModule($input, null);
+            $id = $this->createImportedModule($input);
             $this->updateFromSource($id, $fields);
             $connection->commit();
 
@@ -341,27 +341,89 @@ final readonly class AdminCatalog
         return $this->db->fetchAll('SELECT id FROM categories WHERE slug=:slug', ['slug' => $category['slug']])[0]['id'];
     }
 
-    public function updateFromSource(string $id, array $fields): void
+    private function sourceFields(array $stored, array $fields, bool $createCategory): array
+    {
+        if ($createCategory) {
+            $category = $this->sourceCategory($fields);
+        } else {
+            $detected = ModuleCategory::detect($fields);
+            $category = $detected ? ($this->db->fetchAll('SELECT id FROM categories WHERE slug=:slug', ['slug' => $detected['slug']])[0]['id'] ?? null) : null;
+        }
+        if (null !== $category) {
+            $fields['category_id'] = $category;
+        }
+        $fields = array_replace($fields, ModuleSeo::generate(array_replace($stored, $fields)));
+        $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
+
+        return array_intersect_key($fields, array_flip($allowed));
+    }
+
+    public static function sourceDiff(array $stored, array $fields): array
+    {
+        $changes = [];
+        foreach ($fields as $key => $value) {
+            $old = $stored[$key] ?? null;
+            $same = in_array($key, ['price_from', 'rating', 'reviews'], true)
+                ? is_numeric($old) && is_numeric($value) && (float) $old === (float) $value
+                : $old === $value;
+            if (!$same) {
+                $changes[$key] = ['old' => $old, 'new' => $value];
+            }
+        }
+
+        return $changes;
+    }
+
+    public function sourceMedia(string $id): array
+    {
+        $row = $this->db->fetchAll('SELECT media FROM catalog_source_state WHERE module_id=:id', ['id' => $id])[0] ?? null;
+
+        return $row ? json_decode($row['media'], true, 512, JSON_THROW_ON_ERROR) : [];
+    }
+
+    public function previewSourceChanges(string $id, array $fields): array
+    {
+        $stored = $this->module($id);
+        if (!$stored) {
+            throw new \InvalidArgumentException('Модуль не найден.');
+        }
+        $changes = self::sourceDiff($stored, $this->sourceFields($stored, $fields, false));
+        $category = ModuleCategory::detect($fields);
+        if ($category && [] === $this->db->fetchAll('SELECT id FROM categories WHERE slug=:slug', ['slug' => $category['slug']])) {
+            $changes['category'] = ['old' => $stored['category_id'], 'new' => $category['name']];
+        }
+
+        return $changes;
+    }
+
+    public function updateFromSource(string $id, array $fields): array
     {
         if ([] === $fields) {
             throw new \InvalidArgumentException('Источник не вернул данные модуля.');
         }
-        $category = $this->sourceCategory($fields);
-        if (null !== $category) {
-            $fields['category_id'] = $category;
+        $stored = $this->module($id);
+        if (!$stored) {
+            throw new \InvalidArgumentException('Модуль не найден.');
         }
-        $stored = $this->module($id) ?? [];
-        if (!empty($fields['_vendor_logo']) && isset($stored['partner_id'])) {
+        $prepared = $this->sourceFields($stored, $fields, true);
+        $changes = self::sourceDiff($stored, $prepared);
+        if ([] !== $changes) {
+            $prepared = array_intersect_key($prepared, $changes);
+            $updates = implode(',', array_map(static fn (string $key): string => '"'.$key.'"=r."'.$key.'"', array_keys($prepared)));
+            $this->db->execute('UPDATE extensions e SET '.$updates.',source_updated_at=now() FROM json_populate_record(NULL::extensions,CAST(:data AS json)) r WHERE e.id=:id', ['data' => json_encode($prepared, JSON_THROW_ON_ERROR), 'id' => $id]);
+        }
+        if (!empty($fields['_vendor_logo'])) {
             $logo = self::logoUrl($fields['_vendor_logo']);
-            $this->db->execute("UPDATE partners SET logo_url=:logo WHERE id=:id AND (logo_url='' OR logo_url=:favicon)", ['logo' => $logo, 'id' => $stored['partner_id'], 'favicon' => $fields['_vendor_favicon'] ?? '']);
+            $vendor = $this->vendor($stored['partner_id']);
+            if ($vendor && $vendor['logo_url'] !== $logo && in_array($vendor['logo_url'], ['', $fields['_vendor_favicon'] ?? ''], true)) {
+                $this->db->execute('UPDATE partners SET logo_url=:logo WHERE id=:id', ['logo' => $logo, 'id' => $stored['partner_id']]);
+                $changes['vendor_logo'] = ['old' => $vendor['logo_url'], 'new' => $logo];
+            }
         }
-        $fields = array_replace($fields, ModuleSeo::generate(array_replace($stored, $fields)));
-        $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
-        $fields = array_intersect_key($fields, array_flip($allowed));
-        if ([] === $fields) {
-            throw new \InvalidArgumentException('Источник не вернул данные модуля.');
+        if (isset($fields['_media'])) {
+            $this->db->execute('INSERT INTO catalog_source_state(module_id,media) VALUES (:id,CAST(:media AS jsonb)) ON CONFLICT(module_id) DO UPDATE SET checked_at=now(),media=EXCLUDED.media', ['id' => $id, 'media' => json_encode($fields['_media'], JSON_THROW_ON_ERROR)]);
         }
-        $updates = implode(',', array_map(static fn (string $key): string => '"'.$key.'"=r."'.$key.'"', array_keys($fields)));
-        $this->db->execute('UPDATE extensions e SET '.$updates.',source_updated_at=now() FROM json_populate_record(NULL::extensions,CAST(:data AS json)) r WHERE e.id=:id', ['data' => json_encode($fields, JSON_THROW_ON_ERROR), 'id' => $id]);
+
+        return $changes;
     }
 }

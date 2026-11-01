@@ -5,21 +5,11 @@ declare(strict_types=1);
 namespace App\Service;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final readonly class ModuleImages
 {
     public function __construct(#[Autowire('%kernel.project_dir%/var/storage/modules')] private string $directory)
     {
-    }
-
-    public function upload(UploadedFile $file): string
-    {
-        if (!$file->isValid() || $file->getSize() > 8 * 1024 * 1024) {
-            throw new \InvalidArgumentException('Фото не загрузилось или превышает 8 МБ.');
-        }
-
-        return $this->store(file_get_contents($file->getPathname()));
     }
 
     public function store(string $content): string
@@ -42,6 +32,11 @@ final readonly class ModuleImages
         }
 
         return '/media/modules/'.$filename;
+    }
+
+    public function exists(string $path): bool
+    {
+        return (bool) preg_match('~^/media/modules/[a-f0-9]{40}\.(?:svg|png|jpg|webp)$~D', $path) && is_file($this->directory.'/'.basename($path));
     }
 
     public function storeLogo(string $content): string

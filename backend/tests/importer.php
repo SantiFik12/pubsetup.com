@@ -261,4 +261,25 @@ $structuredMagezon = str_replace('<h1>', '<script type="application/ld+json">{"@
 $structuredFields = ModuleSourceImporter::extract($structuredMagezon, $magezonSource);
 $check('179.00' === $structuredFields['price_from'] && 4.7 === $structuredFields['rating'] && 65 === $structuredFields['reviews'], 'Magezon HTML fallback must preserve valid structured product data');
 
+$magedelightSource = 'https://www.magedelight.com/elastic-search-magento-2.html';
+$magedelightManual = 'https://docs.magedelight.com/display/MAG/Advanced+Search+-+Magento+2';
+$magedelight = <<<'HTML'
+<header><a href="https://docs.magedelight.com/">User Manuals</a></header>
+<div class="guide-link user-linkbox"><svg><title>manual</title></svg><a href="https://docs.magedelight.com/display/MAG/Advanced+Search+-+Magento+2" rel="noindex,nofollow" target="_blank">User Manual</a></div>
+<footer><a href="https://docs.magedelight.com/">User Manual</a></footer>
+HTML;
+$manualFields = ModuleSourceImporter::extract($magedelight, $magedelightSource);
+$check($magedelightManual === $manualFields['user_guide_url'], 'Magedelight User Manual link missing or replaced by general documentation');
+$check(!isset(ModuleSourceImporter::extract('<header><a href="https://docs.magedelight.com/">User Manual</a></header><footer><a href="https://docs.magedelight.com/">User Manual</a></footer>', $magedelightSource)['user_guide_url']), 'User Manual navigation/footer links must remain excluded');
+$check(!isset(ModuleSourceImporter::extract('<a href="#manual">User Manual</a>', $magedelightSource)['user_guide_url']), 'User Manual anchor must not become a document URL');
+$check(!isset(ModuleSourceImporter::extract('<a href="javascript:alert(1)">User Manual</a>', $magedelightSource)['user_guide_url']), 'Unsafe User Manual URL accepted');
+$check(!isset(ModuleSourceImporter::extract('<a href="/related.html">Read our User Manual tips for another extension</a>', $magedelightSource)['user_guide_url']), 'Incidental manual mention mistaken for a guide label');
+$check('https://other.example/manual.pdf' === ModuleSourceImporter::extract('<a href="/manual.pdf">User Manual</a>', 'https://other.example/product.html')['user_guide_url'], 'User Manual support must also work for other vendors');
+
+$vendorIcon = ModuleSourceImporter::extract('<link rel="stylesheet" href="/style.css"><link rel="shortcut icon" href="/media/favicon/default/favicon.ico"><link rel="icon" href="/other.png">', $magedelightSource);
+$check('https://www.magedelight.com/media/favicon/default/favicon.ico' === $vendorIcon['_vendor_logo'], 'Vendor favicon missing or wrong link type selected');
+$invalidIcon = ModuleSourceImporter::extract('<link rel="icon" href="javascript:alert(1)"><link rel="apple-touch-icon" href="//cdn.example.com/icon.png">', $magedelightSource);
+$check('https://cdn.example.com/icon.png' === $invalidIcon['_vendor_logo'], 'Invalid favicon must be skipped for supported icon fallback');
+$check(!isset(ModuleSourceImporter::extract('<link rel="stylesheet" href="/style.css">', $magedelightSource)['_vendor_logo']), 'A vendor icon must not be invented from unrelated links');
+
 echo 'Module importer: '.$checks." checks passed.\n";

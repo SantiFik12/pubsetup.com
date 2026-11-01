@@ -161,6 +161,14 @@ final readonly class ModuleSourceImporter
         $result['seo_source_description'] = $clean($meta('description') ?: $meta('og:description'), 4000);
         $result['_categories'] = array_values(array_unique([...$productCategories, ...array_reverse($categories)]));
         $result['_source_url'] = $url;
+        // Vendor icons are often outside /favicon.ico, especially Magento stores.
+        foreach ($xpath->query('//link[contains(concat(" ",normalize-space(translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))," ")," apple-touch-icon ") or contains(concat(" ",normalize-space(translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))," ")," icon ")]/@href') as $node) {
+            try {
+                $result['_vendor_logo'] = AdminCatalog::url(self::resolveUrl($url, $node->textContent), true);
+                break;
+            } catch (\InvalidArgumentException) {
+            }
+        }
         $offer = $product['offers'] ?? [];
         if (isset($offer[0])) {
             $offer = $offer[0];
@@ -235,7 +243,7 @@ final readonly class ModuleSourceImporter
             $href = self::resolveUrl($url, $node->getAttribute('href'));
             $label = $clean($node->textContent.' '.$node->getAttribute('aria-label'), 300);
             $guidePath = parse_url($href, PHP_URL_PATH) ?? '';
-            $exactLabel = (bool) preg_match('/^(?:user[ -]?guide|readme|documentation|(?:extension )?manual|installation guide)(?:\s*↗)?$/iu', $label);
+            $exactLabel = (bool) preg_match('/^(?:user[ -]?(?:guide|manual)|readme|documentation|(?:extension )?manual|installation guide)(?:\s*↗)?$/iu', $label);
             $documentPath = (bool) preg_match('~/(?:user-guides?|docs?|documentation|manuals?)/.+~i', $guidePath);
             $score = ($exactLabel ? 2 : 0) + ($documentPath ? 1 : 0);
             // Ignore a generic documentation directory from the site's footer.

@@ -10,6 +10,7 @@ function mapPartner(r: Row): Partner {
     slug: r.slug,
     name: r.name,
     logoLetter: r.logo_letter,
+    logoUrl: r.logo_url ?? "",
     description: r.description ?? "",
     website: r.website ?? "",
   };

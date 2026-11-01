@@ -1,4 +1,5 @@
 "use client";
+import { VendorLogo } from "@/components/VendorLogo";
 
 import { Link } from "@/components/Link";
 import { ProductGallery } from "@/components/ProductGallery";
@@ -34,7 +35,7 @@ export default function ExtensionPage() {
             {photos.length > 0 && <ProductGallery key={ext.slug} photos={photos} name={ext.name} />}
           </div>
           <div className="min-w-0 space-y-5">
-            <div className="flex items-center gap-3"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-base font-bold text-primary" aria-hidden="true">{partner.logoLetter}</div><Link to="/partner/$slug" params={{slug:partner.slug}} className="text-sm font-medium text-muted-foreground hover:text-primary">{partner.name}</Link></div>
+            <div className="flex items-center gap-3"><VendorLogo partner={partner} className="h-12 w-12 text-base" /><Link to="/partner/$slug" params={{slug:partner.slug}} className="text-sm font-medium text-muted-foreground hover:text-primary">{partner.name}</Link></div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">{displayName} <span className="text-xl font-medium text-muted-foreground">for Magento 2</span></h1>
             <div className="flex flex-wrap items-center gap-3 text-sm">
               {ext.reviews > 0 && <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-warning text-warning"/>{ext.rating} ({ext.reviews} reviews)</span>}

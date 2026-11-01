@@ -1,4 +1,5 @@
 "use client";
+import { VendorLogo } from "@/components/VendorLogo";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
 import { useCatalog,useExtensions,usePartner } from "@/data/catalog";
@@ -25,9 +26,7 @@ export default function PartnerPage() {
     <>
       <section className="border-b border-border bg-surface">
         <div className="container-page flex flex-col gap-5 py-12 md:flex-row md:items-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-soft text-xl font-bold text-primary shadow-soft">
-            {partner.logoLetter}
-          </div>
+          <VendorLogo partner={partner} className="h-16 w-16 text-xl shadow-soft" />
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">{partner.name}</h1>
             <p className="mt-2 max-w-2xl text-muted-foreground">{partner.description}</p>

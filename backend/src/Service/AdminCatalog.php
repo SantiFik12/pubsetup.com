@@ -153,7 +153,7 @@ final readonly class AdminCatalog
                 AffiliateLinks::resolve('', $template, $module['original_url']);
             }
         }
-        $values = ['name' => $name, 'slug' => $slug, 'description' => $this->text($input, 'description', 10000), 'website' => self::url($this->text($input, 'website', 2048)), 'logo_letter' => mb_substr($name, 0, 2), 'affiliate_template' => $template];
+        $values = ['name' => $name, 'slug' => $slug, 'description' => $this->text($input, 'description', 10000), 'website' => self::url($this->text($input, 'website', 2048)), 'logo_letter' => mb_substr($name, 0, 2), 'affiliate_template' => $template, 'logo_url' => self::url($this->text($input, 'logo_url', 2048))];
         if ([] !== $this->db->fetchAll('SELECT id FROM partners WHERE slug=:slug AND id::text <> :id', ['slug' => $slug, 'id' => $id ?? ''])) {
             throw new \InvalidArgumentException('Вендор с таким slug уже существует.');
         }
@@ -165,9 +165,9 @@ final readonly class AdminCatalog
         }
         try {
             if ($id) {
-                $this->db->execute('UPDATE partners SET name=:name,slug=:slug,description=:description,website=:website,logo_letter=:logo_letter,affiliate_template=:affiliate_template WHERE id=:id', $values + ['id' => $id]);
+                $this->db->execute('UPDATE partners SET name=:name,slug=:slug,description=:description,website=:website,logo_letter=:logo_letter,affiliate_template=:affiliate_template,logo_url=:logo_url WHERE id=:id', $values + ['id' => $id]);
             } else {
-                $id = $this->db->fetchAll('INSERT INTO partners(name,slug,description,website,logo_letter,affiliate_template) VALUES (:name,:slug,:description,:website,:logo_letter,:affiliate_template) RETURNING id', $values)[0]['id'];
+                $id = $this->db->fetchAll('INSERT INTO partners(name,slug,description,website,logo_letter,affiliate_template,logo_url) VALUES (:name,:slug,:description,:website,:logo_letter,:affiliate_template,:logo_url) RETURNING id', $values)[0]['id'];
             }
             if ($applyAll) {
                 $this->db->execute("UPDATE extensions SET affiliate_url='' WHERE partner_id=:id", ['id' => $id]);
@@ -286,7 +286,7 @@ final readonly class AdminCatalog
                 $name = trim(preg_replace('/\s+store$/i', '', $fields['_vendor'] ?? '')) ?: ucfirst(explode('.', $host)[0]);
                 $vendorSlug = $this->slug('', $host);
                 $known = $this->db->fetchAll('SELECT id FROM partners WHERE slug=:slug', ['slug' => $vendorSlug])[0] ?? null;
-                $vendor = $known['id'] ?? $this->saveVendor(['name' => $name, 'slug' => $vendorSlug, 'website' => 'https://'.$host], null);
+                $vendor = $known['id'] ?? $this->saveVendor(['name' => $name, 'slug' => $vendorSlug, 'website' => 'https://'.$host, 'logo_url' => $fields['_vendor_logo'] ?? ''], null);
             }
             $category = $this->sourceCategory($fields, true);
             $slugBase = $this->slug('', $fields['name']);
@@ -342,6 +342,10 @@ final readonly class AdminCatalog
             $fields['category_id'] = $category;
         }
         $stored = $this->module($id) ?? [];
+        if (!empty($fields['_vendor_logo']) && isset($stored['partner_id'])) {
+            $logo = self::url($fields['_vendor_logo'], true);
+            $this->db->execute("UPDATE partners SET logo_url=:logo WHERE id=:id AND logo_url=''", ['logo' => $logo, 'id' => $stored['partner_id']]);
+        }
         $fields = array_replace($fields, ModuleSeo::generate(array_replace($stored, $fields)));
         $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
         $fields = array_intersect_key($fields, array_flip($allowed));

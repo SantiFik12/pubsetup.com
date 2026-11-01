@@ -4,6 +4,7 @@ export type Partner = {
   slug: string;
   name: string;
   logoLetter: string;
+  logoUrl?: string;
   description: string;
   website: string;
 };

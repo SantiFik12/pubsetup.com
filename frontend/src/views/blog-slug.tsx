@@ -1,4 +1,5 @@
 "use client";
+import { VendorLogo } from "@/components/VendorLogo";
 import { Link } from "@/components/Link";
 import { useBlogPost,useCatalog,useExtension,usePartner } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
@@ -17,7 +18,7 @@ function ExtensionCardBlock({ extensionSlug }: { extensionSlug: string }) {
   return (
     <div className="my-6 rounded-2xl border border-border bg-card p-5 shadow-soft">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-sm font-bold text-primary">{partner.logoLetter}</div>
+        <VendorLogo partner={partner} className="h-10 w-10 rounded-xl text-sm" />
         <div className="flex-1">
           <div className="text-xs text-muted-foreground">{partner.name}</div>
           <Link to="/extension/$slug" params={{ slug: ext.slug }} className="text-base font-semibold text-foreground hover:text-primary">{ext.name}</Link>

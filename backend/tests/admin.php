@@ -132,4 +132,12 @@ $navigation = array_values(array_filter($public['extensions'], static fn (array 
 $check(73 === (int) $navigation['views'], 'Catalog views must use module opens, not affiliate clicks');
 $zeroViews = array_values(array_filter($public['extensions'], static fn (array $item): bool => $item['id'] === $otherId))[0];
 $check(0 === (int) $zeroViews['views'], 'Modules without metrics must have zero views');
-echo "Admin database checks passed: vendor/module edits, refresh invariants, drafts and counters.\n";
+$admin->updateFromSource($id, ['_vendor_logo' => 'https://example.com/favicon.ico', 'description' => 'Imported icon']);
+$check('https://example.com/favicon.ico' === $admin->vendor($vendor)['logo_url'], 'Source icon did not populate empty vendor logo');
+$admin->saveVendor(['name' => 'QA vendor logo', 'slug' => $admin->vendor($vendor)['slug'], 'logo_url' => 'https://example.com/custom-logo.png'], $vendor);
+$admin->updateFromSource($id, ['_vendor_logo' => 'https://example.com/other-icon.ico', 'description' => 'Preserve manual logo']);
+$check('https://example.com/custom-logo.png' === $admin->vendor($vendor)['logo_url'], 'Source refresh overwrote manual vendor logo');
+$newLogoModule = $admin->importModule('https://logo-fixture.example/module', '', '', ['name' => 'Logo fixture', 'description' => 'New vendor with favicon', '_vendor_logo' => 'https://logo-fixture.example/icon.png']);
+$check('https://logo-fixture.example/icon.png' === $admin->vendor($admin->module($newLogoModule)['partner_id'])['logo_url'], 'Automatic vendor creation lost source icon');
+$check('https://example.com/custom-logo.png' === array_values(array_filter(new App\Service\CatalogService($db)->all()['partners'], static fn (array $item): bool => $item['id'] === $vendor))[0]['logo_url'], 'Public catalog lost vendor logo');
+echo "Admin database checks passed: vendor/module edits, refresh invariants, drafts, counters and logos.\n";

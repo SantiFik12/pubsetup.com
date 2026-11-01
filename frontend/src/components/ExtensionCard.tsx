@@ -1,4 +1,5 @@
 "use client";
+import { VendorLogo } from "@/components/VendorLogo";
 
 import { Link } from "@/components/Link";
 import Image from "next/image";
@@ -27,7 +28,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
       )}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-sm font-bold text-primary" aria-hidden="true">{partner?.logoLetter}</div>
+          <VendorLogo partner={partner} className="h-11 w-11 text-sm" />
           <div className="min-w-0 flex-1 py-0.5">
             <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground">
               <span className="shrink-0">{partner?.name ?? "Partner"}</span><span aria-hidden="true">·</span>

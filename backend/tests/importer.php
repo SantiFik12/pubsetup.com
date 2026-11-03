@@ -289,4 +289,18 @@ $vectorBranding = ModuleSourceImporter::extract('<link rel="icon" href="/favicon
 $check(str_contains($vectorBranding['_vendor_logo_svg'], '<svg') && str_contains($vectorBranding['_vendor_logo_svg'], 'viewbox='), 'Inline site logo missing');
 $check(!isset(ModuleSourceImporter::extract('<img alt="customer logo" src="/customer-logo.png">', $magedelightSource)['_vendor_logo']), 'Customer badges must not become site branding');
 
+$meetanshiSource = 'https://meetanshi.com/magento-2-eu-guarantee-notice-garan-label.html';
+$meetanshiGuide = 'https://meetanshi.com/docs/magento-2/eu-guarantee-notice-garan-label/';
+$meetanshiMarkup = '<header><nav><a href="/docs/">Documentation</a><div class="user_guide"><i class="icon-book"></i><a href="'.$meetanshiGuide.'" target="_blank">User Guide</a></div></nav></header>';
+$check($meetanshiGuide === ModuleSourceImporter::extract($meetanshiMarkup, $meetanshiSource)['user_guide_url'], 'Meetanshi product guide lost inside malformed header/nav nesting');
+foreach (['https://other.example/module', 'https://meetanshi.com.example/module'] as $source) {
+    $check(!isset(ModuleSourceImporter::extract($meetanshiMarkup, $source)['user_guide_url']), 'Meetanshi exception leaked to another vendor');
+}
+foreach (['https://other.example/docs/magento-2/product/', '/docs/', '/docs/magento-2/', '#guide', 'javascript:alert(1)'] as $href) {
+    $markup = str_replace($meetanshiGuide, $href, $meetanshiMarkup);
+    $check(!isset(ModuleSourceImporter::extract($markup, $meetanshiSource)['user_guide_url']), 'Meetanshi recovered an unrelated, generic or unsafe guide');
+}
+$footerGuide = str_replace(['<header><nav>', '</nav></header>'], ['<footer>', '</footer>'], $meetanshiMarkup);
+$check(!isset(ModuleSourceImporter::extract($footerGuide, $meetanshiSource)['user_guide_url']), 'Meetanshi exception must not recover footer links');
+
 echo 'Module importer: '.$checks." checks passed.\n";

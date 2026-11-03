@@ -280,6 +280,26 @@ final readonly class ModuleSourceImporter implements ModuleSource
                 }
             }
         }
+        // Meetanshi's malformed page nesting puts the product guide inside
+        // header/nav ancestors. Recover only its explicit product guide block;
+        // keep the normal navigation exclusions for every other link/vendor.
+        if (!isset($result['user_guide_url']) && in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['meetanshi.com', 'www.meetanshi.com'], true)) {
+            foreach ($xpath->query('//*[contains(concat(" ",normalize-space(@class)," ")," user_guide ")]//a[@href and not(ancestor::footer)]') as $node) {
+                if (!$node instanceof \DOMElement || 'user guide' !== mb_strtolower($clean($node->textContent, 300))) {
+                    continue;
+                }
+                $href = self::resolveUrl($url, $node->getAttribute('href'));
+                if (!in_array(strtolower(parse_url($href, PHP_URL_HOST) ?? ''), ['meetanshi.com', 'www.meetanshi.com'], true)
+                    || !preg_match('~^/docs/magento-2/[^/]+/?$~D', parse_url($href, PHP_URL_PATH) ?? '')) {
+                    continue;
+                }
+                try {
+                    $result['user_guide_url'] = AdminCatalog::url($href, true);
+                    break;
+                } catch (\InvalidArgumentException) {
+                }
+            }
+        }
         $versions = [];
         foreach ($xpath->query('//text()[not(ancestor::script) and not(ancestor::style) and contains(.,"2.4.") and string-length(.) < 1000]') as $node) {
             if (preg_match_all('/\b2\.[34]\.\d+(?:-p\d+)?\b/', $node->textContent, $matches)) {

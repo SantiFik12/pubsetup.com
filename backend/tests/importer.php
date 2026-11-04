@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
+use App\Service\ModuleImages;
 use App\Service\ModuleSourceImporter;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
 
 $checks = 0;
 $check = static function (bool $condition, string $message) use (&$checks): void {
@@ -339,5 +342,44 @@ foreach (['https://unknown.example/product', 'https://magefan.com.example/produc
     $check('349.00' === $otherMagefan['price_from'] && !isset($otherMagefan['pwa_ready']), 'Magefan rules changed another vendor');
 }
 $check(!isset(ModuleSourceImporter::extract('<a href="/documentation">User Guide</a>', $magefanSource)['user_guide_url']), 'Generic documentation directory must remain excluded');
+
+$sizeChart = '<meta property="product:price:currency" content="EUR"><script type="application/ld+json">{"@type":"Product","name":"Size Chart","description":"Size chart templates","offers":{"price":89,"priceCurrency":"EUR"}}</script><div class="product-banner"><div data-product-id="2050"><span data-price-type="oldPrice" data-price-amount="149"></span><span data-price-type="finalPrice" data-price-amount="89"></span></div></div><div data-product-id="99"><span data-price-type="finalPrice" data-price-amount="0"></span></div>';
+$sizeChartUrl = 'https://magefan.com/magento-2-size-chart?ref=partner';
+$check(!isset(ModuleSourceImporter::extract($sizeChart, $sizeChartUrl)['price_from']), 'Size Chart EUR price must not be stored as USD');
+foreach (['success', 'eur', 'unavailable', 'no-cookie', 'different-product', 'already-usd', 'other-vendor'] as $scenario) {
+    $calls = [];
+    $http = new MockHttpClient(static function (string $method, string $url, array $options) use (&$calls, $scenario, $sizeChart, $check): MockResponse {
+        $calls[] = [$url, $options];
+        if (1 === count($calls)) {
+            return new MockResponse('already-usd' === $scenario ? str_replace('EUR', 'USD', $sizeChart) : $sizeChart);
+        }
+        if (2 === count($calls)) {
+            $check('GET' === $method && str_contains($url, '/directory/currency/switch?') && str_contains($url, 'currency=USD'), 'Magefan did not use its currency switch');
+            $check(0 === $options['max_redirects'], 'Currency switch must not follow redirects without session cookies');
+
+            return new MockResponse('', ['http_code' => 'unavailable' === $scenario ? 503 : 302, 'response_headers' => 'no-cookie' === $scenario ? [] : ['set-cookie: PHPSESSID=isolated-session; Path=/; HttpOnly', 'set-cookie: X-Magento-Vary=usd-context; Path=/']]);
+        }
+        $check(str_contains(implode(';', $options['headers']), 'PHPSESSID=isolated-session') && str_contains(implode(';', $options['headers']), 'X-Magento-Vary=usd-context'), 'USD product request lost currency session cookies');
+        $html = 'eur' === $scenario ? $sizeChart : str_replace('EUR', 'USD', $sizeChart);
+
+        return new MockResponse('different-product' === $scenario ? str_replace('Size Chart', 'Another Product', $html) : $html);
+    });
+    $url = 'other-vendor' === $scenario ? 'https://magefan.com.example/product' : $sizeChartUrl;
+    $importer = new ModuleSourceImporter($http, new ModuleImages('/tmp/unused-magefan-test-images'));
+    // Mock HTTP must remain independent of external DNS while keeping the SSRF wrapper.
+    $safeHttp = new ReflectionProperty(ModuleSourceImporter::class, 'safeHttp')->getValue($importer);
+    $dnsCache = new ReflectionProperty($safeHttp, 'dnsCache')->getValue($safeHttp);
+    $dnsCache[parse_url($url, PHP_URL_HOST)] = '93.184.216.34';
+    $imported = $importer->inspect($url);
+    if (in_array($scenario, ['success', 'already-usd'], true)) {
+        $check('89.00' === $imported['price_from'] && $sizeChartUrl === $imported['_source_url'], 'Single-price Magefan import failed or changed original URL');
+    } else {
+        $check(!isset($imported['price_from']), 'Unavailable/unconfirmed USD price must preserve stored price');
+        if ('other-vendor' !== $scenario) {
+            $check(str_contains(implode(' ', $imported['_warnings']), 'USD'), 'Missing USD price must produce a warning');
+        }
+    }
+    $check(count($calls) === (in_array($scenario, ['already-usd', 'other-vendor'], true) ? 1 : (in_array($scenario, ['unavailable', 'no-cookie'], true) ? 2 : 3)), 'Currency fallback made unexpected requests');
+}
 
 echo 'Module importer: '.$checks." checks passed.\n";

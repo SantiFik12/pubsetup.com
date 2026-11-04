@@ -18,12 +18,12 @@ final readonly class ModuleSourceImporter implements ModuleSource
         $this->logoCache = new \stdClass();
     }
 
-    private function download(string $url, int $limit): string
+    private function download(string $url, int $limit, array $headers = []): string
     {
         AdminCatalog::url($url, true);
         $response = $this->safeHttp->request('GET', $url, [
             'timeout' => 10, 'max_duration' => 20, 'max_redirects' => 3,
-            'headers' => ['User-Agent' => 'pubsetup.com catalog updater/1.0', 'Accept' => 'text/html,image/*;q=0.9,*/*;q=0.5'],
+            'headers' => array_replace(['User-Agent' => 'pubsetup.com catalog updater/1.0', 'Accept' => 'text/html,image/*;q=0.9,*/*;q=0.5'], $headers),
             'on_progress' => static function (int $now, int $total) use ($limit): void {
                 if ($now > $limit || $total > $limit) {
                     throw new \LengthException('Источник возвращает слишком большой файл.');
@@ -665,11 +665,54 @@ final readonly class ModuleSourceImporter implements ModuleSource
         if (empty($data['name']) || empty($data['description'])) {
             throw new \RuntimeException('На странице не найдены название и описание модуля. Проверьте ссылку на товар.');
         }
+        if (!isset($data['price_from']) && in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['magefan.com', 'www.magefan.com'], true)) {
+            try {
+                $usd = self::extract($this->magefanUsdPage($url), $url);
+                if (($usd['name'] ?? '') === $data['name'] && isset($usd['price_from'])) {
+                    $data = $usd;
+                }
+            } catch (\Throwable) { /* Preserve existing prices when the currency switch is unavailable. */
+            }
+            if (!isset($data['price_from'])) {
+                $data['_warnings'][] = 'Цена Magefan в USD недоступна; прежняя цена сохраняется. Автоматическая конвертация не выполняется.';
+            }
+        }
         if (empty($data['user_guide_url'])) {
             $data['_warnings'][] = 'Ссылка на README / User Guide на странице не найдена.';
         }
 
         return $data;
+    }
+
+    private function magefanUsdPage(string $url): string
+    {
+        // Magento stores the selected currency in a session. Keep cookies local
+        // to this product request; never share them between vendors or imports.
+        $origin = parse_url($url, PHP_URL_SCHEME).'://'.parse_url($url, PHP_URL_HOST);
+        $response = $this->safeHttp->request('GET', $origin.'/directory/currency/switch', [
+            'query' => ['currency' => 'USD', 'uenc' => strtr(base64_encode($url), '+/=', '-_,')],
+            'timeout' => 10, 'max_duration' => 20, 'max_redirects' => 0,
+            'headers' => ['User-Agent' => 'pubsetup.com catalog updater/1.0'],
+        ]);
+        try {
+            if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 400) {
+                throw new \RuntimeException('Currency switch unavailable.');
+            }
+            $cookies = [];
+            foreach ($response->getHeaders(false)['set-cookie'] ?? [] as $cookie) {
+                $pair = explode(';', $cookie, 2)[0];
+                if (preg_match('/^[a-zA-Z0-9_-]+=[^\r\n;]*$/D', $pair)) {
+                    $cookies[] = $pair;
+                }
+            }
+        } finally {
+            $response->cancel();
+        }
+        if ([] === $cookies) {
+            throw new \RuntimeException('Currency session unavailable.');
+        }
+
+        return $this->download($url, 3 * 1024 * 1024, ['Cookie' => implode('; ', $cookies), 'Cache-Control' => 'no-cache']);
     }
 
     public function materialize(array $data, array $media = []): array

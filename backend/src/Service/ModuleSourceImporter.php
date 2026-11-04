@@ -272,7 +272,7 @@ final readonly class ModuleSourceImporter implements ModuleSource
             // Ignore a generic documentation directory from the site's footer.
             if ($score > $guideScore
                 && !str_starts_with(trim($node->getAttribute('href')), '#')
-                && !preg_match('~/(?:user-guides?|docs?|documentation|manuals?)/?$~i', $guidePath)) {
+                && !preg_match('~^/(?:user-guides?|docs?|documentation|manuals?)/?$~i', $guidePath)) {
                 try {
                     $result['user_guide_url'] = AdminCatalog::url($href, true);
                     $guideScore = $score;
@@ -429,6 +429,10 @@ final readonly class ModuleSourceImporter implements ModuleSource
         if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['magezon.com', 'www.magezon.com'], true)) {
             $result = self::magezonData($xpath, $result);
         }
+        if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['magefan.com', 'www.magefan.com'], true)) {
+            $currency = strtoupper($meta('product:price:currency') ?: (string) ($offer['priceCurrency'] ?? ''));
+            $result = self::magefanData($xpath, $url, $result, $currency);
+        }
         if ($isWyomind) {
             $result = self::wyomindData($xpath, $url, $result);
             if (!isset($result['price_from']) && isset($offer['priceCurrency']) && 'USD' !== strtoupper((string) $offer['priceCurrency'])) {
@@ -437,6 +441,68 @@ final readonly class ModuleSourceImporter implements ModuleSource
         }
 
         return array_replace($result, ModuleSeo::generate($result));
+    }
+
+    private static function magefanData(\DOMXPath $xpath, string $url, array $result, string $currency): array
+    {
+        $class = static fn (string $name): string => 'contains(concat(" ",normalize-space(@class)," ")," '.$name.' ")';
+        $banner = $xpath->query('//*['.$class('product-banner').']')->item(0);
+        if (!$banner) {
+            return $result;
+        }
+        // JSON-LD uses the selected edition; our listing advertises "from".
+        // Consider only current-product plan IDs, excluding options and upsells.
+        $plans = [];
+        foreach ($xpath->query('.//*[@id="versionPlan"]//input[@name="version"]/@value', $banner) as $node) {
+            $plans[] = $node->textContent;
+        }
+        $prices = [];
+        if ('USD' === $currency) {
+            foreach ($xpath->query('.//*[@data-price-type="finalPrice" and @data-price-amount]', $banner) as $node) {
+                if (!$node instanceof \DOMElement) {
+                    continue;
+                }
+                $plan = $xpath->query('ancestor::*[@data-product-id][1]/@data-product-id', $node)->item(0)->textContent ?? '';
+                $price = $node->getAttribute('data-price-amount');
+                if (([] === $plans || in_array($plan, $plans, true)) && is_numeric($price) && (float) $price >= 0 && (float) $price < 100000000) {
+                    $prices[] = (float) $price;
+                }
+            }
+        }
+        if ([] !== $prices) {
+            $result['price_from'] = number_format(min($prices), 2, '.', '');
+        }
+        $pictures = [];
+        foreach ($xpath->query('.//*['.$class('product-slider').']//*[@data-fancybox="gallery" and @data-src and not(@data-type="iframe") and not(@data-type="video")]/@data-src', $banner) as $node) {
+            $picture = self::resolveUrl($url, $node->textContent);
+            if (preg_match('~^https?://.+\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {
+                $pictures[] = $picture;
+            }
+        }
+        if ([] !== $pictures) {
+            $result['_images'] = array_slice(array_values(array_unique($pictures)), 0, 32);
+            $result['_image'] = $result['_images'][0];
+        }
+        foreach (['hyva_compatible' => '_hyva', 'pwa_ready' => '_pwa'] as $field => $badge) {
+            if ($xpath->query('.//*['.$class('block-icon').']//*['.$class($badge).']', $banner)->length > 0) {
+                $result[$field] = true;
+            }
+        }
+        if ($xpath->query('.//a['.$class('live-demo').']', $banner)->length > 0) {
+            $result['has_demo'] = true;
+        }
+        $features = [];
+        foreach ($xpath->query('//main//*['.$class('all-features-block').']//h3') as $node) {
+            $text = trim(preg_replace('/\s+/u', ' ', $node->textContent));
+            if ('' !== $text) {
+                $features[] = mb_substr($text, 0, 400);
+            }
+        }
+        if ([] !== $features) {
+            $result['features'] = array_slice(array_values(array_unique($features)), 0, 20);
+        }
+
+        return $result;
     }
 
     private static function magezonData(\DOMXPath $xpath, array $result): array

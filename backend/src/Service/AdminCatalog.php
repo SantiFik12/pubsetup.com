@@ -367,7 +367,7 @@ final readonly class AdminCatalog
             $fields['category_id'] = $category;
         }
         $fields = array_replace($fields, ModuleSeo::generate(array_replace($stored, $fields)));
-        $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'price_type'];
+        $allowed = ['seo_title', 'seo_description', 'seo_source_title', 'seo_source_description', 'category_id', 'name', 'short_description', 'description', 'price_from', 'rating', 'reviews', 'cover_image', 'gallery', 'user_guide_url', 'features', 'magento_versions', 'hyva_compatible', 'pwa_ready', 'has_demo', 'price_type'];
 
         return array_intersect_key($fields, array_flip($allowed));
     }

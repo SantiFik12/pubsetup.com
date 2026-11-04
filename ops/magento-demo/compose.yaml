@@ -19,6 +19,8 @@ x-php: &php
 services:
   php:
     <<: *php
+
+
     build: ./php
     depends_on:
       mariadb: {condition: service_healthy}

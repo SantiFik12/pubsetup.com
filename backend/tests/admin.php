@@ -136,6 +136,8 @@ $check($module['affiliate_url'] === $input['affiliate_url'] && 'qa-module' === $
 $check('' !== $module['seo_title'] && '' !== $module['seo_description'], 'Imported module SEO was not saved');
 $check(mb_strlen($module['seo_title']) <= 65 && mb_strlen($module['seo_description']) <= 160, 'Stored SEO exceeds limits');
 $check($module['features'] === ['One', 'Two'] && $module['tags'] === ['one', 'two'], 'Arrays lost their types');
+$admin->updateFromSource($id, ['pwa_ready' => true, 'has_demo' => true]);
+$check($admin->module($id)['pwa_ready'] && $admin->module($id)['has_demo'], 'Source PWA/demo flags were not persisted');
 $admin->saveModuleSettings($id, array_replace(array_diff_key($input, ['published' => true]), ['name' => 'Forbidden manual title', 'description' => 'Forbidden manual content', 'price_from' => '1', 'seo_title' => 'Forbidden manual SEO']));
 $afterSettings = $admin->module($id);
 $check($afterSettings['name'] === $module['name'] && $afterSettings['description'] === $module['description'] && $afterSettings['price_from'] === $module['price_from'] && $afterSettings['seo_title'] === $module['seo_title'], 'Settings endpoint accepted manual imported-content changes');

@@ -303,4 +303,41 @@ foreach (['https://other.example/docs/magento-2/product/', '/docs/', '/docs/mage
 $footerGuide = str_replace(['<header><nav>', '</nav></header>'], ['<footer>', '</footer>'], $meetanshiMarkup);
 $check(!isset(ModuleSourceImporter::extract($footerGuide, $meetanshiSource)['user_guide_url']), 'Meetanshi exception must not recover footer links');
 
+$magefanSource = 'https://magefan.com/magento2-blog-extension';
+$magefan = <<<'HTML'
+<html><head><meta property="product:price:currency" content="USD"><script type="application/ld+json">{"@type":"Product","name":"Magento 2 Blog Extension","description":"Manage a Magento blog","offers":{"price":349,"priceCurrency":"USD"},"aggregateRating":{"ratingValue":4.85,"reviewCount":349},"image":"/module-icon.png"}</script></head><body>
+<header><a href="/documentation">Documentation</a><span class="_hyva">Global compatibility</span></header>
+<div class="product-sub-menu"><a href="/magento2-blog-extension/documentation">User Guide</a></div>
+<main><div class="product-banner">
+<div id="versionPlan"><input name="version" value="1797"><input name="version" value="1821"><input name="version" value="1824" checked></div>
+<div class="price-box" data-product-id="1797" style="display:none"><span data-price-type="finalPrice" data-price-amount="149">$149</span></div>
+<div class="price-box" data-product-id="1821"><span data-price-type="finalPrice" data-price-amount="299">$299</span></div>
+<div class="price-box" data-product-id="1824"><span data-price-type="finalPrice" data-price-amount="349">$349</span></div>
+<div class="price-box" data-product-id="99"><span data-price-type="finalPrice" data-price-amount="0">Free unrelated option</span><span data-price-type="oldPrice" data-price-amount="1">Old price</span></div>
+<div class="product-slider"><picture><img src="/thumbnail.png" data-fancybox="gallery" data-src="//cm.magefan.com/catalog/product/first.png"></picture><div data-fancybox="gallery" data-src="https://cm.magefan.com/catalog/product/second.png"><img src="/thumb2.webp"></div><div style="display:none" data-fancybox="gallery" data-src="/hidden-original.webp"></div><div data-fancybox="gallery" data-src="/hidden-original.webp"></div><div data-fancybox="gallery" data-type="iframe" data-src="/video.png"></div><div data-fancybox="gallery" data-src="javascript:alert(1)"></div></div>
+<div class="block-icon"><div class="_hyva">Compatible with Hyva</div><div class="_pwa">PWA ready</div></div><a class="live-demo" href="#live-demo">Live Demo</a>
+</div>
+<div class="all-features-block"><div class="item-title"><h3>Blog templates</h3></div><div class="item-title"><h3>AI blog writer</h3></div></div>
+<div class="related-products"><span data-price-type="finalPrice" data-price-amount="9">$9</span><img data-fancybox="gallery" data-src="/unrelated.png"><h3>Other module</h3></div></main>
+<footer><a href="/user-guides">Magefan User Guides</a></footer>
+</body></html>
+HTML;
+$magefanFields = ModuleSourceImporter::extract($magefan, $magefanSource);
+$check('149.00' === $magefanFields['price_from'], 'Magefan from-price must use the least expensive current-product plan, not selected Extra, old prices or unrelated options');
+$check($magefanSource.'/documentation' === $magefanFields['user_guide_url'], 'Product-specific /documentation suffix was mistaken for a generic documentation directory');
+$check(4.85 === $magefanFields['rating'] && 349 === $magefanFields['reviews'], 'Magefan structured review data lost');
+$check(['https://cm.magefan.com/catalog/product/first.png', 'https://cm.magefan.com/catalog/product/second.png', 'https://magefan.com/hidden-original.webp'] === $magefanFields['_images'], 'Magefan originals missing or mixed with thumbnails, videos or unrelated products');
+$check($magefanFields['_image'] === $magefanFields['_images'][0], 'Magefan screenshot must replace metadata icon as cover');
+$check($magefanFields['hyva_compatible'] && $magefanFields['pwa_ready'] && $magefanFields['has_demo'], 'Magefan product compatibility/demo badges missing');
+$check(['Blog templates', 'AI blog writer'] === $magefanFields['features'], 'Magefan summary features missing or mixed with recommendation/FAQ headings');
+$noBadges = ModuleSourceImporter::extract(str_replace(['class="block-icon"', 'class="live-demo"'], ['class="other-icons"', 'class="other-link"'], $magefan), $magefanSource);
+$check(!isset($noBadges['hyva_compatible']) && !isset($noBadges['pwa_ready']) && !isset($noBadges['has_demo']), 'Global Magefan compatibility or unrelated links leaked into product flags');
+$eurMagefan = ModuleSourceImporter::extract(str_replace('USD', 'EUR', $magefan), $magefanSource);
+$check(!isset($eurMagefan['price_from']), 'Magefan EUR plan prices treated as USD');
+foreach (['https://unknown.example/product', 'https://magefan.com.example/product'] as $otherSource) {
+    $otherMagefan = ModuleSourceImporter::extract($magefan, $otherSource);
+    $check('349.00' === $otherMagefan['price_from'] && !isset($otherMagefan['pwa_ready']), 'Magefan rules changed another vendor');
+}
+$check(!isset(ModuleSourceImporter::extract('<a href="/documentation">User Guide</a>', $magefanSource)['user_guide_url']), 'Generic documentation directory must remain excluded');
+
 echo 'Module importer: '.$checks." checks passed.\n";

@@ -426,6 +426,21 @@ final readonly class ModuleSourceImporter implements ModuleSource
             $result['_image'] = $result['_images'][0];
         }
 
+        if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['swissuplabs.com', 'www.swissuplabs.com'], true)) {
+            // Swissup's overview includes promotions, demo links and a full sales
+            // pitch. Its SEO description is the concise product introduction.
+            $summary = $clean($meta('description'), 4000) ?: ($result['short_description'] ?? '');
+            if (mb_strlen($summary) > 240) {
+                if (preg_match('/^(.{39,239}[.!?])(?:\s|$)/u', $summary, $sentence)) {
+                    $summary = $sentence[1];
+                } else {
+                    $summary = rtrim(preg_replace('/\s+\S*$/u', '', mb_substr($summary, 0, 239)), ' ,;:-').'…';
+                }
+            }
+            if ('' !== $summary) {
+                $result['short_description'] = $summary;
+            }
+        }
         if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['magezon.com', 'www.magezon.com'], true)) {
             $result = self::magezonData($xpath, $result);
         }

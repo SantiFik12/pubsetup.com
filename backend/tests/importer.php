@@ -382,4 +382,24 @@ foreach (['success', 'eur', 'unavailable', 'no-cookie', 'different-product', 'al
     $check(count($calls) === (in_array($scenario, ['already-usd', 'other-vendor'], true) ? 1 : (in_array($scenario, ['unavailable', 'no-cookie'], true) ? 2 : 3)), 'Currency fallback made unexpected requests');
 }
 
+$swissupUrl = 'https://swissuplabs.com/magento-extensions/magento-2/one-step-checkout-extension-for-magento-2.html';
+$swissupSummary = 'Drive revenue with Magento 2 One step checkout. Three awesome checkout layouts are available. The module allows you to show additional information on Magento Success Page.';
+$swissup = '<meta name="description" content="'.$swissupSummary.'"><script type="application/ld+json">{"@type":"Product","name":"M2 Fire Checkout","description":"Full product description","offers":{"price":79,"priceCurrency":"USD"},"aggregateRating":{"ratingValue":99,"bestRating":100,"reviewCount":10}}</script><div class="product attribute overview"><p>Hyvä Luma fallback compatibility.</p><p>Please check our other website Firecheckout.net.</p><p>'.str_repeat('Long product introduction. ', 20).'</p><h3>One Step Checkout demo sites</h3><a href="https://demo.example">Three column layout</a></div>';
+foreach ([$swissupUrl, str_replace('://swissuplabs.com', '://www.swissuplabs.com', $swissupUrl)] as $url) {
+    $fields = ModuleSourceImporter::extract($swissup, $url);
+    $check($swissupSummary === $fields['short_description'], 'Swissup summary must use concise metadata instead of promotional overview');
+    $check('Full product description' === $fields['description'] && '79.00' === $fields['price_from'] && 10 === $fields['reviews'], 'Swissup summary rule changed full description, price or reviews');
+}
+$longSummary = $swissupSummary.' '.str_repeat('Additional product details. ', 20);
+$shortened = ModuleSourceImporter::extract(str_replace($swissupSummary, $longSummary, $swissup), $swissupUrl)['short_description'];
+$check(mb_strlen($shortened) <= 240 && str_ends_with($shortened, '.'), 'Long Swissup metadata must end at a complete sentence within the limit');
+$noSentences = ModuleSourceImporter::extract(str_replace($swissupSummary, str_repeat('Useful checkout functionality ', 30), $swissup), $swissupUrl)['short_description'];
+$check(mb_strlen($noSentences) <= 240 && preg_match('/\b(?:Useful|checkout|functionality)…$/u', $noSentences), 'Swissup fallback must preserve whole words');
+$withoutMetadata = ModuleSourceImporter::extract(str_replace('<meta name="description" content="'.$swissupSummary.'">', '', $swissup), $swissupUrl)['short_description'];
+$check('' !== $withoutMetadata && mb_strlen($withoutMetadata) <= 240, 'Missing Swissup metadata must retain a bounded fallback');
+foreach (['https://unknown.example/product', 'https://swissuplabs.com.example/product'] as $url) {
+    $unchanged = ModuleSourceImporter::extract($swissup, $url)['short_description'];
+    $check(mb_strlen($unchanged) > 240 && str_contains($unchanged, 'Firecheckout.net'), 'Swissup summary rules changed another vendor');
+}
+
 echo 'Module importer: '.$checks." checks passed.\n";

@@ -84,9 +84,13 @@ final readonly class AdminCatalog
 
                 return false;
             }
-            $info = $this->deletionInfo($kind, $id);
-            if ((int) $info['dependencies'] > 0) {
-                throw new \InvalidArgumentException('vendor' === $kind ? 'Сначала удалите модули вендора или перенесите их к другому вендору.' : 'Модуль связан с заказами. Снимите его с публикации, чтобы сохранить историю заказов.');
+            if ('vendor' === $kind) {
+                // Keep the parent locked until all children are deleted, so a new
+                // module cannot be attached halfway through the operation.
+                // Orders and refresh history survive via their SET NULL foreign keys.
+                $this->db->execute('DELETE FROM extensions WHERE partner_id::text=:id', ['id' => $id]);
+            } elseif ((int) $this->deletionInfo($kind, $id)['dependencies'] > 0) {
+                throw new \InvalidArgumentException('Модуль связан с заказами. Снимите его с публикации, чтобы сохранить историю заказов.');
             }
             $this->db->execute("DELETE FROM $table WHERE id::text=:id", ['id' => $id]);
             $pdo->commit();

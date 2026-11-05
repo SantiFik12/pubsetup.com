@@ -185,7 +185,7 @@ final class AdminController extends AbstractController
                 if (!$this->catalog->deleteRecord($kind, $id)) {
                     throw $this->createNotFoundException();
                 }
-                $this->addFlash('success', 'vendor' === $kind ? 'Вендор удалён.' : 'Модуль удалён.');
+                $this->addFlash('success', 'vendor' === $kind ? 'Вендор и все его модули удалены.' : 'Модуль удалён.');
 
                 return $this->redirectToRoute('admin_dashboard');
             } catch (\InvalidArgumentException $e) {

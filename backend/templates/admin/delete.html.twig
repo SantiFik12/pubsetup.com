@@ -7,16 +7,16 @@
 <div class="page-heading"><div><h1>{{ is_vendor ? 'Удалить вендора?' : 'Удалить модуль?' }}</h1><p class="muted">{{ record.name }}</p></div></div>
 {% if error %}<div class="notice error" role="alert">{{ error }}</div>{% endif %}
 <section class="panel edit-panel form-stack">
-{% if record.dependencies > 0 %}
-    {% if is_vendor %}<p>У вендора есть модули: {{ record.dependencies }}. Сначала удалите их или перенесите к другому вендору в настройках модуля.</p>
-    {% else %}<p>Модуль связан с заказами: {{ record.dependencies }}. Чтобы сохранить историю заказов, удаление недоступно. Снимите флажок «Опубликовать в каталоге» в настройках модуля.</p>{% endif %}
+{% if not is_vendor and record.dependencies > 0 %}
+    <p>Модуль связан с заказами: {{ record.dependencies }}. Чтобы сохранить историю заказов, удаление недоступно. Снимите флажок «Опубликовать в каталоге» в настройках модуля.</p>
     <a class="button" href="{{ path(edit_route,{id:record.id}) }}">Вернуться к редактированию</a>
 {% else %}
-    <p>{{ is_vendor ? 'Вендор будет удалён из каталога.' : 'Модуль и его статистика переходов будут удалены из каталога. Его страница перестанет быть доступна.' }} Восстановить запись через панель нельзя.</p>
+    {% if is_vendor %}<p>Будет удалён вендор «{{ record.name }}» и все его модули: <strong>{{ record.dependencies }}</strong>, включая черновики, а также их статистика переходов. Страницы модулей перестанут быть доступны.</p><p>Заказы и история обновлений сохранятся, но ссылки на удалённые модули в них исчезнут. Восстановить вендора и модули через панель нельзя.</p>
+    {% else %}<p>Модуль и его статистика переходов будут удалены из каталога. Его страница перестанет быть доступна. Восстановить запись через панель нельзя.</p>{% endif %}
     <form method="post" class="form-stack">
         <input type="hidden" name="_token" value="{{ csrf_token('delete_' ~ kind ~ '_' ~ record.id) }}">
-        <label class="check-label"><input type="checkbox" name="confirm" value="delete" required> Подтверждаю удаление «{{ record.name }}»</label>
-        <div class="form-footer"><a class="button" href="{{ path(edit_route,{id:record.id}) }}">Отмена</a><button class="button danger" type="submit">{{ is_vendor ? 'Удалить вендора' : 'Удалить модуль' }}</button></div>
+        <label class="check-label"><input type="checkbox" name="confirm" value="delete" required> Подтверждаю удаление «{{ record.name }}»{% if is_vendor %} и всех его модулей{% endif %}</label>
+        <div class="form-footer"><a class="button" href="{{ path(edit_route,{id:record.id}) }}">Отмена</a><button class="button danger" type="submit">{{ is_vendor ? 'Удалить вендора и все модули' : 'Удалить модуль' }}</button></div>
     </form>
 {% endif %}
 </section>

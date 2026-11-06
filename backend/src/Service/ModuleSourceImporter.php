@@ -426,6 +426,9 @@ final readonly class ModuleSourceImporter implements ModuleSource
             $result['_image'] = $result['_images'][0];
         }
 
+        if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['aitoc.com', 'www.aitoc.com'], true)) {
+            $result = self::aitocDescriptions($xpath, $result);
+        }
         if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['swissuplabs.com', 'www.swissuplabs.com'], true)) {
             // Swissup's overview includes promotions, demo links and a full sales
             // pitch. Its SEO description is the concise product introduction.
@@ -456,6 +459,68 @@ final readonly class ModuleSourceImporter implements ModuleSource
         }
 
         return array_replace($result, ModuleSeo::generate($result));
+    }
+
+    private static function aitocDescriptions(\DOMXPath $xpath, array $result): array
+    {
+        // Metadata may already be clipped by the vendor. Prefer complete product
+        // paragraphs, preserving their boundaries instead of slicing characters.
+        $paragraphs = [];
+        $excluded = 'not(ancestor::header or ancestor::nav or ancestor::footer or ancestor::aside or ancestor::form or ancestor::script or ancestor::style or ancestor::*[contains(@id,"changelog") or contains(@class,"related")])';
+        foreach (['//main//*[@id="overview"]', '//main//*[@id="description" or @itemprop="description"]', '//main'] as $selector) {
+            foreach ($xpath->query($selector.'//p['.$excluded.']') as $node) {
+                $copy = $node->cloneNode(true);
+                if (!$copy instanceof \DOMElement) {
+                    continue;
+                }
+                foreach (['script', 'style'] as $tag) {
+                    while ($child = $copy->getElementsByTagName($tag)->item(0)) {
+                        $child->parentNode->removeChild($child);
+                    }
+                }
+                $text = trim(preg_replace('/\s+/u', ' ', $copy->textContent));
+                if (mb_strlen($text) < 60 || mb_strlen($text) > 10000 || preg_match('/money.back|free support|why choose aitoc|our company was founded|newsletter/iu', $text)) {
+                    continue;
+                }
+                $paragraphs[] = $text;
+                $paragraphs = array_values(array_unique($paragraphs));
+                if (count($paragraphs) >= 2) {
+                    break;
+                }
+            }
+            if ([] !== $paragraphs) {
+                break;
+            }
+        }
+        if ([] !== $paragraphs) {
+            $result['description'] = implode("\n\n", $paragraphs);
+        }
+        $text = $paragraphs[0] ?? ($result['description'] ?? '');
+        $sentences = preg_split('/(?<=[.!?])\s+/u', $text);
+        $summary = [];
+        foreach ($sentences as $sentence) {
+            if (!preg_match('/[.!?]$/u', $sentence)) {
+                break;
+            }
+            if ([] !== $summary && mb_strlen(implode(' ', [...$summary, $sentence])) > 240) {
+                break;
+            }
+            if (mb_strlen($sentence) > 2000) {
+                break;
+            }
+            $summary[] = $sentence;
+        }
+        if ([] !== $summary) {
+            $result['short_description'] = implode(' ', $summary);
+        }
+        if ([] === $paragraphs) {
+            $complete = array_filter($sentences, static fn (string $sentence): bool => (bool) preg_match('/[.!?]$/u', $sentence));
+            if ([] !== $complete) {
+                $result['description'] = implode(' ', $complete);
+            }
+        }
+
+        return $result;
     }
 
     private static function magefanData(\DOMXPath $xpath, string $url, array $result, string $currency): array

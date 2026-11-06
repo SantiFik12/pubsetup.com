@@ -402,4 +402,25 @@ foreach (['https://unknown.example/product', 'https://swissuplabs.com.example/pr
     $check(mb_strlen($unchanged) > 240 && str_contains($unchanged, 'Firecheckout.net'), 'Swissup summary rules changed another vendor');
 }
 
+$aitocUrl = 'https://www.aitoc.com/content-ai.html';
+$aitocIntro = 'ContentAI automates product content creation for Magento stores using artificial intelligence. It generates descriptions and metadata from existing product attributes. Store administrators can configure prompts and review the generated content before publishing it.';
+$aitocDetails = str_repeat('The extension provides configurable prompts for product attributes, supports multiple store views and helps teams manage their content workflow. ', 10).'The final paragraph remains complete.';
+$aitoc = '<script type="application/ld+json">{"@type":"Product","name":"ContentAI for Magento 2","description":"ContentAI automates content creation. The module generates accurate text co","offers":{"price":125,"priceCurrency":"USD"}}</script><header><p>Header text must never become a product description, even when it is long enough.</p></header><main><aside><p>Installation and support offers must never become product descriptions.</p></aside><section id="overview"><p>'.$aitocIntro.'<script>Unwanted tracking code</script></p><ul><li>Feature list excluded from prose</li></ul><p>'.$aitocDetails.'</p></section><section id="changelog"><p>Changelog text is not part of the product introduction or its detailed description.</p></section></main><footer><p>Footer content must not become part of a description when importing an extension.</p></footer>';
+foreach ([$aitocUrl, str_replace('www.', '', $aitocUrl)] as $url) {
+    $fields = ModuleSourceImporter::extract($aitoc, $url);
+    $check($aitocIntro."\n\n".$aitocDetails === $fields['description'], 'Aitoc full paragraphs were clipped, replaced by metadata or mixed with navigation/scripts');
+    $check('ContentAI automates product content creation for Magento stores using artificial intelligence. It generates descriptions and metadata from existing product attributes.' === $fields['short_description'], 'Aitoc summary must contain whole sentences instead of a character slice');
+    $check('125.00' === $fields['price_from'], 'Aitoc description handling changed pricing');
+}
+$fallbackLayout = ModuleSourceImporter::extract(str_replace('id="overview"', 'class="custom-product-content"', $aitoc), $aitocUrl);
+$check($aitocIntro."\n\n".$aitocDetails === $fallbackLayout['description'], 'Aitoc main-content fallback lost complete paragraphs');
+$metadataOnly = ModuleSourceImporter::extract('<script type="application/ld+json">{"@type":"Product","name":"ContentAI","description":"Content creation is automated for Magento stores. This source ends in the middle of a wor"}</script>', $aitocUrl);
+$check('Content creation is automated for Magento stores.' === $metadataOnly['description'] && $metadataOnly['description'] === $metadataOnly['short_description'], 'Aitoc metadata fallback retained an unfinished sentence');
+$longSentence = 'This extension '.str_repeat('automates product content creation and ', 10).'keeps the entire product introduction intact.';
+$longIntro = ModuleSourceImporter::extract(str_replace($aitocIntro, $longSentence, $aitoc), $aitocUrl);
+$check($longSentence === $longIntro['short_description'], 'Aitoc must retain a complete first sentence even when it exceeds 240 characters');
+foreach (['https://unknown.example/product', 'https://aitoc.com.example/product'] as $url) {
+    $check(ModuleSourceImporter::extract($aitoc, $url)['description'] !== $aitocIntro."\n\n".$aitocDetails, 'Aitoc extraction changed another vendor');
+}
+
 echo 'Module importer: '.$checks." checks passed.\n";

@@ -1,5 +1,5 @@
 "use client";
-import { createContext,useContext } from "react";
+import { createContext,useContext,useMemo } from "react";
 import type { Catalog } from "./mappers";
 export type { Catalog } from "./mappers";
 const Context = createContext<Catalog | null>(null);
@@ -41,5 +41,5 @@ export function useSeoLanding(slug?: string) {
 
 export function useAllTags() {
   const { extensions } = useCatalog();
-  return Array.from(new Set(extensions.flatMap((e) => e.tags))).sort();
+  return useMemo(() => Array.from(new Set(extensions.flatMap((e) => e.tags))).sort(), [extensions]);
 }

@@ -76,3 +76,29 @@ test('page navigation stays bounded for large catalogs and includes endpoints', 
   assert.ok(numbers.length <= 9);
   assert.deepEqual(paginationNumbers(1, 1), [1]);
 });
+
+test('search indexes 2000 modules once while matching names, descriptions, vendors and tags', () => {
+  let descriptionReads = 0;
+  const large = Array.from({ length: 2000 }, (_, index) => ({
+    ...modules[index % modules.length], id: `large-${index}`, slug: `large-${index}`, name: `Catalog module ${index}`,
+    shortDescription: 'Short searchable introduction', tags: ['uniquetag'],
+    get description() { descriptionReads++; return 'Detailed searchable description. '.repeat(200); },
+  }));
+  for (const q of ['catalog module 1999', 'SHORT SEARCHABLE', 'detailed searchable', 'Vendor Alpha', 'uniquetag', 'missing phrase']) {
+    const actual = filteredExtensions(large, partners, { ...catalogDefaults, q });
+    if (q === 'catalog module 1999') assert.equal(actual[0]?.id, 'large-1999');
+    else if (q === 'missing phrase') assert.equal(actual.length, 0);
+    else assert.ok(actual.length > 0, `Missing matches for ${q}`);
+  }
+  assert.equal(descriptionReads, large.length, 'Keystrokes must reuse normalized text instead of re-reading and lowercasing every description');
+});
+
+test('search index refreshes when the catalog or vendor data is replaced', () => {
+  const items = [{ ...modules[0], description: 'Original searchable description', partnerId: 'a' }];
+  assert.equal(filteredExtensions(items, partners, { ...catalogDefaults, q: 'original searchable' }).length, 1);
+  const refreshed = [{ ...items[0], description: 'Newly imported description' }];
+  assert.equal(filteredExtensions(refreshed, partners, { ...catalogDefaults, q: 'newly imported' }).length, 1);
+  assert.equal(filteredExtensions(refreshed, partners, { ...catalogDefaults, q: 'original searchable' }).length, 0);
+  assert.equal(filteredExtensions(items, [{ id: 'a', name: 'Renamed Vendor' }], { ...catalogDefaults, q: 'renamed vendor' }).length, 1);
+  assert.equal(filteredExtensions(items, partners, { ...catalogDefaults, q: 'renamed vendor' }).length, 0);
+});

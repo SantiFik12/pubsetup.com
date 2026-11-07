@@ -6,6 +6,17 @@ export const catalogDefaults = { q: "", cat: "", partner: "", tag: "", price: "a
 export type CatalogSearch = typeof catalogDefaults;
 export const extensionPageSize = 24;
 
+const searchIndexes = new WeakMap<Extension[], { partners: Partner[]; text: Map<Extension, string> }>();
+
+function extensionSearchIndex(extensions: Extension[], partners: Partner[]): Map<Extension, string> {
+  const cached = searchIndexes.get(extensions);
+  if (cached?.partners === partners) return cached.text;
+  const partnerNames = new Map(partners.map(partner => [partner.id, partner.name]));
+  const text = new Map(extensions.map(extension => [extension, [extension.name, extension.shortDescription, extension.description, partnerNames.get(extension.partnerId), ...extension.tags].filter(Boolean).join(" ").toLowerCase()]));
+  searchIndexes.set(extensions, { partners, text });
+  return text;
+}
+
 export function readCatalogSearch(params: Record<string, string | string[] | undefined>): CatalogSearch {
   const get = (key: string, fallback: string) => {
     const value = params[key];
@@ -21,8 +32,8 @@ export function filteredExtensions(extensions: Extension[], partners: Partner[],
   let list = search.cat === featuredCategory ? featuredExtensions(extensions) : extensions.slice();
   if (search.q.trim()) {
     const q = search.q.trim().toLowerCase();
-    const partnerNames = new Map(partners.map(partner => [partner.id, partner.name]));
-    list = list.filter(extension => [extension.name, extension.shortDescription, extension.description, partnerNames.get(extension.partnerId), ...extension.tags].filter(Boolean).join(" ").toLowerCase().includes(q));
+    const index = extensionSearchIndex(extensions, partners);
+    list = list.filter(extension => index.get(extension)!.includes(q));
   }
   if (search.cat && search.cat !== featuredCategory) list = list.filter(extension => extension.categoryId === search.cat);
   if (search.partner) list = list.filter(extension => extension.partnerId === search.partner);

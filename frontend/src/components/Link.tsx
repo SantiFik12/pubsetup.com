@@ -11,5 +11,7 @@ export function Link({to, params, search, activeProps, className, ...props}: Pro
  const path = to.replace(/\$(\w+)/g, (_, key: string) => encodeURIComponent(params?.[key] ?? ""));
  const query = new URLSearchParams();
  Object.entries(search ?? {}).forEach(([key,value]) => { if (value !== undefined && value !== "" && value !== false) query.set(key,String(value)); });
- return <NextLink {...props} href={path + (query.size ? `?${query}` : "")} className={pathname === path && activeProps?.className ? activeProps.className : className} />;
+ // Every dynamic route currently includes the catalog. Avoid downloading it
+ // speculatively as search results and their links enter the viewport.
+ return <NextLink prefetch={false} {...props} href={path + (query.size ? `?${query}` : "")} className={pathname === path && activeProps?.className ? activeProps.className : className} />;
 }

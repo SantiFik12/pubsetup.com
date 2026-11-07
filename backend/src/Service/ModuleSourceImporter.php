@@ -426,6 +426,9 @@ final readonly class ModuleSourceImporter implements ModuleSource
             $result['_image'] = $result['_images'][0];
         }
 
+        if ('store.webkul.com' === strtolower(parse_url($url, PHP_URL_HOST) ?? '')) {
+            $result = self::webkulData($xpath, $url, $result);
+        }
         if (in_array(strtolower(parse_url($url, PHP_URL_HOST) ?? ''), ['aitoc.com', 'www.aitoc.com'], true)) {
             $result = self::aitocDescriptions($xpath, $result);
         }
@@ -459,6 +462,57 @@ final readonly class ModuleSourceImporter implements ModuleSource
         }
 
         return array_replace($result, ModuleSeo::generate($result));
+    }
+
+    private static function webkulData(\DOMXPath $xpath, string $url, array $result): array
+    {
+        $class = static fn (string $name): string => 'contains(concat(" ",normalize-space(@class)," ")," '.$name.' ")';
+        $text = static function (\DOMNode $node) use ($xpath): string {
+            $parts = [];
+            foreach ($xpath->query('.//text()[not(ancestor::script or ancestor::style)]', $node) as $part) {
+                $parts[] = $part->textContent;
+            }
+
+            return trim(preg_replace('/\s+/u', ' ', implode('', $parts)));
+        };
+        $summary = $xpath->query('//*['.$class('product-info-dima').']/p')->item(0);
+        if ($summary) {
+            $intro = $text($summary);
+            if (mb_strlen($intro) > 240 && preg_match('/^.+?[.!?](?=\s|$)/u', $intro, $sentence)) {
+                $intro = $sentence[0];
+            }
+            if ('' !== $intro && mb_strlen($intro) <= 2000) {
+                $result['short_description'] = $intro;
+            }
+        }
+        // Read only the introductory paragraphs, before feature headings,
+        // recommendations, FAQ and changelog sections inside the same tab.
+        $paragraphs = [];
+        foreach ($xpath->query('//*[@id="descriptionTab"]/*['.$class('preset').']/*['.$class('preset-wrapper').'][1]/p | //*[@id="descriptionTab"]/p') as $node) {
+            $paragraph = $text($node);
+            if ('' !== $paragraph && mb_strlen(implode("\n\n", [...$paragraphs, $paragraph])) <= 10000) {
+                $paragraphs[] = $paragraph;
+            }
+            if (count($paragraphs) >= 3) {
+                break;
+            }
+        }
+        if ([] !== $paragraphs) {
+            $result['description'] = implode("\n\n", array_unique($paragraphs));
+        }
+        $pictures = [];
+        foreach ($xpath->query('//*[@id="wsScreenShots"]//a[@data-lightbox and @href]/@href') as $node) {
+            $picture = self::resolveUrl($url, $node->textContent);
+            if (preg_match('~^https?://.+\.(?:png|jpe?g|webp)(?:[?#]|$)~i', $picture)) {
+                $pictures[] = $picture;
+            }
+        }
+        if ([] !== $pictures) {
+            $result['_images'] = array_slice(array_values(array_unique($pictures)), 0, 32);
+            $result['_image'] = $result['_images'][0];
+        }
+
+        return $result;
     }
 
     private static function aitocDescriptions(\DOMXPath $xpath, array $result): array

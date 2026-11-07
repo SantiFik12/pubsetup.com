@@ -423,4 +423,22 @@ foreach (['https://unknown.example/product', 'https://aitoc.com.example/product'
     $check(ModuleSourceImporter::extract($aitoc, $url)['description'] !== $aitocIntro."\n\n".$aitocDetails, 'Aitoc extraction changed another vendor');
 }
 
+$webkulUrl = 'https://store.webkul.com/magento2-multi-vendor-marketplace.html';
+$webkulIntro = 'Turn your Magento store into a marketplace where independent sellers manage their own products, inventory and orders.';
+$webkulParagraph = str_repeat('Sellers manage their catalogs and orders while the store administrator controls approvals and commissions. ', 15).'The complete paragraph must survive import.';
+$webkul = '<meta name="description" content="Old metadata description"><script type="application/ld+json">{"@type":"Product","name":"Marketplace","description":"Old metadata description","image":"/icon.png","offers":{"price":349,"priceCurrency":"USD"}}</script><textarea id="description">Unrelated contact form field</textarea><div class="product-info-dima"><p>'.$webkulIntro.'<script>tracking code</script></p><ul><li>Summary feature list should not enter the short description</li></ul></div><div id="descriptionTab"><div class="preset"><div class="preset-wrapper"><p>'.$webkulParagraph.'</p><p>Supports simple and configurable products with tools for inventory, shipments and seller profiles.</p><p>Compatible with supported Magento storefronts and the latest platform releases.</p></div><div class="preset-wrapper"><h2>Features</h2><p>Unrelated feature section must not become the introduction.</p><img data-src="https://storecdn.webkul.com/showcase/feature.png"></div></div></div><div id="wsScreenShots"><a href="/first.png" data-lightbox="example-set"><img src="/first.png"></a><a href="/second.webp" data-lightbox="example-set"><img src="/skeleton.png" data-src="/second.webp"></a><a href="/first.png" data-lightbox="example-set">Duplicate</a><a href="javascript:alert(1)" data-lightbox="example-set">Unsafe</a><a href="/video.mp4" data-lightbox="example-set">Video</a><img src="/skeleton.png"></div><footer><a data-lightbox="example-set" href="/unrelated.png">Unrelated image</a></footer>';
+$webkulFields = ModuleSourceImporter::extract($webkul, $webkulUrl);
+$check($webkulIntro === $webkulFields['short_description'], 'Webkul summary mixed with metadata, scripts or feature lists');
+$check($webkulParagraph."\n\nSupports simple and configurable products with tools for inventory, shipments and seller profiles.\n\nCompatible with supported Magento storefronts and the latest platform releases." === $webkulFields['description'], 'Webkul introduction paragraphs clipped or mixed with form fields and feature sections');
+$check(['https://store.webkul.com/first.png', 'https://store.webkul.com/second.webp'] === $webkulFields['_images'], 'Webkul gallery missing originals, polluted with placeholders, duplicates, video or unrelated images');
+$check($webkulFields['_image'] === $webkulFields['_images'][0] && '349.00' === $webkulFields['price_from'], 'Webkul cover order or existing price changed');
+$noWebkulBlocks = ModuleSourceImporter::extract(str_replace(['id="wsScreenShots"', 'id="descriptionTab"', 'class="product-info-dima"'], ['id="otherSlider"', 'id="otherDescription"', 'class="other-summary"'], $webkul), $webkulUrl);
+$check('Old metadata description' === $noWebkulBlocks['description'] && ['https://store.webkul.com/icon.png'] === $noWebkulBlocks['_images'], 'Missing Webkul blocks must preserve generic extraction');
+$longWebkulSummary = ModuleSourceImporter::extract(str_replace($webkulIntro, $webkulIntro.' '.str_repeat('Additional promotional text and product details. ', 10), $webkul), $webkulUrl);
+$check($webkulIntro === $longWebkulSummary['short_description'], 'Long Webkul introduction must end at a complete sentence');
+foreach (['https://unknown.example/product', 'https://store.webkul.com.example/product', 'https://webkul.com/blog/product'] as $url) {
+    $fields = ModuleSourceImporter::extract($webkul, $url);
+    $check('Old metadata description' === $fields['description'] && 1 === count($fields['_images']), 'Webkul store rules changed another domain');
+}
+
 echo 'Module importer: '.$checks." checks passed.\n";

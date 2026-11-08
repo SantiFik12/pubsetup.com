@@ -5,6 +5,7 @@ import { useBlogPost,useCatalog,useExtension,usePartner } from "@/data/catalog";
 import { tagSlug } from "@/lib/slug";
 import { ExternalLink,Zap } from "lucide-react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 const headingIdFromText = (text?: string) =>
   text?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -72,6 +73,11 @@ export default function BlogPostPage() {
       </header>
 
       <div className="container-page max-w-3xl py-12">
+        {post.cover && (
+          <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-2xl">
+            <Image src={post.cover} alt={post.title} fill sizes="(max-width: 768px) 100vw, 720px" preload className="object-cover" />
+          </div>
+        )}
         {post.toc.length > 0 && (
           <nav className="mb-10 rounded-xl border border-border bg-surface p-4">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Table of contents</p>

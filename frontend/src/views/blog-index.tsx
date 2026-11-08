@@ -1,6 +1,7 @@
 "use client";
 import { Link } from "@/components/Link";
 import { useBlogPosts } from "@/data/catalog";
+import Image from "next/image";
 
 
 
@@ -28,6 +29,7 @@ export default function BlogPage() {
             {blogPosts.map((p) => (
               <Link key={p.id} to="/blog/$slug" params={{ slug: p.slug }} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:-translate-y-0.5 hover:shadow-card">
                 <div className="aspect-[16/9] bg-brand-gradient relative">
+                  {p.cover && <Image src={p.cover} alt={p.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover" />}
                   <span className="absolute bottom-3 left-3 rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur">{p.category}</span>
                 </div>
                 <div className="flex flex-1 flex-col p-5">

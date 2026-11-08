@@ -75,7 +75,7 @@ export default function BlogPostPage() {
       <div className="container-page max-w-3xl py-12">
         {post.cover && (
           <div className="relative mb-10 aspect-[16/9] overflow-hidden rounded-2xl">
-            <Image src={post.cover} alt={post.title} fill sizes="(max-width: 768px) 100vw, 720px" preload className="object-cover" />
+            <Image src={post.cover} alt={post.title} fill unoptimized={/\.webp(?:[?#]|$)/i.test(post.cover)} sizes="(max-width: 768px) 100vw, 720px" preload className="object-cover" />
           </div>
         )}
         {post.toc.length > 0 && (

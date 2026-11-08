@@ -90,7 +90,7 @@ export default function BlogPostPage() {
         )}
 
         <div className="space-y-5">
-          {post.content.map((block: { type: string; text?: string; items?: string[]; extensionSlug?: string }, i: number) => {
+          {post.content.map((block, i) => {
             if (block.type === "p") return <p key={i} className="leading-relaxed text-foreground">{block.text}</p>;
             if (block.type === "h2") {
               const id = post.toc[post.content.slice(0, i).filter(b => b.type === "h2").length]?.id ?? headingIdFromText(block.text);
@@ -100,6 +100,25 @@ export default function BlogPostPage() {
               <ul key={i} className="ml-5 list-disc space-y-1.5 text-foreground">
                 {block.items?.map((it: string) => <li key={it}>{it}</li>)}
               </ul>
+            );
+            if (block.type === "table" && block.columns && block.rows) return (
+              <div key={i} className="overflow-x-auto rounded-xl border border-border" role="region" aria-label={block.caption ?? "Comparison table"} tabIndex={0}>
+                <table className="w-full min-w-[640px] text-left text-sm">
+                  {block.caption && <caption className="p-4 text-left font-semibold text-foreground">{block.caption}</caption>}
+                  <thead className="bg-surface">
+                    <tr>{block.columns.map((column, columnIndex) => <th key={columnIndex} scope="col" className="border-t border-border p-3 font-semibold">{column}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        {row.map((cell, cellIndex) => cellIndex === 0
+                          ? <th key={cellIndex} scope="row" className="border-t border-border p-3 align-top font-medium">{cell}</th>
+                          : <td key={cellIndex} className="border-t border-border p-3 align-top">{cell}</td>)}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             );
             if (block.type === "extension-card" && block.extensionSlug) {
               return <ExtensionCardBlock key={i} extensionSlug={block.extensionSlug} />;

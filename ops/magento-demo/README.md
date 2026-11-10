@@ -166,6 +166,10 @@ bash scripts/enable-demo.sh
 
 Для оставшихся ошибок навигации нужны URL и статус неуспешного запроса из Network браузера вместе с записью Magento за то же время: старые записи публичных запросов не позволяют установить причину конкретного окна в админке.
 
+В заказе вкладка Comments History загружается отдельным AJAX-запросом `sales/order/commentsHistory`, в том числе через POST. Этот маршрут разрешён только для чтения истории; `sales/order/addComment` остаётся запрещённым. Ответ 403 от демомодуля не создаёт исключение в логах Magento, но может вызвать общее сообщение об ошибке в интерфейсе.
+
+Если после пересборки отступа всё ещё нет, проверьте исходный HTML страницы входа: должны присутствовать класс `pubsetup-demo-login-credentials` и подключение `Pubsetup_Demo/css/login.css`. Их отсутствие означает, что сервер отдаёт старый шаблон/layout. Пересборка Docker-образа не обновляет исходники модуля в bind mount: сначала доставьте актуальный репозиторий, затем скопируйте `module/` и `scripts/` в рабочий каталог демо и запустите `enable-demo.sh`. Сравните исходный шаблон `module/Pubsetup/Demo/view/adminhtml/templates/login-credentials.phtml` с установленным `app/app/code/Pubsetup/Demo/view/adminhtml/templates/login-credentials.phtml`. Если страница возвращает `X-Magento-Cache-Debug: UNCACHEABLE` и `Cache-Control: no-store`, очистка Varnish не устраняет старую версию модуля.
+
 ### Показать блок на основном сайте
 
 После прохождения проверок в `/home/deploy/pubsetup/.env.production` установить:

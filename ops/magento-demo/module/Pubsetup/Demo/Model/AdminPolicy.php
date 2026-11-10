@@ -24,6 +24,7 @@ final class AdminPolicy
         'newsletter_template_grid', 'newsletter_queue_grid', 'newsletter_subscriber_grid',
         'search_term_grid', 'adminhtml_sitemap_grid', 'review_product_grid', 'adminhtml_system_store_grid',
         'customer_index_orders', 'customer_index_lastOrders', 'customer_index_newsletter',
+        'sales_order_commentsHistory',
     ];
 
     /** Exact resources, never Magento_Backend::all. Unlisted child actions stay denied. */

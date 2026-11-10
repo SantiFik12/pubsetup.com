@@ -233,11 +233,11 @@ namespace {
     }
     $request->action = 'catalog_rule_promo_catalog_grid'; $request->method = 'POST';
     check($guard->aroundExecute($action, $proceed) === 'executed', 'Legacy rule grid filtering can render via POST');
-    foreach (['customer_index_orders', 'customer_index_lastOrders', 'customer_index_newsletter'] as $route) {
+    foreach (['customer_index_orders', 'customer_index_lastOrders', 'customer_index_newsletter', 'sales_order_commentsHistory'] as $route) {
         $request->action = $route;
         foreach (['GET', 'HEAD', 'POST'] as $method) {
             $request->method = $method;
-            check($guard->aroundExecute($action, $proceed) === 'executed', "$route $method loads the customer tab");
+            check($guard->aroundExecute($action, $proceed) === 'executed', "$route $method loads the read-only tab");
         }
         $request->method = 'DELETE'; $called = false;
         check($guard->aroundExecute($action, $proceed)->code === 403 && !$called, "$route rejects DELETE");

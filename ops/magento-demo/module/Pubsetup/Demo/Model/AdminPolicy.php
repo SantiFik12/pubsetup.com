@@ -11,7 +11,7 @@ final class AdminPolicy
     public const PUBLIC_PASSWORD_PATH = 'pubsetup_demo/access/public_password';
     private const GRID_NAMESPACES = [
         'product_listing', 'sales_order_grid',
-        'customer_listing', 'customer_group_listing', 'customer_online_grid',
+        'customer_listing', 'customer_group_listing', 'customer_online_grid', 'customer_address_listing',
         'cms_page_listing', 'cms_block_listing', 'url_rewrite_listing',
         'search_synonyms_grid', 'design_theme_listing',
     ];
@@ -23,6 +23,7 @@ final class AdminPolicy
         'catalog_rule_promo_catalog_grid', 'sales_rule_promo_quote_grid',
         'newsletter_template_grid', 'newsletter_queue_grid', 'newsletter_subscriber_grid',
         'search_term_grid', 'adminhtml_sitemap_grid', 'review_product_grid', 'adminhtml_system_store_grid',
+        'customer_index_orders', 'customer_index_lastOrders', 'customer_index_newsletter',
     ];
 
     /** Exact resources, never Magento_Backend::all. Unlisted child actions stay denied. */

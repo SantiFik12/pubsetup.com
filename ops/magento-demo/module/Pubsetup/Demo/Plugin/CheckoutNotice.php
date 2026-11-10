@@ -17,7 +17,8 @@ final class CheckoutNotice
     public function aroundExecute(ActionInterface $subject, callable $proceed)
     {
         if ($this->request->getFullActionName() === 'checkout_index_index'
-            || $this->request->getModuleName() === 'multishipping') {
+            // Payment callbacks must also stop before Magento tries to load a quote.
+            || in_array($this->request->getModuleName(), ['multishipping', 'paypal'], true)) {
             $this->messages->addNoticeMessage(__(BlockOrders::MESSAGE));
             return $this->redirects->create()->setPath('checkout/cart');
         }

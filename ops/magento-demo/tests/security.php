@@ -23,10 +23,17 @@ namespace Magento\Framework\App\Request {
         public function __construct(public string $action = '', public string $method = 'GET', public mixed $namespace = null, public mixed $section = null) {}
         public function getFullActionName(): string { return $this->action; }
         public function getMethod(): string { return $this->method; }
+        public string $module = '';
+        public function getModuleName(): string { return $this->module; }
         public function getParam(string $name): mixed { return $name === 'section' ? $this->section : $this->namespace; }
     }
 }
 namespace Magento\Framework\Controller\Result {
+    class RedirectFactory { public function create(): Redirect { return new Redirect(); } }
+    class Redirect {
+        public string $path = '';
+        public function setPath(string $path): self { $this->path = $path; return $this; }
+    }
     class RawFactory { public function create(): Raw { return new Raw(); } }
     class Raw {
         public int $code = 200;
@@ -35,6 +42,9 @@ namespace Magento\Framework\Controller\Result {
         public function setHeader(...$args): self { return $this; }
         public function setContents(string $contents): self { $this->contents = $contents; return $this; }
     }
+}
+namespace Magento\Framework\Message {
+    interface ManagerInterface { public function addNoticeMessage($message); }
 }
 namespace Magento\Backend\Model\Auth {
     class Session {
@@ -149,6 +159,8 @@ namespace {
         'sales_order_create_save', 'adminhtml_system_config_save', 'adminhtml_system_account_save',
         'adminhtml_user_save', 'adminhtml_user_role_save', 'adminhtml_cache_flushAll',
         'cms_page_save', 'cms_block_save', 'cms_page_delete', 'customer_index_save', 'customer_index_resetPassword',
+        'customer_address_save', 'customer_address_delete', 'customer_address_massDelete', 'customer_index_inlineEdit',
+        'customer_index_cart', 'customer_index_wishlist', 'mui_index_render_handle',
         'catalog_rule_promo_catalog_save', 'catalog_rule_promo_catalog_applyRules',
         'sales_rule_promo_quote_save', 'sales_rule_promo_quote_generate',
         'newsletter_queue_save', 'newsletter_subscriber_massDelete',
@@ -171,9 +183,14 @@ namespace {
         check($guard->aroundExecute($action, $proceed)->code === 403, "$route POST rejected");
     }
     $request->action = 'mui_index_render'; $request->method = 'POST';
-    foreach (['product_listing', 'sales_order_grid', 'cms_page_listing', 'cms_block_listing', 'customer_listing', 'url_rewrite_listing'] as $namespace) {
+    foreach (['product_listing', 'sales_order_grid', 'cms_page_listing', 'cms_block_listing', 'customer_listing', 'customer_address_listing', 'url_rewrite_listing'] as $namespace) {
         $request->namespace = $namespace;
         check($guard->aroundExecute($action, $proceed) === 'executed', 'Read-only grid POST works');
+        $request->method = 'GET';
+        check($guard->aroundExecute($action, $proceed) === 'executed', 'Read-only grid GET works');
+        $request->method = 'DELETE';
+        check($guard->aroundExecute($action, $proceed)->code === 403, 'Read-only grid rejects DELETE');
+        $request->method = 'POST';
     }
     foreach (['integrations_listing', 'permissions_users', [], null] as $namespace) {
         $request->namespace = $namespace;
@@ -181,7 +198,7 @@ namespace {
     }
 
     $request->action = 'mui_bookmark_save';
-    foreach (['product_listing', 'sales_order_grid', 'cms_page_listing', 'cms_block_listing', 'customer_listing', 'url_rewrite_listing'] as $namespace) {
+    foreach (['product_listing', 'sales_order_grid', 'cms_page_listing', 'cms_block_listing', 'customer_listing', 'customer_address_listing', 'url_rewrite_listing'] as $namespace) {
         $request->namespace = $namespace;
         $request->method = 'POST';
         $called = false;
@@ -216,6 +233,15 @@ namespace {
     }
     $request->action = 'catalog_rule_promo_catalog_grid'; $request->method = 'POST';
     check($guard->aroundExecute($action, $proceed) === 'executed', 'Legacy rule grid filtering can render via POST');
+    foreach (['customer_index_orders', 'customer_index_lastOrders', 'customer_index_newsletter'] as $route) {
+        $request->action = $route;
+        foreach (['GET', 'HEAD', 'POST'] as $method) {
+            $request->method = $method;
+            check($guard->aroundExecute($action, $proceed) === 'executed', "$route $method loads the customer tab");
+        }
+        $request->method = 'DELETE'; $called = false;
+        check($guard->aroundExecute($action, $proceed)->code === 403 && !$called, "$route rejects DELETE");
+    }
     $request->action = 'adminhtml_system_config_edit'; $request->method = 'GET';
     foreach (['general', 'catalog', 'sales', 'checkout', 'tax'] as $section) {
         $request->section = $section;
@@ -270,6 +296,31 @@ namespace {
     check($guard->aroundExecute($action, $proceed)->code === 403, 'Another user of the demo role cannot mutate');
 
     $orders = new \Pubsetup\Demo\Plugin\BlockOrders();
+    $messages = new class implements \Magento\Framework\Message\ManagerInterface {
+        public array $notices = [];
+        public function addNoticeMessage($message) { $this->notices[] = $message; }
+    };
+    $checkout = new \Pubsetup\Demo\Plugin\CheckoutNotice(
+        $request, new \Magento\Framework\Controller\Result\RedirectFactory(), $messages
+    );
+    foreach ([
+        ['checkout', 'checkout_index_index'],
+        ['multishipping', 'multishipping_checkout_index'],
+        ['paypal', 'paypal_transparent_response'],
+        ['paypal', 'paypal_express_start'],
+    ] as [$module, $route]) {
+        $request->module = $module; $request->action = $route;
+        foreach (['GET', 'POST'] as $method) {
+            $request->method = $method; $called = false;
+            $result = $checkout->aroundExecute($action, $proceed);
+            check(!$called && $result->path === 'checkout/cart', "$route stops before payment or quote loading");
+            check(end($messages->notices) === $orders::MESSAGE, 'Blocked checkout explains demo mode');
+        }
+    }
+    foreach ([['checkout', 'checkout_cart_index'], ['catalog', 'catalog_product_view']] as [$module, $route]) {
+        $request->module = $module; $request->action = $route; $request->method = 'GET';
+        check($checkout->aroundExecute($action, $proceed) === 'executed', "$route remains available");
+    }
     foreach (['beforePlaceOrder', 'beforeSubmit', 'beforePlace'] as $method) {
         rejects(fn () => $orders->$method(new \stdClass()), 'All order placement paths reject');
     }

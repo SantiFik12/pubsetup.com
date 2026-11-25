@@ -1,3 +1,4 @@
+import { CatalogPage } from "@/components/CatalogPage";
 import { JsonLd } from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog.server";
 import { breadcrumbs, collectionSchema, metaDescription, pageMetadata } from "@/lib/seo";
@@ -22,5 +23,5 @@ export async function generateMetadata(props: Props) {
 export default async function Page(props: Props) {
   const { item, extensions } = await details(props);
   const path = `/category/${item.slug}`;
-  return <><JsonLd data={collectionSchema(item.name, path, extensions.map(extension => ({ name: extension.name, path: `/extension/${extension.slug}` })))} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Magento 2 Extensions", path: "/extensions" }, { name: item.name, path }])} /><View category={item} extensions={extensions} /></>;
+  return <><JsonLd data={collectionSchema(item.name, path, extensions.map(extension => ({ name: extension.name, path: `/extension/${extension.slug}` })))} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Magento 2 Extensions", path: "/extensions" }, { name: item.name, path }])} /><CatalogPage><View category={item} extensions={extensions} /></CatalogPage></>;
 }

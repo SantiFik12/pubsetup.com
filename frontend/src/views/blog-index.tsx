@@ -13,7 +13,7 @@ export default function BlogPage() {
       <section className="border-b border-border bg-surface">
         <div className="container-page py-14">
           <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">Magento 2 blog & guides</h1>
-          <p className="mt-3 max-w-2xl text-lg text-muted-foreground">Independent reviews, side-by-side comparisons and battle-tested guides.</p>
+          <p className="mt-3 max-w-2xl text-lg text-muted-foreground">Magento 2 extension comparisons, documented features and practical implementation checklists.</p>
           <div className="mt-6 flex flex-wrap gap-2">
             {categories.map((c) => (
               <span key={c} className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">{c}</span>

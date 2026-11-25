@@ -1,3 +1,4 @@
+import { CatalogPage } from "@/components/CatalogPage";
 import { CollectionSeo } from "@/components/CollectionSeo";
 import { getCatalog } from "@/lib/catalog.server";
 import { pageMetadata } from "@/lib/seo";
@@ -9,5 +10,5 @@ export async function generateMetadata() {
 }
 export default async function Page() {
   const catalog = await getCatalog();
-  return <><CollectionSeo name="Magento 2 Services" path="/services" items={catalog.services.map(item => ({ name: item.name, path: `/services/${item.slug}` }))} /><View /></>;
+  return <><CollectionSeo name="Magento 2 Services" path="/services" items={catalog.services.map(item => ({ name: item.name, path: `/services/${item.slug}` }))} /><CatalogPage><View /></CatalogPage></>;
 }

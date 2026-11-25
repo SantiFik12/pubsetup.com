@@ -1,3 +1,6 @@
+import { GuideLinks } from "@/components/GuideLinks";
+import { relatedPosts } from "@/lib/page-catalog";
+import { CatalogPage } from "@/components/CatalogPage";
 import { JsonLd } from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog.server";
 import { breadcrumbs, pageMetadata } from "@/lib/seo";
@@ -19,5 +22,5 @@ export async function generateMetadata(props: Props) {
 }
 export default async function Page(props: Props) {
   const item = await details(props);
-  return <><JsonLd data={articleSchema(item)} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }, { name: item.title, path: `/blog/${item.slug}` }])} /><View /></>;
+  return <><JsonLd data={articleSchema(item)} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }, { name: item.title, path: `/blog/${item.slug}` }])} /><CatalogPage kind="blog" slug={item.slug}><View /></CatalogPage><GuideLinks posts={relatedPosts(await getCatalog(), item.slug)} title="Related Magento 2 guides" /></>;
 }

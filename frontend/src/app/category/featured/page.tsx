@@ -1,3 +1,4 @@
+import { CatalogPage } from "@/components/CatalogPage";
 import { CollectionSeo } from "@/components/CollectionSeo";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
@@ -14,7 +15,7 @@ export async function generateMetadata() {
 export default async function Page() {
   const catalog = await getCatalog();
   const featured = featuredExtensions(catalog.extensions);
-  return <>
+  return <CatalogPage>
     <CollectionSeo name="Featured extensions" path="/category/featured" items={featured.map(item => ({ name: item.name, path: `/extension/${item.slug}` }))} />
     <section className="border-b border-border bg-surface"><div className="container-page py-12">
       <Link to="/extensions" className="text-sm text-muted-foreground hover:text-foreground">← All extensions</Link>
@@ -24,5 +25,5 @@ export default async function Page() {
     <section className="container-page py-10">
       {featured.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{featured.map(item => <ExtensionCard key={item.id} ext={item} />)}</div> : <p className="text-muted-foreground">Extensions will appear here as they are added to the catalog.</p>}
     </section>
-  </>;
+  </CatalogPage>;
 }

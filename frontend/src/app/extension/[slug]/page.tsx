@@ -1,3 +1,4 @@
+import { CatalogPage } from "@/components/CatalogPage";
 import { JsonLd } from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog.server";
 import { breadcrumbs, extensionMetadata } from "@/lib/seo";
@@ -23,5 +24,5 @@ export default async function Page(props: Props) {
     { name: "Home", path: "/" }, { name: "Magento 2 Extensions", path: "/extensions" },
     ...(category ? [{ name: category.name, path: `/category/${category.slug}` }] : []),
     { name: item.name, path: `/extension/${item.slug}` },
-  ])} /><View /></>;
+  ])} /><CatalogPage kind="extension" slug={item.slug}><View /></CatalogPage></>;
 }

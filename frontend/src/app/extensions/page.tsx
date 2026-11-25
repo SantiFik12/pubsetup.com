@@ -1,3 +1,4 @@
+import { CatalogPage } from "@/components/CatalogPage";
 import { CollectionSeo } from "@/components/CollectionSeo";
 import { getCatalog } from "@/lib/catalog.server";
 import { catalogDefaults, extensionListHref, extensionPage, filteredExtensions, readCatalogSearch } from "@/lib/extension-list";
@@ -19,5 +20,5 @@ export async function generateMetadata({ searchParams }: Props) {
 }
 export default async function Page({ searchParams }: Props) {
   const { pagination, path } = await listing(searchParams);
-  return <><CollectionSeo name="Magento 2 Extensions Catalog" path={path} items={pagination.items.map(item => ({ name: item.name, path: `/extension/${item.slug}` }))} /><View /></>;
+  return <><CollectionSeo name="Magento 2 Extensions Catalog" path={path} items={pagination.items.map(item => ({ name: item.name, path: `/extension/${item.slug}` }))} /><CatalogPage><View /></CatalogPage></>;
 }

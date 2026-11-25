@@ -1,29 +1,27 @@
 "use client";
-import { extensionPage, filteredExtensions } from "@/lib/extension-list";
+import type { extensionPage } from "@/lib/extension-list";
 import { ExtensionPagination } from "@/components/ExtensionPagination";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
-import { useAllTags,useCatalog } from "@/data/catalog";
+import { useCatalog } from "@/data/catalog";
 import { useCatalogSearch } from "@/lib/search";
 import { featuredCategory } from "@/lib/featured";
 import { useCompare } from "@/state/compare";
 import * as Select from "@radix-ui/react-select";
 import { Check,ChevronDown,ChevronUp,Search,SlidersHorizontal,Star } from "lucide-react";
-import { useMemo,useState } from "react";
+import { useState } from "react";
 
-export default function ExtensionsPage() {
-  const [search, navigate] = useCatalogSearch();
+export default function ExtensionsPage({ pagination, totalExtensions, allTags }: {
+  pagination: ReturnType<typeof extensionPage>; totalExtensions: number; allTags: string[];
+}) {
+  const [search, navigate, pending] = useCatalogSearch();
   const [advancedOpen, setAdvancedOpen] = useState(Boolean(search.tag || search.hyva || search.pwa || search.price !== "all"));
   const { items: compareItems, clear } = useCompare();
-  const { extensions, partners, categories } = useCatalog();
-  const allTags = useAllTags();
+  const { partners, categories } = useCatalog();
 
   const update = (patch: Partial<typeof search>) => {
     navigate({ search: (prev: typeof search) => ({ ...prev, ...patch, page: "1" }) });
   };
-
-  const filtered = useMemo(() => filteredExtensions(extensions, partners, search), [search, extensions, partners]);
-  const pagination = extensionPage(filtered, search.page);
 
   const clearAll = () =>
     navigate({ search: { q: "", cat: "", partner: "", tag: "", price: "all", hyva: false, pwa: false, sort: "popular", page: "1" } });
@@ -32,10 +30,10 @@ export default function ExtensionsPage() {
   const hasFilters = Boolean(search.q || search.cat || search.partner || advancedCount);
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12">
+    <section aria-busy={pending} className="mx-auto w-full max-w-6xl px-4 py-12">
       <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Magento 2 extensions</h1>
       <p className="mt-2 text-muted-foreground">
-        {extensions.length} expert-curated modules from {partners.length} trusted partners. Filter, compare, and install with one click.
+        {totalExtensions} expert-curated modules from {partners.length} trusted partners. Filter, compare, and install with one click.
       </p>
 
       <div className="mt-8 rounded-xl border border-border bg-surface p-4">
@@ -129,7 +127,7 @@ export default function ExtensionsPage() {
         )}
       </div>
       <ExtensionPagination search={search} page={pagination.page} pages={pagination.pages} />
-      {filtered.length === 0 ? (
+      {pagination.total === 0 ? (
         <div className="mt-8 rounded-2xl border border-dashed border-border px-4 py-12 text-center">
           <Star aria-hidden="true" className="mx-auto h-8 w-8 text-muted-foreground" />
           <p className="mt-3 font-medium">No extensions match your filters.</p>

@@ -10,5 +10,5 @@ export async function generateMetadata() {
 }
 export default async function Page() {
   const catalog = await getCatalog();
-  return <><CollectionSeo name="Magento 2 Services" path="/services" items={catalog.services.map(item => ({ name: item.name, path: `/services/${item.slug}` }))} /><CatalogPage><View /></CatalogPage></>;
+  return <><CollectionSeo name="Magento 2 Services" path="/services" items={catalog.services.map(item => ({ name: item.name, path: `/services/${item.slug}` }))} /><CatalogPage kind="services"><View /></CatalogPage></>;
 }

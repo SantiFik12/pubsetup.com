@@ -23,5 +23,5 @@ export async function generateMetadata(props: Props) {
 }
 export default async function Page(props: Props) {
   const item = await details(props);
-  return <><JsonLd data={serviceSchema(item)} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Services", path: "/services" }, { name: item.name, path: `/services/${item.slug}` }])} /><CatalogPage><View /></CatalogPage></>;
+  return <><JsonLd data={serviceSchema(item)} /><JsonLd data={breadcrumbs([{ name: "Home", path: "/" }, { name: "Services", path: "/services" }, { name: item.name, path: `/services/${item.slug}` }])} /><CatalogPage kind="services"><View /></CatalogPage></>;
 }

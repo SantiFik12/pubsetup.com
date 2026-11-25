@@ -1,4 +1,5 @@
-import { CatalogPage } from "@/components/CatalogPage";
+import { CatalogProvider } from "@/data/catalog";
+import { collectionCatalog } from "@/lib/page-catalog";
 import { CollectionSeo } from "@/components/CollectionSeo";
 import { ExtensionCard } from "@/components/ExtensionCard";
 import { Link } from "@/components/Link";
@@ -15,7 +16,8 @@ export async function generateMetadata() {
 export default async function Page() {
   const catalog = await getCatalog();
   const featured = featuredExtensions(catalog.extensions);
-  return <CatalogPage>
+  const scoped = collectionCatalog(catalog, featured);
+  return <CatalogProvider catalog={scoped}>
     <CollectionSeo name="Featured extensions" path="/category/featured" items={featured.map(item => ({ name: item.name, path: `/extension/${item.slug}` }))} />
     <section className="border-b border-border bg-surface"><div className="container-page py-12">
       <Link to="/extensions" className="text-sm text-muted-foreground hover:text-foreground">← All extensions</Link>
@@ -23,7 +25,7 @@ export default async function Page() {
       <p className="mt-3 max-w-2xl text-lg text-muted-foreground">Explore the most-viewed Magento 2 modules in our catalog.</p>
     </div></section>
     <section className="container-page py-10">
-      {featured.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{featured.map(item => <ExtensionCard key={item.id} ext={item} />)}</div> : <p className="text-muted-foreground">Extensions will appear here as they are added to the catalog.</p>}
+      {featured.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{scoped.extensions.map(item => <ExtensionCard key={item.id} ext={item} />)}</div> : <p className="text-muted-foreground">Extensions will appear here as they are added to the catalog.</p>}
     </section>
-  </CatalogPage>;
+  </CatalogProvider>;
 }

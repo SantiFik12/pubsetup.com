@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 
 
 
-export default function PartnerPage() {
+export default function PartnerPage({ total }: { total: number }) {
   const { slug } = useParams<{ slug: string; landing: string }>();
   const { isLoading } = useCatalog();
   const partner = usePartner(slug);
@@ -34,8 +34,8 @@ export default function PartnerPage() {
           </div>
         </div>
       </section>
-      <section className="container-page py-10">
-        <p className="mb-6 text-sm text-muted-foreground">{list.length} extensions by {partner.name}</p>
+      <section id="collection-results" className="container-page scroll-mt-24 py-10">
+        <p className="mb-6 text-sm text-muted-foreground">{total} extensions by {partner.name}</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
         </div>

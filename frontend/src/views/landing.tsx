@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 
 
 
-export default function LandingPage() {
+export default function LandingPage({ total }: { total: number }) {
   const { landing: slug } = useParams<{ slug: string; landing: string }>();
   const catalog = useCatalog();
   const { isLoading } = catalog;
@@ -30,8 +30,8 @@ export default function LandingPage() {
           <p className="mt-4 text-lg text-muted-foreground">{landing.intro}</p>
         </div>
       </section>
-      <section className="container-page py-10">
-        <p className="mb-6 text-sm text-muted-foreground">{list.length} extensions</p>
+      <section id="collection-results" className="container-page scroll-mt-24 py-10">
+        <p className="mb-6 text-sm text-muted-foreground">{total} extensions</p>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
         </div>

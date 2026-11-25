@@ -5,7 +5,7 @@ import type { Category, Extension } from "@/data/types";
 
 
 
-export default function CategoryPage({ category: cat, extensions: list }: { category: Category; extensions: Extension[] }) {
+export default function CategoryPage({ category: cat, extensions: list, total }: { category: Category; extensions: Extension[]; total: number }) {
   return (
     <>
       <section className="border-b border-border bg-surface">
@@ -15,8 +15,8 @@ export default function CategoryPage({ category: cat, extensions: list }: { cate
           <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{cat.description}</p>
         </div>
       </section>
-      <section className="container-page py-10">
-        <p className="mb-6 text-sm text-muted-foreground">{list.length} extensions in this category</p>
+      <section id="collection-results" className="container-page scroll-mt-24 py-10">
+        <p className="mb-6 text-sm text-muted-foreground">{total} extensions in this category</p>
         {list.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((e) => <ExtensionCard key={e.id} ext={e} />)}
         </div> : <p className="text-muted-foreground">No extensions are listed in this collection yet. <Link to="/extensions" className="text-primary hover:underline">Browse all extensions</Link>.</p>}

@@ -55,3 +55,6 @@ docker compose run --rm -T migrate php bin/console app:import - < catalog.json
 Карточка Data Feed Manager показывает ссылку на руководство только если статья присутствует в опубликованном каталоге. Обратная ссылка и карточка модуля включены в статью. Источники, дата редакционной проверки и условность учебных данных указаны в тексте.
 
 Миграция `022_zoho_inventory_setup_guide.sql` добавляет руководство по настройке Zoho Inventory и проверке синхронизации. Обложка создана в одном варианте и сохранена как `/images/blog/pubsetup-magento-2-zoho-inventory-setup.webp`. Ссылка из модуля на руководство определяется общей логикой по фактическому упоминанию модуля в статье, без списка ручных исключений. На главной выводятся шесть последних материалов, полный список остаётся в `/blog`.
+# Extra-fee guide (2026-11-26)
+
+Source: `content/blog/magento-2-extra-fees-tax-and-refund-checklist.md`. Migration `023_extra_fee_checklist_guide.sql` inserts the article without overwriting an existing slug. One generated cover is stored at `/images/blog/pubsetup-magento-2-extra-fees.webp`. Rebuild frontend assets and apply migrations through the normal deployment process. The article includes an eight-case acceptance worksheet, attributed Amasty examples and Adobe credit-memo documentation, and contextual internal links to both reviewed product pages. No module records are modified.

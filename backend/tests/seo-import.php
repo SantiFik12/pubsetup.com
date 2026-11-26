@@ -29,11 +29,15 @@ $fields = ModuleSourceImporter::extract('<html><head><title>Magento 2 Import SEO
 $id = $admin->importModule($source, '', '', $fields);
 $module = $admin->module($id);
 $slug = $module['slug'];
+$companionSource = 'https://seo-import.example/companion-'.bin2hex(random_bytes(4)).'.html';
+$companionFields = ModuleSourceImporter::extract('<html><head><title>Magento 2 Import SEO Widget Companion</title><meta name="description" content="A related product filtering widget from the source."></head><body><h1>Magento 2 Import SEO Widget Companion</h1><p>A related product filtering widget from the source.</p></body></html>', $companionSource);
+$companionId = $admin->importModule($companionSource, '', '', $companionFields);
+$companionSlug = $admin->module($companionId)['slug'];
 $before = new CatalogService($db)->all();
 $check(in_array($slug, array_column($before['extensions'], 'slug'), true), 'New import missing from public catalog');
 $response = new ModuleClickController()->click(Request::create('/go/module/'.$slug, 'GET'), 'module', $slug, $db);
 $check('/extension/'.rawurlencode($slug) === $response->getTargetUrl(), 'Imported module has inconsistent redirect target');
-$updated = ModuleSourceImporter::extract('<html><head><title>Magento 2 Refreshed SEO Widget</title><meta name="description" content="Updated source capabilities."></head><body><h1>Magento 2 Refreshed SEO Widget</h1><p>Updated product filtering capabilities.</p></body></html>', $source);
+$updated = ModuleSourceImporter::extract('<html><head><title>Magento 2 Stock Reporting</title><meta name="description" content="Updated source capabilities."></head><body><h1>Magento 2 Stock Reporting</h1><p>Updated stock reporting capabilities.</p></body></html>', $source);
 $admin->updateFromSource($id, $updated);
 $refreshed = $admin->module($id);
 $check($slug === $refreshed['slug'], 'Source refresh changed an existing module URL');
@@ -44,6 +48,6 @@ $public = array_values(array_filter($after['extensions'], static fn (array $item
 $check(1 === count($public) && $public[0]['slug'] === $slug, 'Refreshed module has inconsistent public URL');
 $check(1 === (int) $public[0]['views'], 'Source refresh lost the existing click counter');
 if ($path = getenv('SEO_IMPORT_SNAPSHOT')) {
-    file_put_contents($path, json_encode(['slug' => $slug, 'before' => $before, 'after' => $after], JSON_THROW_ON_ERROR));
+    file_put_contents($path, json_encode(['slug' => $slug, 'companionSlug' => $companionSlug, 'before' => $before, 'after' => $after], JSON_THROW_ON_ERROR));
 }
 echo "SEO import checks passed: parser, new import, stable URL, refresh, repeated import and counters.\n";

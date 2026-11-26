@@ -94,3 +94,10 @@ CatalogProvider находится на уровне страницы, а не �
 `backend/tests/seo-import.php` на отдельной базе `_test` проверяет парсер источника, создание модуля, попадание в CatalogService, стабильность URL при обновлении, повторный импорт без дубля и сохранение счётчика. Переменная `SEO_IMPORT_SNAPSHOT` позволяет сохранить до/после для проверки frontend. Обновления и повторный импорт выполняются штатными методами AdminCatalog, без ручных исправлений записей.
 
 Автогенерация редакционных summary для всего каталога в этот пакет не входит. Возможный следующий пилот должен использовать проверяемые факты и источники, а не выдавать пересказ описания за собственное тестирование.
+# SEO package: related products and extra-fee guide (2026-11-26)
+
+Extension detail pages render up to three related products from the current public catalog. Matching requires at least two meaningful shared name terms and 40% overlap, excludes generic catalog terms, deduplicates slugs and uses stable ordering. No unrelated fallback fills empty slots. Products are presented as related subjects, without asserting feature parity. Selection stays on the server; only each link slug crosses the client boundary for the existing best-effort click counter. Links point directly to canonical extension URLs.
+
+New imports, source refreshes and removals affect recommendations on the next catalog request; there are no stored recommendation lists or per-module patches. This package does not generate automated editorial summaries.
+
+Migration `023_extra_fee_checklist_guide.sql` publishes the extra-fee tax and refund checklist. The article references MageDelight and Amasty separately, uses attributed vendor examples, and adds reciprocal guide links through the existing shared article-reference resolver. Home still shows six latest articles. Search Console data available during preparation ends November 23, before these publications, so it cannot establish their impact.

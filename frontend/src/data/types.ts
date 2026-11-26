@@ -82,7 +82,7 @@ export type BlogPost = {
   date: string;
   readMinutes: number;
   toc: { id: string; label: string }[];
-  content: { type: "p" | "h2" | "list" | "extension-card" | "table"; text?: string; items?: string[]; extensionSlug?: string; caption?: string; columns?: string[]; rows?: string[][] }[];
+  content: { type: "p" | "h2" | "list" | "extension-card" | "table" | "code"; text?: string; items?: string[]; ordered?: boolean; language?: string; extensionSlug?: string; caption?: string; columns?: string[]; rows?: string[][] }[];
 };
 
 export type SeoLanding = {

@@ -8,6 +8,7 @@ type BuyingNote = {
   summary: string;
   sections: { heading: string; text?: string; items?: string[] }[];
   sources: { title: string; url: string }[];
+  relatedGuides?: string[];
 };
 
 // Original buying guidance stays separate from vendor imports. Capability claims
@@ -38,6 +39,7 @@ const notes: Record<string, BuyingNote> = {
     ],
   },
   "data-feed-manager": {
+    relatedGuides: ["magento-2-product-feeds-mapping-variants-and-validation"],
     vendorHosts: ["wyomind.com", "syde.shop"],
     reviewedAt: "2026-11-25",
     title: "Wyomind Data Feed Manager for Magento 2",

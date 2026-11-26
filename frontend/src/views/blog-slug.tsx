@@ -6,6 +6,7 @@ import { tagSlug } from "@/lib/slug";
 import { ExternalLink,Zap } from "lucide-react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
+import { ArticleText } from "@/components/ArticleText";
 
 const headingIdFromText = (text?: string) =>
   text?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -91,29 +92,34 @@ export default function BlogPostPage() {
 
         <div className="space-y-5">
           {post.content.map((block, i) => {
-            if (block.type === "p") return <p key={i} className="leading-relaxed text-foreground">{block.text}</p>;
+            if (block.type === "p") return <p key={i} className="leading-relaxed text-foreground"><ArticleText text={block.text ?? ""} /></p>;
             if (block.type === "h2") {
               const id = post.toc[post.content.slice(0, i).filter(b => b.type === "h2").length]?.id ?? headingIdFromText(block.text);
               return <h2 key={i} id={id} className="mt-8 text-2xl font-bold tracking-tight text-foreground">{block.text}</h2>;
             }
-            if (block.type === "list") return (
-              <ul key={i} className="ml-5 list-disc space-y-1.5 text-foreground">
-                {block.items?.map((it: string) => <li key={it}>{it}</li>)}
-              </ul>
-            );
+            if (block.type === "list") {
+              const List = block.ordered ? "ol" : "ul";
+              return <List key={i} className={`ml-5 space-y-1.5 text-foreground ${block.ordered ? "list-decimal" : "list-disc"}`}>
+                {block.items?.map((it: string, j: number) => <li key={j}><ArticleText text={it} /></li>)}
+              </List>;
+            }
+            if (block.type === "code") return <figure key={i} className="min-w-0 max-w-full">
+              {block.caption && <figcaption className="mb-2 text-sm font-medium text-muted-foreground">{block.caption}</figcaption>}
+              <pre tabIndex={0} aria-label={block.caption ?? "Code example"} className="max-w-full overflow-x-auto rounded-xl border border-border bg-surface p-4 text-sm leading-relaxed text-foreground"><code>{block.text}</code></pre>
+            </figure>;
             if (block.type === "table" && block.columns && block.rows) return (
               <div key={i} className="overflow-x-auto rounded-xl border border-border" role="region" aria-label={block.caption ?? "Comparison table"} tabIndex={0}>
                 <table className="w-full min-w-[640px] text-left text-sm">
                   {block.caption && <caption className="p-4 text-left font-semibold text-foreground">{block.caption}</caption>}
                   <thead className="bg-surface">
-                    <tr>{block.columns.map((column, columnIndex) => <th key={columnIndex} scope="col" className="border-t border-border p-3 font-semibold">{column}</th>)}</tr>
+                    <tr>{block.columns.map((column, columnIndex) => <th key={columnIndex} scope="col" className="border-t border-border p-3 font-semibold"><ArticleText text={column} /></th>)}</tr>
                   </thead>
                   <tbody>
                     {block.rows.map((row, rowIndex) => (
                       <tr key={rowIndex}>
                         {row.map((cell, cellIndex) => cellIndex === 0
-                          ? <th key={cellIndex} scope="row" className="border-t border-border p-3 align-top font-medium">{cell}</th>
-                          : <td key={cellIndex} className="border-t border-border p-3 align-top">{cell}</td>)}
+                          ? <th key={cellIndex} scope="row" className="border-t border-border p-3 align-top font-medium"><ArticleText text={cell} /></th>
+                          : <td key={cellIndex} className="border-t border-border p-3 align-top"><ArticleText text={cell} /></td>)}
                       </tr>
                     ))}
                   </tbody>

@@ -1,10 +1,13 @@
 import { extensionBuyingNote } from "@/lib/extension-editorial";
 import type { Extension } from "@/data/types";
+import { getCatalog } from "@/lib/catalog.server";
+import { GuideLinks } from "./GuideLinks";
 
-export function ExtensionBuyingNotes({ item }: { item: Extension }) {
+export async function ExtensionBuyingNotes({ item }: { item: Extension }) {
   const note = extensionBuyingNote(item);
   if (!note) return null;
-  return <section aria-labelledby="buying-notes-heading" className="container-page max-w-4xl border-t border-border py-12">
+  const guides = note.relatedGuides?.length ? (await getCatalog()).blogPosts.filter(post => note.relatedGuides!.includes(post.slug)) : [];
+  return <><section aria-labelledby="buying-notes-heading" className="container-page max-w-4xl border-t border-border py-12">
     <h2 id="buying-notes-heading" className="text-2xl font-bold tracking-tight text-foreground">Buying and setup notes</h2>
     <p className="mt-3 text-sm text-muted-foreground">Pubsetup editorial guidance based on the vendor documentation linked below. Reviewed {new Date(`${note.reviewedAt}T00:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" })}.</p>
     {note.sections.map(section => <div key={section.heading} className="mt-7">
@@ -16,5 +19,5 @@ export function ExtensionBuyingNotes({ item }: { item: Extension }) {
       <p className="text-sm font-semibold text-foreground">Vendor sources</p>
       <ul className="mt-2 space-y-2 text-sm">{note.sources.map(source => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{source.title} ↗</a></li>)}</ul>
     </div>
-  </section>;
+  </section><GuideLinks posts={guides} title="Product feed setup guide" /></>;
 }

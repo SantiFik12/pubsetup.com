@@ -84,6 +84,7 @@ function mapService(r: Row): Service {
 
 function mapBlog(r: Row): BlogPost {
   return {
+    createdAt: r.created_at ?? undefined,
     updatedAt: r.updated_at ?? undefined,
     id: r.id,
     slug: r.slug,

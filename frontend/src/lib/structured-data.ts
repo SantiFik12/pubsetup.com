@@ -37,7 +37,7 @@ export function articleSchema(post: BlogPost) {
     headline: post.title, description: post.excerpt, url: absoluteUrl(`/blog/${post.slug}`),
     mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`), datePublished: validDate(post.date), dateModified: validDate(post.updatedAt || post.date),
     ...(post.cover ? { image: absoluteUrl(post.cover) } : {}),
-    ...(post.author ? { author: { "@type": "Person", name: post.author } } : {}),
+    ...(post.author ? { author: { "@type": post.author === "Pubsetup Team" ? "Organization" : "Person", name: post.author } } : {}),
     publisher: { "@id": absoluteUrl("/#organization") },
   };
 }

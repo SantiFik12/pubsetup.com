@@ -1,5 +1,6 @@
 "use client";
 import { VendorLogo } from "@/components/VendorLogo";
+import { ModuleLink } from "./ModuleLink";
 
 import { Link } from "@/components/Link";
 import Image from "next/image";
@@ -22,9 +23,9 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
   return (
     <article data-testid="extension-card" className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-soft transition hover:shadow-card">
       {cover && (
-        <a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="relative block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
+        <ModuleLink slug={ext.slug} className="relative block aspect-video w-full overflow-hidden bg-surface" aria-label={`View ${ext.name}`}>
           <Image src={cover} alt={ext.name} title={ext.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px" unoptimized={cover.startsWith("http:")} className="object-cover object-top transition duration-300 motion-safe:group-hover:scale-[1.02]" />
-        </a>
+        </ModuleLink>
       )}
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start gap-3">
@@ -34,7 +35,7 @@ export function ExtensionCard({ ext }: { ext: Extension }) {
               <span className="shrink-0">{partner?.name ?? "Partner"}</span><span aria-hidden="true">·</span>
               {category && <Link to="/category/$slug" params={{ slug: category.slug }} className="truncate hover:text-foreground">{category.name}</Link>}
             </div>
-            <h2 className="mt-2 truncate text-base font-semibold text-foreground"><a href={`/go/module/${encodeURIComponent(ext.slug)}`} className="hover:text-primary" title={ext.name}>{ext.name}</a></h2>
+            <h2 className="mt-2 truncate text-base font-semibold text-foreground"><ModuleLink slug={ext.slug} className="hover:text-primary" title={ext.name}>{ext.name}</ModuleLink></h2>
           </div>
         </div>
         <p className="mt-6 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{ext.shortDescription}</p>

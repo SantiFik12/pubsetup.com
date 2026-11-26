@@ -5,6 +5,7 @@ import { Link } from "@/components/Link";
 import { ProductGallery } from "@/components/ProductGallery";
 import { useCategory, useExtension, usePartner, useServices } from "@/data/catalog";
 import { isFreeExtension } from "@/lib/extension-price";
+import { moduleDisplayName } from "@/lib/module-links";
 import { tagSlug } from "@/lib/slug";
 import { BookOpen, Check, ExternalLink, Star, Zap } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -18,7 +19,7 @@ export default function ExtensionPage() {
   const installation = services.find(service => ["install-magento-2-extension", "extension-installation"].includes(service.slug));
   if (!ext || !partner || !category) return null;
   const photos = Array.from(new Set([ext.coverImage, ...ext.gallery].filter(Boolean)));
-  const displayName = ext.name.replace(/\s+for Magento 2$/i, "");
+  const displayName = moduleDisplayName(ext.name);
 
   return (
     <>

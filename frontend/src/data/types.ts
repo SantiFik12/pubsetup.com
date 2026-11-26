@@ -70,6 +70,7 @@ export type Service = {
 };
 
 export type BlogPost = {
+  createdAt?: string;
   updatedAt?: string;
   id: string;
   slug: string;

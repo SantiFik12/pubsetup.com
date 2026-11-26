@@ -48,6 +48,7 @@
             "@php tests/catalog-refresh.php",
             "@php tests/catalog-delete.php",
             "@php tests/admin.php",
+            "@php tests/seo-import.php",
             "@php tests/module-pagination.php"
         ],
         "qa:phpstan": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=512M",

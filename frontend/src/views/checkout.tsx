@@ -123,8 +123,9 @@ export default function CheckoutPage() {
                   <Row k="Email" v={form.email} />
                   {form.site && <Row k="Website" v={form.site} />}
                   <div className="my-2 border-t border-border" />
-                  <Row k="Total" v={`$${service.price}`} bold />
+                  <Row k={service.unit?.includes("/hr") ? "Minimum budget" : "Total"} v={`$${service.price}`} bold />
                 </dl>
+                {service.unit?.includes("/hr") && <p className="mt-3 text-sm text-muted-foreground">{service.unit}. Billed hourly; scope and estimated hours are confirmed before work begins.</p>}
                 {error && <p className="mt-3 rounded bg-destructive/10 p-2 text-sm text-destructive">{error}</p>}
                 <button
                   disabled={submitting}

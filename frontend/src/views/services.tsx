@@ -44,7 +44,8 @@ export default function ServicesPage() {
                 <Clock className="h-4 w-4" /> {s.duration}
               </div>
 
-              <div className="mt-auto flex items-baseline gap-1.5 border-t border-border pt-5">
+              {s.unit?.includes("/hr") && <p className="mt-auto pt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">Minimum budget</p>}
+              <div className={`${s.unit?.includes("/hr") ? "mt-2" : "mt-auto border-t border-border pt-5"} flex flex-wrap items-baseline gap-1.5`}>
                 {s.price > 0 ? (
                   <>
                     <span className="text-3xl font-bold text-foreground">${s.price}</span>

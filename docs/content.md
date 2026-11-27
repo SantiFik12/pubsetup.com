@@ -58,3 +58,11 @@ docker compose run --rm -T migrate php bin/console app:import - < catalog.json
 # Extra-fee guide (2026-11-26)
 
 Source: `content/blog/magento-2-extra-fees-tax-and-refund-checklist.md`. Migration `023_extra_fee_checklist_guide.sql` inserts the article without overwriting an existing slug. One generated cover is stored at `/images/blog/pubsetup-magento-2-extra-fees.webp`. Rebuild frontend assets and apply migrations through the normal deployment process. The article includes an eight-case acceptance worksheet, attributed Amasty examples and Adobe credit-memo documentation, and contextual internal links to both reviewed product pages. No module records are modified.
+
+## Payment and shipping restrictions guides (2026-11-27)
+
+Two separate guides cover payment-method availability and delivery-method eligibility. Sources are in `content/blog/magento-2-payment-restrictions-customer-groups-and-cart-rules.md` and `content/blog/magento-2-shipping-restrictions-rules-and-checkout-testing.md`. Migrations `024_payment_restrictions_guide.sql` and `025_shipping_restrictions_guide.sql` publish them through the normal deployment process and preserve any existing article with the same slug. Each article has a nine-case worksheet, a five-step release checklist and attributed Adobe/Amasty documentation. Vendor behaviour is distinguished from editorial test suggestions and other vendors' capabilities.
+
+Both articles reference actual catalog modules and each other. Existing shared logic adds reciprocal guide links on the referenced module pages, lists both articles in the sitemap and keeps the homepage feed limited to six. No module records or importer behaviour are changed.
+
+One generated cover per article is saved in `frontend/public/images/blog/` as `pubsetup-magento-2-payment-restrictions.webp` and `pubsetup-magento-2-shipping-restrictions.webp` (about 117 and 119 KiB). The built-in imagegen prompt set and asset paths are recorded in `content/blog-assets/2026-11-27-banner-prompts.md`. Rebuild the frontend to include these assets.

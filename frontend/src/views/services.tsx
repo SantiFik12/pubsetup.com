@@ -14,7 +14,7 @@ export default function ServicesPage() {
           <div className="mx-auto max-w-2xl text-center">
             <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">Magento 2 services & pricing</h1>
             <p className="mt-4 text-balance text-lg text-muted-foreground">
-              Installation, performance, security and migration. Choose a fixed-price service, an hourly package or request a quote.
+              Installation, API and ERP / CRM integrations, performance, security and migration. Choose a fixed-price service, an hourly package or request a quote.
             </p>
           </div>
         </div>
@@ -29,7 +29,7 @@ export default function ServicesPage() {
                   Featured service
                 </span>
               )}
-              <h2 className="text-lg font-semibold text-foreground">{s.name}</h2>
+              <h2 className="text-lg font-semibold text-foreground"><Link to="/services/$slug" params={{ slug: s.slug }} className="hover:text-primary hover:underline">{s.name}</Link></h2>
               <p className="mt-2 min-h-[60px] text-sm leading-relaxed text-muted-foreground">{s.description}</p>
 
               <ul className="mt-5 space-y-1.5 text-sm">

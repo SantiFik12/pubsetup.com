@@ -66,3 +66,11 @@ Two separate guides cover payment-method availability and delivery-method eligib
 Both articles reference actual catalog modules and each other. Existing shared logic adds reciprocal guide links on the referenced module pages, lists both articles in the sitemap and keeps the homepage feed limited to six. No module records or importer behaviour are changed.
 
 One generated cover per article is saved in `frontend/public/images/blog/` as `pubsetup-magento-2-payment-restrictions.webp` and `pubsetup-magento-2-shipping-restrictions.webp` (about 117 and 119 KiB). The built-in imagegen prompt set and asset paths are recorded in `content/blog-assets/2026-11-27-banner-prompts.md`. Rebuild the frontend to include these assets.
+
+## API, ERP / CRM and cron guides (2026-11-28)
+
+Migrations `028_api_integration_guide.sql`, `029_erp_crm_integration_guide.sql` and `030_cron_indexers_guide.sql` add three guides with November 28 publication dates. The matching Markdown sources are in `content/blog/`. Existing articles with the same slug are preserved. These migrations do not modify module or service records.
+
+The API guide distinguishes deployment-specific authentication, retry decisions and asynchronous completion. The ERP / CRM guide covers identifiers, field ownership and inventory mapping. The cron guide provides a read-only diagnostic command block and an evidence worksheet; it does not instruct readers to reset job state or run a full rebuild as a first step. All use primary Adobe documentation and distinguish editorial planning from tested results.
+
+The articles link to relevant services, to each other and to existing catalog modules where appropriate. Reciprocal module links use the existing shared resolver, the homepage remains capped at six latest articles and sitemap entries come from the public catalog. One built-in imagegen cover per article is stored in `frontend/public/images/blog/`: `pubsetup-magento-2-api-integration.webp`, `pubsetup-magento-2-erp-crm-integration.webp`, `pubsetup-magento-2-cron-indexers.webp`. Prompts and asset paths are recorded in `content/blog-assets/2026-11-28-banner-prompts.md`. Rebuild frontend assets as part of deployment.
